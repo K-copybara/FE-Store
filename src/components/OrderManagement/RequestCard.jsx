@@ -1,22 +1,21 @@
 // components/RequestCard.jsx
 import React, { useState } from 'react';
 import styled from 'styled-components';
-import { display_small, display_xl, display_large } from "../styles/font";
+import { display_small, display_xl, display_large } from '../../styles/font';
 import ConfirmModal from './ConfirmModal';
 
-const RequestCard = ({ request, onComplete }) => {
+const RequestCard = ({ request }) => {
+  const [isNew, setIsNew] = useState(false);
   const [showCompleteModal, setShowCompleteModal] = useState(false);
- 
+
   const handleCompleteClick = () => {
     setShowCompleteModal(true);
   };
 
   const handleConfirmComplete = () => {
     setShowCompleteModal(false);
-    
-    setTimeout(() => {
-      onComplete && onComplete();
-    }, 500);
+
+    //요청 완료 api
   };
 
   const formatTime = (timestamp) => {
@@ -26,10 +25,7 @@ const RequestCard = ({ request, onComplete }) => {
 
   return (
     <>
-      <CardWrapper 
-        status={request.status}
-      >
-        {/* 상단: 요청 시간과 테이블 번호 */}
+      <CardWrapper status={request.status} isNew={isNew}>
         <CardHeader>
           <Left>
             <RequestTime>{formatTime(request.requestedAt)}</RequestTime>
@@ -37,14 +33,10 @@ const RequestCard = ({ request, onComplete }) => {
           </Left>
         </CardHeader>
 
-        {/* 요청 내용 */}
         {request.requestNote && (
-          <RequestNote>
-            {request.requestNote}
-          </RequestNote>
+          <RequestNote>{request.requestNote}</RequestNote>
         )}
 
-        {/* 요청 아이템들 */}
         {request.items && request.items.length > 0 && (
           <ItemList>
             {request.items.map((item, index) => (
@@ -56,17 +48,11 @@ const RequestCard = ({ request, onComplete }) => {
           </ItemList>
         )}
 
-        {/* 완료 버튼 */}
-        {request.status === 'PENDING' && (
-          <CompleteButtonWrapper>
-            <CompleteButton onClick={handleCompleteClick}>
-              완료
-            </CompleteButton>
-          </CompleteButtonWrapper>
-        )}
+        <CompleteButtonWrapper>
+          <CompleteButton onClick={handleCompleteClick}>완료</CompleteButton>
+        </CompleteButtonWrapper>
       </CardWrapper>
 
-      {/* 완료 확인 모달 */}
       <ConfirmModal
         isOpen={showCompleteModal}
         onClose={() => setShowCompleteModal(false)}
@@ -89,13 +75,16 @@ const CardWrapper = styled.div`
 
   background: var(--white);
   border-radius: 1.25rem;
-  border: 1px solid ${props => {
-    if (props.status === 'PENDING') return 'var(--secondary)';
-    return 'var(--gray300)';
-  }};
-  box-shadow: ${props => {
-    if (props.status === 'PENDING') return '0 4px 8px 0 rgba(25, 14, 170, 0.30)';
-    return '0 2px 8px rgba(0,0,0,0.08)';
+  border: 2px solid
+    ${(props) => {
+      if (props.isNew) return 'var(--yellow)';
+      if (!props.isNew) return 'var(--secondary)';
+      return 'var(--secondary)';
+    }};
+  box-shadow: ${(props) => {
+    if (!props.isNew) return '0 4px 8px 0 rgba(252, 201, 0, 0.20)';
+    if (props.isNew) return '0 4px 8px 0 rgba(130, 152, 255, 0.20)';
+    return '0 4px 8px 0 rgba(130, 152, 255, 0.20)';
   }};
 `;
 
@@ -169,10 +158,9 @@ const CompleteButton = styled.button`
   padding: 0.625rem 1.5rem;
   justify-content: center;
   align-items: center;
-  
+
   background: none;
   border: none;
   cursor: pointer;
   color: var(--primary);
 `;
-

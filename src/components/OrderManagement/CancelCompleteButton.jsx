@@ -1,31 +1,20 @@
-
 import React from 'react';
 import styled from 'styled-components';
-import { display_large } from '../styles/font';
+import { display_large } from '../../styles/font';
 
-const CancelCompleteButton = ({ 
+const CancelCompleteButton = ({
   leftButton = { text: '취소', type: 'cancel' },
   rightButton = { text: '완료', type: 'accept' },
   onLeftClick,
-  onRightClick
+  onRightClick,
 }) => {
   return (
     <ActionsContainer>
-      <ActionButton 
-        type={leftButton.type} 
-        onClick={onLeftClick}
-      >
+      <ActionButton type={leftButton.type} onClick={onLeftClick}>
         {leftButton.text}
       </ActionButton>
-      <ActionDivider>
-        <svg width="3" height="23" viewBox="0 0 3 23" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M2.04688 0.640625V22.3906H0.3125V0.640625H2.04688Z" fill="#999999"/>
-        </svg>
- </ActionDivider>
-      <ActionButton 
-        type={rightButton.type} 
-        onClick={onRightClick}
-      >
+      <ActionDivider>|</ActionDivider>
+      <ActionButton type={rightButton.type} onClick={onRightClick}>
         {rightButton.text}
       </ActionButton>
     </ActionsContainer>
@@ -55,17 +44,20 @@ const ActionButton = styled.button`
   border: none;
   cursor: pointer;
 
-  color: ${props => {
-    switch(props.type) {
-      case 'cancel': return 'var(--gray700)';
-      case 'accept': return 'var(--primary)';
-      default: return 'var(--gray700)';
+  color: ${(props) => {
+    switch (props.type) {
+      case 'cancel':
+        return 'var(--gray700)';
+      case 'accept':
+        return 'var(--primary)';
+      default:
+        return 'var(--gray700)';
     }
   }};
 `;
 
 const ActionDivider = styled.span`
-    ${display_large}
-    color: var(--gray500);
-    flex-shrink: 0;
+  ${display_large}
+  color: var(--gray500);
+  flex-shrink: 0;
 `;

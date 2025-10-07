@@ -1,8 +1,9 @@
 // components/ConfirmModal.jsx
 import React from 'react';
 import styled from 'styled-components';
-import { display_large } from '../styles/font';
+
 import CancelCompleteButton from './CancelCompleteButton';
+import { display_large } from '../../styles/font';
 
 const ConfirmModal = ({ isOpen, onClose, onConfirm, message }) => {
   if (!isOpen) return null;
@@ -45,7 +46,7 @@ const ModalContent = styled.div`
   justify-content: center;
   align-items: center;
   gap: 5.90625rem;
-  
+
   background: var(--white);
   border-radius: 1.25rem;
   min-width: 25rem;
