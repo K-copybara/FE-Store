@@ -1,7 +1,7 @@
 import styled from 'styled-components';
 import { useState, useRef } from 'react';
 import Sidebar from '../../components/Sidebar';
-import { display_xl, display_large, title_large, body_large} from '../../styles/font';
+import { body_large, bold36, bold24, bold18, reg24} from '../../styles/font';
 
 const DailyStatsPage = () => {
 
@@ -173,12 +173,12 @@ const Layout = styled.div`
 `;
 
 const Title = styled.h1`  
-    ${display_xl}
+    ${bold36}
     color: var(--black);
 `;
 
 const TodayDate = styled.div`
-    ${display_xl}
+    ${bold36}
     color: var(--black);
 `;
 const MainContent = styled.div`
@@ -209,18 +209,18 @@ const StatBlock = styled.div`
 `;
 
 const StatLabel = styled.div`
-  ${display_large}
+  ${bold24}
   color: var(--gray700);
 `;
 
 const StatValue = styled.div`
-  ${display_xl}
+  ${bold36}
   color: var(--black);
   text-align: right;
 `;
 
 const SectionTitle = styled.h2`
-  ${display_large}
+  ${bold24}
   color: var(--gray700);
   margin-bottom: 1.25rem;
 `;
@@ -259,7 +259,8 @@ const SortButton = styled.button`
 `;
 
 const SortText = styled.span`
-  ${title_large}
+  ${bold18}
+  color: var(--black);
 `;
 
 const SortIcon = styled.div`
@@ -326,41 +327,41 @@ const MenuListItem = styled.div`
 `;
 
 const MenuRank = styled.div`
-  ${display_large}
+  ${bold24}
   color: var(--black);
   min-width: 2rem;
 `;
 
 const MenuName = styled.div`
-  ${display_large}
+  ${bold24}
   flex: 1;
   color: var(--black);
   text-align: left;
 `;
 
 const MenuRating = styled.div`
-  ${display_large}
+  ${reg24}
   color: var(--orange);
   text-align: center;
   min-width: 16rem;
 `;
 
 const MenuSales = styled.div`
-  ${display_large}
+  ${reg24}
   min-width: 10rem;
   color: var(--black);
   text-align: right;
 `;
 
 const MenuCount = styled.div`
-  ${display_large}
+  ${reg24}
   min-width: 3rem;
   color: var(--gray500);
   text-align: right;
 `;
 
 const MenuCount2 = styled.div`
-  ${display_large}
+  ${reg24}
   min-width: 3rem;
   color: var(--black);
   text-align: right;

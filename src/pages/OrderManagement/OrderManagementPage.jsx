@@ -4,7 +4,7 @@ import Sidebar from '../../components/Sidebar';
 import OrderCard from '../../components/OrderCard'; 
 import RequestCard from '../../components/RequestCard';
 
-import { display_xl, display_large } from '../../styles/font';
+import {bold36, bold24 } from '../../styles/font';
 
 import { useOrders } from '../../hooks/useOrders';
 import { useRequests } from '../../hooks/useRequests';
@@ -127,7 +127,7 @@ const OrderStatus = styled.div`
 `;
 
 const OrderTitle = styled.div`
-  ${display_xl}
+  ${bold36}
   color: var(--black);
 `;
 
@@ -138,7 +138,7 @@ const TabContainer = styled.div`
 `;
 
 const TabButton = styled.button`
-  ${display_large}
+  ${bold24}
   background: none;
   border: none;
   color: ${props => props.active ? 'var(--primary)' : 'var(--gray500)'};
@@ -152,12 +152,12 @@ const TabButton = styled.button`
 `;
 
 const TabDivider = styled.span`
-  ${display_large}
+  ${bold24}
   color: var(--gray300);
 `;
 
 const EmptyMessage = styled.div`
-  ${display_large}
+  ${bold24}
   display: flex;
   justify-content: center;
   align-items: center;

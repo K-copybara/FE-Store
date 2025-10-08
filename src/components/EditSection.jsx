@@ -1,6 +1,6 @@
 import styled from 'styled-components';
 import { useState, useEffect} from 'react';
-import { display_large, body_medium, title_semi } from '../styles/font';
+import { bold24, reg14, reg18, bold18 } from '../styles/font';
 
 const EditSection = ({ 
   title = "섹션 제목",
@@ -382,7 +382,7 @@ const Header = styled.div`
 `;
 
 const SectionTitle = styled.h3`
-  ${display_large}
+  ${bold24}
   color: var(--black);
 `;
 
@@ -394,7 +394,7 @@ const ActionButton = styled.button`
   border-radius: 0.5rem;
   transition: all 0.2s;
   flex-shrink: 0;
-  ${body_medium}
+  ${reg14}
   color: var(--gray500);
   &:hover {
     background: var(--gray100);
@@ -413,7 +413,7 @@ const EditingArea = styled.div`
 `;
 
 const TextArea = styled.textarea`
-  ${title_semi}
+  ${reg18}
   width: 100%;
   min-height: 25vh;
   padding: 1.5rem;
@@ -442,7 +442,7 @@ const TextArea = styled.textarea`
 `;
 
 const TextDisplay = styled.div`
-  ${title_semi}
+  ${reg18}
   width: 100%;
   height: 25vh;
   padding: 1.5rem;     /* TextArea와 동일한 패딩 */
@@ -485,7 +485,7 @@ const BusinessHourRow = styled.div`
 `;
 
 const DayLabel = styled.div`
-  ${title_semi}
+  ${bold18}
   color: var(--black);
 `;
 
@@ -495,14 +495,14 @@ const TimeGroup = styled.div`
   gap: 0.5rem;
 `;
 const TimeInput2 = styled.div`
-  ${title_semi}
+  ${reg18}
   color: var(--black);
   width: 100%;
   text-align: center;
 `;
 
 const TimeInput = styled.input`
-  ${title_semi}
+  ${reg18}
   color: var(--black);
   width: 100%;
   text-align: center;
@@ -514,12 +514,12 @@ const TimeInput = styled.input`
 `;
 
 const TimeSeparator = styled.span`
-    ${title_semi}
+    ${reg18}
   color: var(--black);
 `;
 
 const BreakLabel = styled.div`
-  ${title_semi}
+  ${bold18}
   color: var(--black);
   text-align: right;
 `;

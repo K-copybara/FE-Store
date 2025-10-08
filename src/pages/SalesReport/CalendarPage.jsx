@@ -1,6 +1,6 @@
 import {React, useState} from 'react';
 import styled from 'styled-components';
-import { body_large, display_xl } from '../../styles/font';
+import { bold36, reg24 } from '../../styles/font';
 import Sidebar from '../../components/Sidebar';
 
 const CalendarPage = () => {
@@ -322,7 +322,7 @@ const NavButton = styled.button`
 `;
 
 const MonthTitle = styled.h1`
-  ${display_xl}
+  ${bold36}
   color: var(--black);
   width: 10rem;  
   text-align: center; 
@@ -352,7 +352,7 @@ const HeaderRow = styled.tr`
 `;
 
 const DayHeader = styled.th`
-  ${body_large}
+  ${reg24}
   color: var(--black);
   padding: 0.5rem 3.6875rem;
   justify-content: center;
@@ -381,7 +381,7 @@ const DayCellContent = styled.div`
 `;
 
 const DateNumber = styled.div`
-  ${body_large}
+  ${reg24}
   color: ${props => {
     if (props.isToday) return 'var(--gray500)';
     if (props.isCurrentMonth) return 'var(--gray500)';
@@ -390,7 +390,7 @@ const DateNumber = styled.div`
 `;
 
 const SalesAmount = styled.div`
-  ${body_large}
+  ${reg24}
   color: var(--black);
   align-self: flex-end;
 `;
@@ -410,12 +410,12 @@ const WeekTotalContent = styled.div`
 `;
 
 const WeekNumber = styled.div`
-  ${body_large}
+  ${reg24}
   color: var(--gray500);
 `;
 
 const WeekSalesAmount = styled.div`
-  ${body_large}
+  ${reg24}
   color: var(--black);
   align-self: flex-end;
 `;
@@ -457,12 +457,12 @@ const MonthTotalBox = styled.div`
 `;
 
 const DayLabel = styled.div`
-  ${body_large}
+  ${reg24}
   color: var(--gray500);
 `;
 
 const TotalAmount = styled.div`
-  ${body_large}
+  ${reg24}
   color: var(--black);
   align-self: flex-end;
 `;

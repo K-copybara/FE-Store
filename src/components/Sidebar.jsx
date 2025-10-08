@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
-import {display_xl, display_large} from "../styles/font"; 
+import {bold36, bold24} from "../styles/font"; 
 import {NavLink} from 'react-router-dom';
 const Sidebar = () => {
 
@@ -87,7 +87,7 @@ const SidebarWrapper = styled.aside`
 `;
 
 const StoreName = styled.div`
-  ${display_xl}
+  ${bold36}
   color: var(--black);
   padding: 0.625rem;
   align-items: center;
@@ -120,7 +120,7 @@ const MenuItem = styled.li`
 
 // 클릭 가능한 링크 (NavLink)
 const StyledNavLink = styled(NavLink)`
-  ${display_large}
+  ${bold24}
   display: flex; /* 링크가 li 영역 전체를 차지하도록 */
   border-radius: 0.5rem;
   text-decoration: none;
@@ -140,7 +140,7 @@ const StyledNavLink = styled(NavLink)`
 `;
 
 const SalesMenuItem = styled.div`
-  ${display_large}
+  ${bold24}
   display: flex;
   justify-content: space-between;
   align-items: center;

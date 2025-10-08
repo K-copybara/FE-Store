@@ -1,7 +1,7 @@
 import styled from 'styled-components';
-import { body_large, display_large} from '../styles/font';
+import {  bold18, bold24, reg14, reg18, title_medium} from '../styles/font';
 import { useState } from 'react';
-import { body_medium, title_semi } from '../styles/font';
+
 
 const EditCategory = ({ title = "메뉴 카테고리" }) => {
 
@@ -339,7 +339,7 @@ const Header = styled.div`
 `;
 
 const SectionTitle = styled.h3`
-  ${display_large}
+  ${bold24}
   color: var(--black);
 `;
 
@@ -378,12 +378,12 @@ const MenuHeader = styled.div`
     gap: 1.25rem;
 `;
 const CategoryName = styled.div`
-  ${body_large}
+  ${title_medium}
   color: var(--black);
 `;
 
 const MenuCount = styled.div`
-  ${body_large}
+  ${title_medium}
   color: var(--black);
 `;
 
@@ -424,12 +424,12 @@ const ModalHeader = styled.div`
 `;
 
 const ModalTitle = styled.h2`
-  ${title_semi}
+  ${bold18}
   color: var(--black);
 `;
 
 const Save = styled.button`
-  ${body_medium}
+  ${reg14}
   color: var(--gray500);
   background: none;
     border: none;
@@ -460,7 +460,7 @@ const CategoryRow = styled.div`
   }
 `;
 const MenuCount2 = styled.div`
-  ${title_semi}
+  ${reg18}
   color: var(--black);
     white-space: nowrap;
   flex-shrink: 0;
@@ -477,7 +477,7 @@ const DragHandle = styled.div`
 `;
 
 const CategoryInput = styled.input`
-  ${display_large}
+  ${bold24}
   display: flex;
   align-items: center;
   border-radius: 0.3125rem;
@@ -488,7 +488,7 @@ const CategoryInput = styled.input`
 `;
 
 const CategoryInputName = styled.div`
-   ${display_large}
+   ${bold24}
     flex: 1;
     border: none;
     background: transparent;
@@ -538,7 +538,6 @@ const AddButton = styled.button`
   border-radius: 3.125rem;
   background: var(--gray100);
   cursor: pointer;
-  ${body_medium}
 `;
 
 // 아이콘 컴포넌트들 (기존과 동일)

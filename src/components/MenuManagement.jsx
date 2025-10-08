@@ -3,7 +3,7 @@ import { useState, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import MenuModal from './MenuModal';
 import ConfirmModal from './ConfirmModal';
-import { display_large, body_large, body_medium, title_semi } from '../styles/font';
+import { body_large, bold24, reg24, bold18, reg18, reg14 } from '../styles/font';
 
 const MenuManagement = ({ title = "메뉴 관리" }) => {
     const menusdummy = [
@@ -238,12 +238,12 @@ const Header = styled.div`
 `;
 
 const SectionTitle = styled.h3`
-  ${display_large}
+  ${bold24}
   color: var(--black);
 `;
 
 const AddButton = styled.button`
-  ${body_medium}
+  ${reg24}
   padding: 0.75rem 1.5rem;
   background: var(--primary);
   color: var(--white);
@@ -264,7 +264,7 @@ const MenuList = styled.div`
 `;
 
 const EmptyState = styled.div`
-  ${body_large}
+  ${bold24}
   color: var(--gray500);
   text-align: center;
   padding: 3rem;
@@ -303,7 +303,7 @@ const OutOfStockOverlay = styled.div`
 `;
 
 const CategoryTag = styled.div`
-  ${title_semi}
+  ${bold18}
   color: var(--black);
   text-align: center;
   padding: 0.5rem 1rem;
@@ -344,13 +344,13 @@ const MenuInfo = styled.div`
 `;
 
 const MenuName = styled.h4`
-  ${title_semi}
+  ${reg18}
   color: var(--black);
   margin: 0;
 `;
 
 const MenuDescription = styled.p`
-  ${body_medium}
+  ${reg14}
   color: var(--gray600);
   margin: 0;
   line-height: 1.4;
@@ -361,7 +361,7 @@ const MenuDescription = styled.p`
 `;
 
 const MenuPrice = styled.div`
-  ${title_semi}
+  ${bold18}
   color: var(--black);
   flex-shrink: 0;
   margin-right: 1rem;
@@ -412,7 +412,7 @@ const DropdownMenuPortal = styled.div`
 `;
 
 const DropdownItem = styled.button`
-  ${body_medium}
+  ${body_large}
   width: 100%;
   padding: 0.75rem 1rem;
   background: none;

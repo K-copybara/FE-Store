@@ -1,7 +1,7 @@
 
 import React from 'react';
 import styled from 'styled-components';
-import { display_large } from '../styles/font';
+import { bold24} from '../styles/font';
 
 const CancelCompleteButton = ({ 
   leftButton = { text: '취소', type: 'cancel' },
@@ -42,7 +42,7 @@ const ActionsContainer = styled.div`
 `;
 
 const ActionButton = styled.button`
-  ${display_large}
+  ${bold24}
   display: flex;
   padding: 0.625rem;
   justify-content: center;
@@ -65,7 +65,7 @@ const ActionButton = styled.button`
 `;
 
 const ActionDivider = styled.span`
-    ${display_large}
+    ${bold24}
     color: var(--gray500);
     flex-shrink: 0;
 `;

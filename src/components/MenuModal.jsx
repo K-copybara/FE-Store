@@ -1,7 +1,7 @@
 // components/MenuModal.jsx
 import styled from 'styled-components';
 import { useState, useRef, useEffect } from 'react';
-import { title_semi, display_large, body_medium, body_small } from '../styles/font';
+import { body_small, bold18, reg24, reg18, reg14 } from '../styles/font';
 
 const MenuModal = ({ onClose, editingMenuId = null }) => { 
 
@@ -602,10 +602,7 @@ const MenuModal = ({ onClose, editingMenuId = null }) => {
 
 export default MenuModal;
 
-// 기존 스타일 컴포넌트들 (동일하게 유지)...
 
-
-//  기존 스타일 컴포넌트들 (그대로 유지)
 const StepIndicator = styled.div`
   display: flex;
   align-items: center;
@@ -640,7 +637,7 @@ const Step = styled.div`
 `;
 
 const BackButton = styled.button`
-  ${body_medium}
+  ${bold18}
   padding: 0.75rem 2rem;
   background: var(--gray200);
   color: var(--black);
@@ -655,7 +652,7 @@ const BackButton = styled.button`
 `;
 
 const SubmitButton = styled.button`
-  ${body_medium}
+  ${bold18}
   padding: 0.75rem 2rem;
   background: var(--primary);
   color: var(--white);
@@ -686,7 +683,7 @@ const CategoryDropdown = styled.div`
 `;
 
 const CategoryInput = styled.input`
-  ${title_semi}
+  ${reg18}
   width: 100%;
   padding: 0.5rem 0.625rem;
   border: 1px solid var(--secondary);
@@ -746,7 +743,7 @@ const DropdownMenu = styled.div`
 `;
 
 const DropdownItem = styled.div`
-  ${title_semi}
+  ${reg18}
   padding: 0.75rem 1rem;
   cursor: pointer;
   transition: background-color 0.2s ease;
@@ -794,7 +791,7 @@ const ModalHeader = styled.div`
 `;
 
 const ModalTitle = styled.h2`
-  ${display_large}
+  ${bold18}
   color: var(--black);
 `;
 
@@ -825,13 +822,13 @@ const FormGroup = styled.div`
 `;
 
 const Label = styled.label`
-  ${display_large}
+  ${reg24}
   color: var(--black);
   font-weight: 400;
 `;
 
 const TextInput = styled.input`
-  ${title_semi}
+  ${reg18}
   padding: 0.5rem 0.625rem;
   border: 1px solid var(--secondary);
   border-radius: 0.625rem;
@@ -851,7 +848,7 @@ const PriceContainer = styled.div`
 `;
 
 const PriceInput = styled.input`
-  ${title_semi}
+  ${reg18}
   flex: 1;
   padding: 0.5rem 0.625rem;
   background: var(--gray100);
@@ -863,7 +860,7 @@ const PriceInput = styled.input`
 `;
 
 const PriceUnit = styled.span`
-  ${title_semi}
+  ${reg18}
   padding: 0.5rem 0.625rem;
   background: var(--gray100);
   border-left: 1px solid var(--gray300);
@@ -885,7 +882,7 @@ const ModalActions = styled.div`
 `;
 
 const NextButton = styled.button`
-  ${body_medium}
+  ${bold18}
   padding: 0.75rem 2rem;
   background: var(--primary);
   color: var(--white);
@@ -974,12 +971,12 @@ const ImageUploadArea = styled.div`
 `;
 
 const SubLabel = styled.p`
-  ${body_medium}
+  ${reg14}
   color: var(--primary);
 `;
 
 const SubLabel2 = styled.p`
-  ${body_medium}
+  ${reg14}
   color: var(--gray500);
 `;
 
@@ -1028,7 +1025,7 @@ const AllergyTagContainer = styled.div`
 `;
 
 const AllergyTag = styled.div`
-  ${title_semi}
+  ${reg18}
   display: flex;
   align-items: center;
   padding: 0.5rem 0.75rem;
@@ -1079,7 +1076,7 @@ const AllergyTagArea = styled.div`
 `;
 
 const AllergyInput = styled.input`
-  ${title_semi}
+  ${reg18}
   flex: 1;
   padding: 0.75rem;
   border: 1.5px solid var(--secondary);
