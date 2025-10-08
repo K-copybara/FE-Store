@@ -9,6 +9,8 @@ import {bold36, bold24 } from '../../styles/font';
 import { useOrders } from '../../hooks/useOrders';
 import { useRequests } from '../../hooks/useRequests';
 
+import DividerIcon from '../../assets/icons/divider-icon.svg?react';
+
 const OrderManagementPage = () => {
 
   const { 
@@ -47,9 +49,7 @@ const OrderManagementPage = () => {
               처리 중
             </TabButton>
             <TabDivider>
-              <svg width="3" height="23" viewBox="0 0 3 23" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M2.04688 0.640625V22.3906H0.3125V0.640625H2.04688Z" fill="#999999"/>
-              </svg>
+              <DividerIcon />
             </TabDivider>
             <TabButton 
               active={activeTab === 'completed'} 

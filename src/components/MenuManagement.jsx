@@ -5,6 +5,8 @@ import MenuModal from './MenuModal';
 import ConfirmModal from './ConfirmModal';
 import { body_large, bold24, reg24, bold18, reg18, reg14 } from '../styles/font';
 
+import MenuEditIcon from '../assets/icons/menuedit-icon.svg?react';
+
 const MenuManagement = ({ title = "메뉴 관리" }) => {
     const menusdummy = [
       {
@@ -154,7 +156,7 @@ const MenuManagement = ({ title = "메뉴 관리" }) => {
                 onClick={(e) => handleDropdownToggle(menu.menuId, e)}
                 $isActive={openDropdownId === menu.menuId}
               >
-                <EditIcon />
+                <MenuEditIcon />
               </EditButton>
             </MenuCard>
           );
@@ -430,9 +432,4 @@ const DropdownItem = styled.button`
   }
 `;
 
-// 편집 아이콘
-const EditIcon = () => (
-  <svg width="12" height="24" viewBox="0 0 12 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M8 12C8 12.55 7.80833 13.025 7.425 13.425C7.04167 13.8083 6.56667 14 6 14C5.45 14 4.975 13.8083 4.575 13.425C4.19167 13.025 4 12.55 4 12C4 11.4333 4.19167 10.9583 4.575 10.575C4.975 10.1917 5.45 10 6 10C6.56667 10 7.04167 10.1917 7.425 10.575C7.80833 10.9583 8 11.4333 8 12ZM8 5C8 5.55 7.80833 6.025 7.425 6.425C7.04167 6.80833 6.56667 7 6 7C5.45 7 4.975 6.80833 4.575 6.425C4.19167 6.025 4 5.55 4 5C4 4.43333 4.19167 3.95833 4.575 3.575C4.975 3.19167 5.45 3 6 3C6.56667 3 7.04167 3.19167 7.425 3.575C7.80833 3.95833 8 4.43333 8 5ZM8 19C8 19.55 7.80833 20.025 7.425 20.425C7.04167 20.8083 6.56667 21 6 21C5.45 21 4.975 20.8083 4.575 20.425C4.19167 20.025 4 19.55 4 19C4 18.4333 4.19167 17.9583 4.575 17.575C4.975 17.1917 5.45 17 6 17C6.56667 17 7.04167 17.1917 7.425 17.575C7.80833 17.9583 8 18.4333 8 19Z" fill="currentColor"/>
-  </svg>
-);
+

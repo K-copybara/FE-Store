@@ -3,6 +3,9 @@ import styled from 'styled-components';
 import { bold36, reg24 } from '../../styles/font';
 import Sidebar from '../../components/Sidebar';
 
+import PrevMonthIcon from '../../assets/icons/Calendar/prevmonth-icon.svg?react';
+import NextMonthIcon from '../../assets/icons/Calendar/nextmonth-icon.svg?react';
+
 const CalendarPage = () => {
   const [selectedMonth, setSelectedMonth] = useState(new Date()); 
 
@@ -175,17 +178,13 @@ const CalendarPage = () => {
         <CalendarHeader>
           <MonthNavigation>
             <NavButton onClick={handlePrevMonth}>
-              <svg width="24" height="48" viewBox="0 0 24 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M16 30C16 30.5667 15.8 31.0333 15.4 31.4C15 31.7667 14.5167 31.9667 13.95 32C13.4167 32 12.9667 31.8 12.6 31.4L6.6 25.4C6.2 25.0333 6 24.5667 6 24C6 23.4333 6.2 22.9667 6.6 22.6L12.6 16.6C13 16.2 13.4667 16.0167 14 16.05C14.5333 16.05 15 16.2333 15.4 16.6C15.8 16.9667 16 17.4333 16 18V30Z" fill="#222222"/>
-              </svg>
+              <PrevMonthIcon />
             </NavButton>
             <MonthTitle>
               {selectedMonth.getFullYear()}. {selectedMonth.getMonth() + 1}
             </MonthTitle>
             <NavButton onClick={handleNextMonth}>
-              <svg width="24" height="48" viewBox="0 0 24 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M8 18C8 17.4333 8.2 16.9667 8.6 16.6C9 16.2333 9.46667 16.05 10 16.05C10.5667 16.0167 11.0333 16.2 11.4 16.6L17.4 22.6C17.8 22.9667 18 23.4333 18 24C18 24.5667 17.8 25.0333 17.4 25.4L11.4 31.4C11 31.8 10.5333 32 10 32C9.46667 31.9667 9 31.7667 8.6 31.4C8.2 31.0333 8 30.5667 8 30V18Z" fill="#222222"/>
-              </svg>
+              <NextMonthIcon />
             </NavButton>
           </MonthNavigation>
         </CalendarHeader>

@@ -78,7 +78,11 @@ const body_small = css`
 
 
 
-
+const title_medium = css`
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: normal;
+`;
 const title_small = css`
   font-size: 0.75rem;
   font-weight: 400;
@@ -98,6 +102,7 @@ export {
 
   loginTitle,
   title_small,
+  title_medium,
   body_large,
   body_small,
 };

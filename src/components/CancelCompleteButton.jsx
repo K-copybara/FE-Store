@@ -2,7 +2,7 @@
 import React from 'react';
 import styled from 'styled-components';
 import { bold24} from '../styles/font';
-
+import DividerIcon from '../assets/icons/divider-icon.svg?react';
 const CancelCompleteButton = ({ 
   leftButton = { text: '취소', type: 'cancel' },
   rightButton = { text: '완료', type: 'accept' },
@@ -18,10 +18,8 @@ const CancelCompleteButton = ({
         {leftButton.text}
       </ActionButton>
       <ActionDivider>
-        <svg width="3" height="23" viewBox="0 0 3 23" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M2.04688 0.640625V22.3906H0.3125V0.640625H2.04688Z" fill="#999999"/>
-        </svg>
- </ActionDivider>
+        <DividerIcon />
+      </ActionDivider>
       <ActionButton 
         type={rightButton.type} 
         onClick={onRightClick}
