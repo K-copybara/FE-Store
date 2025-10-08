@@ -1,11 +1,62 @@
-import React from 'react';
+import {React, useState} from 'react';
 import styled from 'styled-components';
 import { body_large, display_xl } from '../../styles/font';
-import { useSales } from '../../hooks/useSales';
 import Sidebar from '../../components/Sidebar';
 
 const CalendarPage = () => {
-  const { selectedMonth, setSelectedMonth, getSalesByDate, getWeeklyTotals } = useSales();
+  const [selectedMonth, setSelectedMonth] = useState(new Date()); 
+
+    const dailySalesData = [
+      { date: "2025-09-01", sales: 152000 },
+      { date: "2025-09-02", sales: 98000 },
+      { date: "2025-09-03", sales: 175000 },
+      { date: "2025-09-04", sales: 134000 },
+      { date: "2025-09-05", sales: 189000 },
+      { date: "2025-09-06", sales: 225000 },
+      { date: "2025-09-07", sales: 167000 },
+      { date: "2025-09-08", sales: 143000 },
+      { date: "2025-09-09", sales: 156000 },
+      { date: "2025-09-10", sales: 198000 },
+      { date: "2025-09-11", sales: 176000 },
+      { date: "2025-09-12", sales: 187000 },
+      { date: "2025-09-13", sales: 234000 },
+      { date: "2025-09-14", sales: 201000 },
+      { date: "2025-09-15", sales: 165000 },
+      { date: "2025-09-16", sales: 142000 },
+      { date: "2025-09-17", sales: 159000 },
+      { date: "2025-09-18", sales: 183000 },
+      { date: "2025-09-19", sales: 177000 },
+      { date: "2025-09-20", sales: 195000 },
+      { date: "2025-09-21", sales: 251000 },
+      { date: "2025-09-22", sales: 189000 },
+      { date: "2025-09-23", sales: 167000 },
+      { date: "2025-09-24", sales: 145000 },
+      { date: "2025-09-25", sales: 178000 },
+      { date: "2025-09-26", sales: 192000 },
+      { date: "2025-09-27", sales: 186000 },
+      { date: "2025-09-28", sales: 203000 },
+      { date: "2025-09-29", sales: 219000 },
+      { date: "2025-09-30", sales: 174000 }
+    ];
+
+  const weeklySalesArray = [
+    { weekday: "MONDAY", sales: 520000 },
+    { weekday: "TUESDAY", sales: 430000 },
+    { weekday: "WEDNESDAY", sales: 610000 },
+    { weekday: "THURSDAY", sales: 480000 },
+    { weekday: "FRIDAY", sales: 750000 },
+    { weekday: "SATURDAY", sales: 880000 },
+    { weekday: "SUNDAY", sales: 790000 }
+  ];
+
+  const weeklySalesData = weeklySalesArray.reduce((acc, item) => {
+  const dayMapping = {
+    "SUNDAY": "일", "MONDAY": "월", "TUESDAY": "화", "WEDNESDAY": "수",
+    "THURSDAY": "목", "FRIDAY": "금", "SATURDAY": "토"
+  };
+  acc[dayMapping[item.weekday]] = item.sales;
+  return acc;
+}, {});
 
   // 달력 데이터 생성
   const getKoreanToday = () => {
@@ -65,7 +116,7 @@ const CalendarPage = () => {
         
         // 한국시간 기준으로 날짜 문자열 생성
         const dateString = getKoreanDateString(date);
-        const sales = getSalesByDate(dateString);
+        const sales = dailySalesData.find(item => item.date === dateString)?.sales || 0;
         const isCurrentMonth = date.getMonth() === month;
         const isToday = dateString === todayString;
         
@@ -85,7 +136,7 @@ const CalendarPage = () => {
     return weeks;
   };
 
-  // 요일별 총 매출 계산
+  // 주별 총 매출 계산 함수
   const getWeekTotal = (week) => {
     return week.reduce((total, day) => {
       return total + (day.isCurrentMonth ? day.sales : 0);
@@ -104,10 +155,8 @@ const CalendarPage = () => {
   };
 
   
-  // API에서 받은 요일별 총 매출 사용 (계산 없이 그대로 사용)
   const weeks = generateCalendarData();
-  const dayTotals = getWeeklyTotals(); // [일, 월, 화, 수, 목, 금, 토]
-  const monthTotal = dayTotals.reduce((sum, total) => sum + total, 0);
+  const monthTotal = weeklySalesArray.reduce((sum, item) => sum + item.sales, 0);
 
   const handlePrevMonth = () => {
     setSelectedMonth(new Date(selectedMonth.getFullYear(), selectedMonth.getMonth() - 1));
@@ -206,10 +255,10 @@ const CalendarPage = () => {
         {/* 요일별 합계 섹션 (별도 분리) */}
         <WeeklyTotalSection>
           <WeeklyTotalGrid>
-            {['일', '월', '화', '수', '목', '금', '토'].map((dayName, index) => (
-              <WeeklyTotalBox key={index}>
+            {['일', '월', '화', '수', '목', '금', '토'].map((dayName) => (
+              <WeeklyTotalBox>
                 <DayLabel>{dayName}</DayLabel>
-                <TotalAmount>{dayTotals[index].toLocaleString()}</TotalAmount>
+                <TotalAmount>{weeklySalesData[dayName]?.toLocaleString() || 0}</TotalAmount>
               </WeeklyTotalBox>
             ))}
             <MonthTotalBox>

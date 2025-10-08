@@ -2,11 +2,42 @@ import styled from 'styled-components';
 import { useState, useRef } from 'react';
 import Sidebar from '../../components/Sidebar';
 import { display_xl, display_large, title_large, body_large} from '../../styles/font';
-import { useSales } from '../../hooks/useSales';
 
 const DailyStatsPage = () => {
 
-  const { todaySalesData, timeSalesData, rankSalesData } = useSales();
+  const todaySalesData = [
+    { date: "2025-09-29", sales: 19180400, orders: 42 },
+  ];
+
+  const timeSalesData = [
+    { "hour": "09", "sales": 25000, "orderCount": 3 },
+    { "hour": "10", "sales": 48000, "orderCount": 5 },
+    { "hour": "11", "sales": 92000, "orderCount": 9 },
+    { "hour": "12", "sales": 134000, "orderCount": 12 },
+    { "hour": "13", "sales": 25000, "orderCount": 3 },
+    { "hour": "10", "sales": 48000, "orderCount": 5 },
+    { "hour": "11", "sales": 92000, "orderCount": 9 },
+    { "hour": "12", "sales": 134000, "orderCount": 12 },
+    { "hour": "09", "sales": 25000, "orderCount": 3 },
+    { "hour": "10", "sales": 48000, "orderCount": 5 },
+    { "hour": "11", "sales": 92000, "orderCount": 9 },
+    { "hour": "12", "sales": 134000, "orderCount": 12 },
+  ];  
+
+  const rankSalesData = [
+    { "menuId": 1, "name": "아메리카노", "sales": 120000, "reviewCount": 4.5, "orderCount": 20},
+    { "menuId": 2, "name": "카페라떼", "sales": 95000, "reviewCount": 4, "orderCount": 15 },
+    { "menuId": 3, "name": "바닐라라떼", "sales": 60000, "reviewCount": 5, "orderCount": 10 },
+    { "menuId": 4, "name": "아메리카노", "sales": 120000, "reviewCount": 4.5, "orderCount": 20},
+    { "menuId": 5, "name": "카페라떼", "sales": 95000, "reviewCount": 4, "orderCount": 15 },
+    { "menuId": 6, "name": "바닐라라떼", "sales": 60000, "reviewCount": 5, "orderCount": 10 },
+    { "menuId": 7, "name": "아메리카노", "sales": 120000, "reviewCount": 4.5, "orderCount": 20},
+    { "menuId": 8, "name": "카페라떼", "sales": 95000, "reviewCount": 4, "orderCount": 15 },
+    { "menuId": 9, "name": "바닐라라떼", "sales": 60000, "reviewCount": 5, "orderCount": 10 },
+    { "menuId": 10, "name": "아메리카노", "sales": 120000, "reviewCount": 4.5, "orderCount": 20},
+    { "menuId": 11, "name": "카페라떼", "sales": 95000, "reviewCount": 4, "orderCount": 15 },
+    { "menuId": 12, "name": "바닐라라떼", "sales": 60000, "reviewCount": 5, "orderCount": 10 }
+    ];
 
   const [sortType, setSortType] = useState('sales');
   const [dropdownOpen, setDropdownOpen] = useState(false);

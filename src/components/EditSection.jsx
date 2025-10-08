@@ -1,6 +1,5 @@
 import styled from 'styled-components';
-import { useState, useEffect } from 'react';
-import {useStores} from '../hooks/useStores';
+import { useState, useEffect} from 'react';
 import { display_large, body_medium, title_semi } from '../styles/font';
 
 const EditSection = ({ 
@@ -15,28 +14,134 @@ const EditSection = ({
   const [businessHours, setBusinessHours] = useState([]);
   const [saving, setSaving] = useState(false);
 
-  // 영업시간 기본 데이터 구조
-  const { 
-    storeInfo, 
-    updateNotice,           //  StoreInfoProvider에서 제공
-    updateBusinessHours,    //  StoreInfoProvider에서 제공
-    getBusinessHoursForEdit, //  StoreInfoProvider에서 제공
-    getNotice              //  StoreInfoProvider에서 제공
-  } = useStores();
+    // 요일 순서 정의
+  const DAY_ORDER = ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"];
+
+  // 요일 영어-한국어 매핑
+  const dayOfWeekMap = {
+    "MONDAY": "월",
+    "TUESDAY": "화", 
+    "WEDNESDAY": "수",
+    "THURSDAY": "목",
+    "FRIDAY": "금",
+    "SATURDAY": "토",
+    "SUNDAY": "일"
+  };
+
+  const storeInfo = [{
+      storeId: 1,
+      shopName: "딤딤섬",
+      notice: "안녕하세요 딤딤섬입니다. 1인 2주문 해주세요.",
+      businessHoursDetail: [
+        {
+          dayOfWeek: "MONDAY",
+          openTime: "11:00",
+          closeTime: "23:00",
+          breakOpenTime: "15:00",
+          breakCloseTime: "17:00"
+        },
+        {
+          dayOfWeek: "TUESDAY", 
+          openTime: "11:00",
+          closeTime: "23:00",
+          breakOpenTime: "15:00",
+          breakCloseTime: "17:00"
+        },
+        {
+          dayOfWeek: "WEDNESDAY",
+          openTime: "11:00", 
+          closeTime: "23:00",
+          breakOpenTime: "15:00",
+          breakCloseTime: "17:00"
+        },
+        {
+          dayOfWeek: "THURSDAY",
+          openTime: "11:00",
+          closeTime: "23:00", 
+          breakOpenTime: "15:00",
+          breakCloseTime: "17:00"
+        },
+        {
+          dayOfWeek: "FRIDAY",
+          openTime: "11:00",
+          closeTime: "23:00",
+          breakOpenTime: "15:00", 
+          breakCloseTime: "17:00"
+        },
+        {
+          dayOfWeek: "SATURDAY",
+          openTime: "10:00",
+          closeTime: "24:00",
+          breakOpenTime: null,
+          breakCloseTime: null
+        },
+        {
+          dayOfWeek: "SUNDAY",
+          openTime: "10:00",
+          closeTime: "22:00",
+          breakOpenTime: null,
+          breakCloseTime: null
+        }
+      ]
+}];
+
+  // 영업시간 업데이트 (EditSection 형식 → API 형식 변환)
+  const updateBusinessHours = async (editSectionFormat) => {
+    console.log('영업시간 업데이트 요청:', editSectionFormat);
+  };
+
+  // API 형식을 EditSection 형식으로 변환 (요일 순서대로 정렬)
 
 
-  useEffect(() => {
-    if (!storeInfo) return;
+  // 공지사항 가져오기 함수
+  // const getNotice = () => {
+  //   return storeInfo?.notice || '';
+  // };
 
-    if (type === 'text' && field === 'notice') {
-      setValue(getNotice()); //  StoreInfoProvider 함수 사용
-    } else if (type === 'business-hours') {
-      const editFormat = getBusinessHoursForEdit(); //  StoreInfoProvider 함수 사용
-      if (editFormat) {
-        setBusinessHours(editFormat);
-      }
-    }
-  }, [storeInfo, type, field, getNotice, getBusinessHoursForEdit]);
+
+
+
+
+  //공지사항 업데이트
+    const updateNotice = async (newNotice) => {
+      console.log('Updating notice to:', newNotice);
+  };
+  // const getBusinessHoursForEdit = () => {
+  //   if (!storeInfo?.businessHoursDetail) return null;
+
+  //   // 요일 순서대로 정렬
+  //   const sortedHours = DAY_ORDER.map(dayOfWeek => {
+  //     const found = storeInfo.businessHoursDetail.find(item => item.dayOfWeek === dayOfWeek);
+  //     return found || {
+  //       dayOfWeek,
+  //       openTime: "11:00",
+  //       closeTime: "21:00", 
+  //       breakOpenTime: "15:00",
+  //       breakCloseTime: "17:00"
+  //     };
+  //   });
+
+  //   return sortedHours.map(item => ({
+  //     day: dayOfWeekMap[item.dayOfWeek],
+  //     dayEng: item.dayOfWeek.toLowerCase(),
+  //     startTime: item.openTime,
+  //     endTime: item.closeTime,
+  //     breakStart: item.breakOpenTime || '',
+  //     breakEnd: item.breakCloseTime || ''
+  //   }));
+  // };
+  // useEffect(() => {
+  //   if (!storeInfo) return;
+
+  //   if (type === 'text' && field === 'notice') {
+  //     setValue(getNotice()); //  StoreInfoProvider 함수 사용
+  //   } else if (type === 'business-hours') {
+  //     const editFormat = getBusinessHoursForEdit(); //  StoreInfoProvider 함수 사용
+  //     if (editFormat) {
+  //       setBusinessHours(editFormat);
+  //     }
+  //   }
+  // }, [storeInfo, type, field, getNotice, getBusinessHoursForEdit]);
 
   // 시간 포맷팅 함수
   const formatTimeInput = (value) => {
@@ -78,6 +183,35 @@ const EditSection = ({
       return `${hours}:${minutes}`;
     }
   };
+
+    // 더미데이터 직접 설정
+  useEffect(() => {
+    if (type === 'text' && field === 'notice') {
+      setValue(storeInfo[0]?.notice || '');
+    } else if (type === 'business-hours') {
+      // 더미데이터를 직접 변환해서 설정
+      const dummyBusinessHours = DAY_ORDER.map(dayOfWeek => {
+        const found = storeInfo[0].businessHoursDetail.find(item => item.dayOfWeek === dayOfWeek);
+        const item = found || {
+          dayOfWeek,
+          openTime: "11:00",
+          closeTime: "21:00", 
+          breakOpenTime: "15:00",
+          breakCloseTime: "17:00"
+        };
+        
+        return {
+          day: dayOfWeekMap[item.dayOfWeek],
+          dayEng: item.dayOfWeek.toLowerCase(),
+          startTime: item.openTime,
+          endTime: item.closeTime,
+          breakStart: item.breakOpenTime || '',
+          breakEnd: item.breakCloseTime || ''
+        };
+      });
+      setBusinessHours(dummyBusinessHours);
+    }
+  }, [type, field]);
 
   const handleSave = async () => {
     setSaving(true);
@@ -204,7 +338,6 @@ const EditSection = ({
             <BusinessHoursContainer>
               {businessHours.map((hour) => (
                 <BusinessHourRow key={hour.dayEng}>
-                 
                     <DayLabel>{hour.day}</DayLabel>
                   <TimeGroup>
                     <TimeInput2>{hour.startTime}</TimeInput2>
@@ -214,7 +347,6 @@ const EditSection = ({
 
                   <BreakLabel>브레이크타임</BreakLabel>
                   
-                  {/* 편집 모드와 동일한 구조로 변경 */}
                   <TimeGroup>
                     <TimeInput2>{hour.breakStart}</TimeInput2>
                     <TimeSeparator>-</TimeSeparator>

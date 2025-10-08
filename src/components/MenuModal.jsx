@@ -1,14 +1,25 @@
 // components/MenuModal.jsx
 import styled from 'styled-components';
 import { useState, useRef, useEffect } from 'react';
-import { useStores } from '../hooks/useStores';
 import { title_semi, display_large, body_medium, body_small } from '../styles/font';
 
 const MenuModal = ({ onClose, editingMenuId = null }) => { 
-  //  편집 모드 확인
+
+  //메뉴등록 (더미 함수로 변경)
+  const createMenu = async (menuData) => {
+    console.log('🍽️ 메뉴 등록 요청:', menuData);
+    
+    // 더미 응답 반환
+    return {
+      success: true,
+      data: { menuId: Date.now() } // 더미 메뉴 ID
+    };
+  };
+
+  // 편집 모드 확인
   const isEditMode = !!editingMenuId;
 
-  //  통합된 폼 데이터 상태
+  // 통합된 폼 데이터 상태
   const [formData, setFormData] = useState({
     // 1단계 데이터
     categoryId: null,
@@ -31,33 +42,63 @@ const MenuModal = ({ onClose, editingMenuId = null }) => {
 
   const fileInputRef = useRef(null);
 
+  // useStores 훅 대신 더미 함수들로 대체
+  const getCategories = () => {
+    console.log('📋 카테고리 목록 조회');
+    return [
+      { categoryId: 1, name: '신메뉴' },
+      { categoryId: 2, name: '인기메뉴' },
+      { categoryId: 3, name: '음료' }
+    ];
+  };
 
-  const { 
-    getCategories, 
-    createMenu, 
-    uploadMenuImage, 
-    updateMenu,
-    getMenuById,
-    getCategoryById 
-  } = useStores();
+  const uploadMenuImage = async (menuId, imageFile) => {
+    console.log('📸 이미지 업로드 요청:', { menuId, imageFile });
+    return { success: true };
+  };
+
+  const updateMenu = async (menuId, updateData) => {
+    console.log('✏️ 메뉴 수정 요청:', { menuId, updateData });
+    return { success: true };
+  };
+
+  const getMenuById = (menuId) => {
+    console.log('🔍 메뉴 조회 요청:', menuId);
+    // 더미 메뉴 데이터 반환
+    return {
+      categoryId: 1,
+      name: '더미 메뉴',
+      price: 5000,
+      description: '더미 설명',
+      image: 'https://via.placeholder.com/300x300',
+      spicyLevel: 2,
+      allergies: ['견과류'],
+      extraInfo: '더미 추가 정보'
+    };
+  };
+
+  const getCategoryById = (categoryId) => {
+    console.log('🏷️ 카테고리 조회 요청:', categoryId);
+    return { categoryId: 1, name: '신메뉴' };
+  };
+
   const categories = getCategories();
-
 
   useEffect(() => {
     if (isEditMode && editingMenuId) {
-      console.log('편집 모드로 모달 열림. 메뉴 ID:', editingMenuId);
+      console.log('✏️ 편집 모드로 모달 열림. 메뉴 ID:', editingMenuId);
       
       const menuData = getMenuById(editingMenuId);
-      console.log('기존 메뉴 데이터:', menuData);
+      console.log('📋 기존 메뉴 데이터:', menuData);
       
       if (menuData) {
-        //  기존 데이터로 폼 초기화
+        // 기존 데이터로 폼 초기화
         setFormData({
           categoryId: menuData.categoryId,
           name: menuData.name,
           price: menuData.price.toString(),
           description: menuData.description || '',
-          image: menuData.image ? 'existing' : null, // 기존 이미지가 있으면 'existing' 플래그
+          image: menuData.image ? 'existing' : null,
           spicyLevel: menuData.spicyLevel || 0,
           allergies: menuData.allergies || [],
           extraInfo: menuData.extraInfo || ''
@@ -79,20 +120,21 @@ const MenuModal = ({ onClose, editingMenuId = null }) => {
           });
         }
 
-        console.log('편집 데이터 로드 완료');
+        console.log('✅ 편집 데이터 로드 완료');
       }
     }
-  }, [isEditMode, editingMenuId, getMenuById, getCategoryById]);
+  }, [isEditMode, editingMenuId]);
 
-  //  공통 데이터 업데이트 함수
+  // 공통 데이터 업데이트 함수
   const updateFormData = (field, value) => {
+    console.log('🔄 폼 데이터 업데이트:', { field, value });
     setFormData(prev => ({
       ...prev,
       [field]: value
     }));
   };
 
-  //  파일 업로드 핸들러
+  // 파일 업로드 핸들러
   const handleFileUpload = (event) => {
     console.log('🖱️ 파일 선택 이벤트 발생');
     const file = event.target.files[0];
@@ -109,7 +151,7 @@ const MenuModal = ({ onClose, editingMenuId = null }) => {
     });
     
     if (file.type.startsWith('image/')) {
-      console.log('이미지 파일 확인됨');
+      console.log('✅ 이미지 파일 확인됨');
       
       const reader = new FileReader();
       reader.onload = (e) => {
@@ -122,7 +164,7 @@ const MenuModal = ({ onClose, editingMenuId = null }) => {
         
         setUploadedImage(imageData);
         updateFormData('image', file);
-        console.log('🔄 상태 업데이트 완료');
+        console.log('🔄 이미지 상태 업데이트 완료');
       };
       
       reader.readAsDataURL(file);
@@ -134,42 +176,50 @@ const MenuModal = ({ onClose, editingMenuId = null }) => {
   };
 
   const handleAddImageClick = () => {
+    console.log('🖼️ 이미지 추가 버튼 클릭');
     fileInputRef.current?.click();
   };
 
+  // 미리보기 이미지 제거
   const handleRemoveImage = () => {
+    console.log('🗑️ 이미지 제거');
     setUploadedImage(null);
     updateFormData('image', null);
   };
 
   const handleCategorySelect = (category) => {
+    console.log('🏷️ 카테고리 선택:', category);
     setSelectedCategory(category.name);
     updateFormData('categoryId', category.categoryId);
     setShowDropdown(false);
   };
 
   const [allergyInput, setAllergyInput] = useState('');
+  
   const handleAddAllergy = () => {
+    console.log('🚨 알레르기 정보 추가:', allergyInput);
     if (allergyInput.trim() && !formData.allergies.includes(allergyInput.trim())) {
-        const newAllergies = [...formData.allergies, allergyInput.trim()];
-        updateFormData('allergies', newAllergies);
-        setAllergyInput('');
+      const newAllergies = [...formData.allergies, allergyInput.trim()];
+      updateFormData('allergies', newAllergies);
+      setAllergyInput('');
     }
   };
   
-  //  알레르기 삭제 함수
+  // 알레르기 삭제 함수
   const handleRemoveAllergy = (allergyToRemove) => {
+    console.log('❌ 알레르기 정보 삭제:', allergyToRemove);
     const newAllergies = formData.allergies.filter(allergy => allergy !== allergyToRemove);
     updateFormData('allergies', newAllergies);
   };
   
   const toggleDropdown = () => {
+    console.log('📋 드롭다운 토글');
     setShowDropdown(!showDropdown);
   };
 
-  //가격 입력 핸들러
+  // 가격 입력 핸들러
   const handlePriceChange = (e) => {
-    // 입력값에서 숫자만 추출
+    console.log('💰 가격 입력:', e.target.value);
     const value = e.target.value.replace(/[^\d]/g, '');
     updateFormData('price', value);
   };
@@ -179,8 +229,10 @@ const MenuModal = ({ onClose, editingMenuId = null }) => {
     return parseInt(price).toLocaleString();
   };
   
-  //  1단계 → 2단계 이동 (편집 모드에서는 이미지 검사 수정)
+  // 1단계 → 2단계 이동
   const handleStep1Next = () => {
+    console.log('➡️ 1단계에서 2단계로 이동');
+    
     // 1단계 유효성 검사
     if (!formData.name.trim()) {
       alert('메뉴 이름을 입력해주세요.');
@@ -200,7 +252,7 @@ const MenuModal = ({ onClose, editingMenuId = null }) => {
       return;
     }
     
-    console.log('1단계 완료:', {
+    console.log('✅ 1단계 완료:', {
       isEditMode,
       categoryId: formData.categoryId,
       name: formData.name,
@@ -212,8 +264,10 @@ const MenuModal = ({ onClose, editingMenuId = null }) => {
     setCurrentStep(2);
   };
 
-  //  최종 제출 (등록/편집 모드 구분)
+  // 최종 제출 (등록/편집 모드 구분)
   const handleFinalSubmit = async () => {
+    console.log('🚀 최종 제출 시작');
+    
     // 2단계 유효성 검사
     if (!formData.extraInfo.trim()) {
       alert('추가 정보를 입력해주세요.');
@@ -227,7 +281,7 @@ const MenuModal = ({ onClose, editingMenuId = null }) => {
       console.log('편집 모드:', isEditMode);
 
       if (isEditMode) {
-        //  편집 모드 - 메뉴 수정
+        // 편집 모드 - 메뉴 수정
         console.log('📤 메뉴 수정 API 호출');
         
         const updateData = {
@@ -240,7 +294,7 @@ const MenuModal = ({ onClose, editingMenuId = null }) => {
           extraInfo: formData.extraInfo
         };
 
-        console.log('수정할 데이터:', updateData);
+        console.log('✏️ 수정할 데이터:', updateData);
 
         const result = await updateMenu(editingMenuId, updateData);
 
@@ -248,9 +302,9 @@ const MenuModal = ({ onClose, editingMenuId = null }) => {
           throw new Error(result.error || '메뉴 수정에 실패했습니다.');
         }
 
-        console.log(' 메뉴 정보 수정 완료');
+        console.log('✅ 메뉴 정보 수정 완료');
 
-        //  새 이미지가 있으면 별도 업로드
+        // 새 이미지가 있으면 별도 업로드
         if (formData.image && formData.image !== 'existing') {
           console.log('📤 새 이미지 업로드');
           
@@ -260,7 +314,7 @@ const MenuModal = ({ onClose, editingMenuId = null }) => {
             console.warn('⚠️ 이미지 업로드 실패:', imageResult.error);
             alert('메뉴는 수정되었지만 이미지 업로드에 실패했습니다.');
           } else {
-            console.log(' 이미지 업로드 완료');
+            console.log('✅ 이미지 업로드 완료');
           }
         }
 
@@ -269,7 +323,7 @@ const MenuModal = ({ onClose, editingMenuId = null }) => {
         onClose();
 
       } else {
-        //  등록 모드 (기존 로직)
+        // 등록 모드
         console.log('📤 메뉴 등록 API 호출');
         
         const menuData = {
@@ -282,15 +336,17 @@ const MenuModal = ({ onClose, editingMenuId = null }) => {
           extraInfo: formData.extraInfo
         };
 
+        console.log('🍽️ 등록할 메뉴 데이터:', menuData);
+
         const menuResult = await createMenu(menuData);
 
         if (!menuResult.success) {
           throw new Error(menuResult.error || '메뉴 등록에 실패했습니다.');
         }
 
-        console.log(' 메뉴 정보 등록 완료:', menuResult.data.menuId);
+        console.log('✅ 메뉴 정보 등록 완료:', menuResult.data.menuId);
 
-        //  이미지가 있으면 별도로 업로드
+        // 이미지가 있으면 별도로 업로드
         if (formData.image) {
           console.log('📤 이미지 업로드');
           
@@ -303,7 +359,7 @@ const MenuModal = ({ onClose, editingMenuId = null }) => {
             console.warn('⚠️ 이미지 업로드 실패:', imageResult.error);
             alert('메뉴는 등록되었지만 이미지 업로드에 실패했습니다.');
           } else {
-            console.log(' 이미지 업로드 완료');
+            console.log('✅ 이미지 업로드 완료');
           }
         }
 
@@ -320,7 +376,7 @@ const MenuModal = ({ onClose, editingMenuId = null }) => {
     }
   };
 
-  //  1단계 렌더링 (타이틀 편집/등록 구분)
+  // 1단계 렌더링 (타이틀 편집/등록 구분)
   const renderStep1 = () => (
     <>
       <ModalHeader>
@@ -429,7 +485,7 @@ const MenuModal = ({ onClose, editingMenuId = null }) => {
     </>
   );
 
-  //  2단계 렌더링 (타이틀 편집/등록 구분)
+  // 2단계 렌더링 (타이틀 편집/등록 구분)
   const renderStep2 = () => (
     <>
       <ModalHeader>
@@ -455,7 +511,7 @@ const MenuModal = ({ onClose, editingMenuId = null }) => {
             </SpicyLevelContainer>
           </FormGroup>
 
-          {/*  알레르기 정보 (입력창으로 변경) */}
+          {/* 알레르기 정보 */}
           <FormGroup>
           <AllergySection>
             <ModalHeader>
@@ -463,7 +519,7 @@ const MenuModal = ({ onClose, editingMenuId = null }) => {
               <SubLabel2>음식의 재료 중 알레르기 유발할 수 있는 재료명이 있나요?</SubLabel2>
             </ModalHeader>
             
-            {/*  태그 영역 (고정된 공간 확보) */}
+            {/* 태그 영역 */}
             <AllergyTagArea>
               {formData.allergies.length > 0 && (
                 <AllergyTagContainer>
@@ -479,7 +535,7 @@ const MenuModal = ({ onClose, editingMenuId = null }) => {
               )}
             </AllergyTagArea>
             
-            {/*  알레르기 입력창 (항상 하단에 고정) */}
+            {/* 알레르기 입력창 */}
             <AllergyInputContainer>
               <AllergyInput
                 value={allergyInput}
@@ -497,7 +553,7 @@ const MenuModal = ({ onClose, editingMenuId = null }) => {
           </FormGroup>
         </LeftSection>
 
-        {/*  추가 정보 */}
+        {/* 추가 정보 */}
         <RightSection>
           <FormGroup>
             <Label>추가 정보</Label>
@@ -522,7 +578,7 @@ const MenuModal = ({ onClose, editingMenuId = null }) => {
     </>
   );
 
-  //  단계별 컨텐츠 렌더링
+  // 단계별 컨텐츠 렌더링
   const renderStepContent = () => {
     switch(currentStep) {
       case 1:
@@ -537,7 +593,7 @@ const MenuModal = ({ onClose, editingMenuId = null }) => {
   return (
     <ModalOverlay onClick={onClose}>
       <ModalContent onClick={(e) => e.stopPropagation()}>
-        {/*  단계별 컨텐츠 렌더링 */}
+        {/* 단계별 컨텐츠 렌더링 */}
         {renderStepContent()}
       </ModalContent>
     </ModalOverlay>
@@ -545,6 +601,9 @@ const MenuModal = ({ onClose, editingMenuId = null }) => {
 };
 
 export default MenuModal;
+
+// 기존 스타일 컴포넌트들 (동일하게 유지)...
+
 
 //  기존 스타일 컴포넌트들 (그대로 유지)
 const StepIndicator = styled.div`
