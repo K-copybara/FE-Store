@@ -1,21 +1,28 @@
 import styled from 'styled-components';
 import { useState, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { useStores } from '../hooks/useStores';
 import MenuModal from './MenuModal';
 import ConfirmModal from './ConfirmModal';
 import { display_large, body_large, body_medium, title_semi } from '../styles/font';
 
 const MenuManagement = ({ title = "메뉴 관리" }) => {
-  const { 
-    getMenus,
-    getMenuDetailById,
-    getCategoryById,
-    updateMenu,
-    deleteMenu
-  } = useStores();
+    const menusdummy = [
+      {
+      "menuId": 1,
+      "name": "아메리카노",
+      "menuInfo" :"~~~~~",
+      "price": 4000,
+      "status": "ON_SALE"
+    },
+    {
+      "menuId": 2,
+      "name": "카페라떼",
+      "menuInfo" :"~~~~~",
+      "price": 4500,
+      "status": "SOLD_OUT"
+    }
+  ];
 
-  const menus = getMenus();
   const [showAddModal, setShowAddModal] = useState(false);
   
   //  편집 관련 상태
@@ -54,73 +61,24 @@ const MenuManagement = ({ title = "메뉴 관리" }) => {
 
   //  메뉴 편집
   const handleEditMenu = (menuId) => {
-    setEditingMenuId(menuId);
-    setShowEditModal(true);
-    setOpenDropdownId(null);
+    // setEditingMenuId(menuId);
+    // setShowEditModal(true);
+    // setOpenDropdownId(null);
+    console.log('메뉴 편집 클릭:', menuId);
   };
 
   //  일시품절 토글 (SOLD_OUT ↔ ON_SALE)
   const handleToggleOutOfStock = async (menuId) => {
-    try {
-      const menuDetail = getMenuDetailById(menuId);
-      const currentStatus = menuDetail.status || 'ON_SALE';
-      
-      //  SOLD_OUT ↔ ON_SALE 토글
-      const newStatus = currentStatus === 'ON_SALE' ? 'SOLD_OUT' : 'ON_SALE';
-      
-      console.log(`상태 변경: ${currentStatus} → ${newStatus}`);
-      
-      const updateData = {
-        ...menuDetail,
-        status: newStatus
-      };
-
-      const result = await updateMenu(menuId, updateData);
-      
-      if (result.success) {
-        console.log(` 메뉴 상태 변경 완료: ${newStatus}`);
-      } else {
-        alert('상태 변경에 실패했습니다.');
-      }
-    } catch (error) {
-      console.error('상태 변경 오류:', error);
-      alert('상태 변경 중 오류가 발생했습니다.');
-    }
-    setOpenDropdownId(null);
+    console.log('일시품절 토글 클릭:', menuId);
   };
 
   //  메뉴 삭제
   const handleDeleteMenuClick = (menuId) => {
-    const menu = getMenus().find(m => m.menuId === menuId);
-    if (menu) {
-      setMenuToDelete({ id: menuId, name: menu.name });
-      setShowConfirmModal(true);
-      setOpenDropdownId(null);
-    }
+    console.log('삭제 클릭:', menuId);
   };
   //  삭제 확인 시 실제 삭제 실행
   const handleConfirmDelete = async () => {
-    if (!menuToDelete) return;
-    
-    try {
-      console.log('메뉴 삭제 시작:', menuToDelete);
-      
-      const result = await deleteMenu(menuToDelete.id);
-      
-      if (result.success) {
-        console.log(' 메뉴 삭제 완료');
-        // 성공 메시지는 Provider에서 처리되므로 별도 알림 불필요
-      } else {
-        alert('메뉴 삭제에 실패했습니다: ' + result.error);
-      }
-    } catch (error) {
-      console.error('메뉴 삭제 오류:', error);
-      alert('메뉴 삭제 중 오류가 발생했습니다: ' + error.message);
-    } finally {
-      //  모달 닫기
-      setShowConfirmModal(false);
-      setMenuToDelete(null);
-    }
+    console.log('삭제 확인:', menuToDelete);
   };
 
   //  삭제 취소
@@ -150,60 +108,59 @@ const MenuManagement = ({ title = "메뉴 관리" }) => {
         <AddButton onClick={() => setShowAddModal(true)}>등록</AddButton>
       </Header>
 
-      <MenuList>
-        {menus.length === 0 ? (
-          <EmptyState>등록된 메뉴가 없습니다.</EmptyState>
-        ) : (
-          menus.map((menu) => {
-            const detail = getMenuDetailById(menu.menuId);
-            const category = detail ? getCategoryById(detail.categoryId) : null;
-            
-            //  SOLD_OUT 상태 확인
-            const isSoldOut = detail?.status === 'SOLD_OUT';
-            
-            return (
-              <MenuCard key={menu.menuId} $isSoldOut={isSoldOut}>
-                {/*  일시품절 오버레이 */}
-                {isSoldOut && <OutOfStockOverlay />}
-                
-                <MenuContent>
-                  {/* 카테고리 */}
-                  <CategoryTag>
-                    {category ? category.name : '알 수 없는 카테고리'}
-                  </CategoryTag>
+     <MenuList>
+      {menusdummy.length === 0 ? (
+        <EmptyState>등록된 메뉴가 없습니다.</EmptyState>
+      ) : (
+        menusdummy.map((menu) => {
+          const detail = menu;
+          
+          // SOLD_OUT 상태 확인
+          const isSoldOut = detail?.status === 'SOLD_OUT';
+          
+          return (
+            <MenuCard key={menu.menuId} $isSoldOut={isSoldOut}>
+              {/* 일시품절 오버레이 */}
+              {isSoldOut && <OutOfStockOverlay />}
+              
+              <MenuContent>
+                {/* 카테고리 */}
+                <CategoryTag>
+                  신메뉴
+                </CategoryTag>
 
-                  {/* 메뉴 이미지 */}
-                  <MenuImage 
-                    src={menu.image}
-                    alt={menu.name}
-                    onError={(e) => {
-                      e.target.src = "src/assets/mandoo.svg";
-                    }}
-                  />
+                {/* 메뉴 이미지 */}
+                <MenuImage 
+                  src={menu.image}
+                  alt={menu.name}
+                  onError={(e) => {
+                    e.target.src = "src/assets/images/mandoo.svg";
+                  }}
+                />
 
-                  {/* 메뉴 상세 정보 */}
-                  <MenuInfo>
-                    <MenuName>{menu.name}</MenuName>
-                    <MenuDescription>{detail?.description || menu.menuInfo}</MenuDescription>
-                  </MenuInfo>
+                {/* 메뉴 상세 정보 */}
+                <MenuInfo>
+                  <MenuName>{menu.name}</MenuName>
+                  <MenuDescription>{detail?.description || menu.menuInfo}</MenuDescription>
+                </MenuInfo>
 
-                  {/* 가격 */}
-                  <MenuPrice>{menu.price.toLocaleString()}원</MenuPrice>
-                </MenuContent>
+                {/* 가격 */}
+                <MenuPrice>{menu.price.toLocaleString()}원</MenuPrice>
+              </MenuContent>
 
-                {/*  편집 버튼 */}
-                <EditButton 
-                  ref={(el) => editButtonRefs.current[menu.menuId] = el}
-                  onClick={(e) => handleDropdownToggle(menu.menuId, e)}
-                  $isActive={openDropdownId === menu.menuId}
-                >
-                  <EditIcon />
-                </EditButton>
-              </MenuCard>
-            );
-          })
-        )}
-      </MenuList>
+              {/* 편집 버튼 */}
+              <EditButton 
+                ref={(el) => editButtonRefs.current[menu.menuId] = el}
+                onClick={(e) => handleDropdownToggle(menu.menuId, e)}
+                $isActive={openDropdownId === menu.menuId}
+              >
+                <EditIcon />
+              </EditButton>
+            </MenuCard>
+          );
+        })
+      )}
+    </MenuList>
 
       {/*  Portal을 사용한 드롭다운 메뉴 */}
       {openDropdownId && createPortal(
@@ -223,11 +180,7 @@ const MenuManagement = ({ title = "메뉴 관리" }) => {
           
           {/*  일시품절 설정/해제 (상태에 따라 텍스트 변경) */}
           <DropdownItem onClick={() => handleToggleOutOfStock(openDropdownId)}>
-            {(() => {
-              const detail = getMenuDetailById(openDropdownId);
-              const isSoldOut = detail?.status === 'SOLD_OUT';
-              return isSoldOut ? '일시품절 해제' : '일시품절 설정';
-            })()}
+            일시품절 설정
           </DropdownItem>
           
           {/*  메뉴 삭제 (항상 표시) */}
@@ -243,7 +196,7 @@ const MenuManagement = ({ title = "메뉴 관리" }) => {
 
       {/*  메뉴 등록 모달 */}
       {showAddModal && (
-        <MenuModal onClose={() => setShowAddModal(false)} />
+        <MenuModal onClose={() => setShowAddModal(true)} />
       )}
 
       {/*  메뉴 편집 모달 */}
