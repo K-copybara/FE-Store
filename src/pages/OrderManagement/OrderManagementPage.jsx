@@ -226,8 +226,7 @@ const OrderManagementPage = () => {
   }, []);
 
   return (
-    <Layout>
-      <Sidebar />
+    <>
       <OrderContainer>
         <OrderStatus>
           <OrderTitle>주문</OrderTitle>
@@ -280,20 +279,11 @@ const OrderManagementPage = () => {
           ))
         )}
       </RequestContainer>
-    </Layout>
+    </>
   );
 };
 
 export default OrderManagementPage;
-
-const Layout = styled.div`
-  display: flex;
-  flex-direction: row;
-  align-items: flex-start;
-  gap: 1.25rem;
-  width: 100%;
-  height: 100%;
-`;
 
 const OrderContainer = styled.div`
   display: flex;
@@ -307,6 +297,7 @@ const OrderContainer = styled.div`
   flex: 1;
   height: 100%;
   overflow-y: auto;
+  box-sizing: border-box;
   box-sizing: border-box;
 `;
 
@@ -333,6 +324,7 @@ const TabButton = styled.button`
   ${display_large}
   background: none;
   border: none;
+  color: ${(props) => (props.active ? 'var(--primary)' : 'var(--gray500)')};
   color: ${(props) => (props.active ? 'var(--primary)' : 'var(--gray500)')};
   cursor: pointer;
   padding: 0.5rem 0;

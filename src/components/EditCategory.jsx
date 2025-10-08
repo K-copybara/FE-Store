@@ -1,24 +1,37 @@
 import styled from 'styled-components';
 import { body_large, display_large} from '../styles/font';
-import { useStores } from '../hooks/useStores';
 import { useState } from 'react';
 import { body_medium, title_semi } from '../styles/font';
 
 const EditCategory = ({ title = "메뉴 카테고리" }) => {
+
+    const categories = [
+      {categoryId: 1, name: '신메뉴', order: 0, menuCount: 1},
+      {categoryId: 2, name: '딤섬', order: 1, menuCount: 0},
+      {categoryId: 3, name: '식사류', order: 2, menuCount: 0},
+      {categoryId: 4, name: '음료', order: 3, menuCount: 0}
+    ];
+
+  //  카테고리 순서 변경
+  const updateCategoryOrder = async (categoryOrders) => {
+    console.log('카테고리 순서 변경 요청:', categoryOrders);
+  };
+  //  헬퍼 함수 - 현재 카테고리 정렬된 상태로 반환. 필요한가??
+  const getCategories = () => {
+    return categories.sort((a, b) => a.order - b.order);
+  };
+
+  //  카테고리 삭제 가능 여부 확인 (메뉴가 없는 경우에만 가능)
+  const canDeleteCategory = (categoryId) => {
+    console.log('카테고리 삭제 가능 여부 확인:', categoryId);
+  };
+
   const [showModal, setShowModal] = useState(false);
   const [localCategories, setLocalCategories] = useState([]);
   const [draggedIndex, setDraggedIndex] = useState(null);
   const [isAddingNew, setIsAddingNew] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState('');
-  
-  const { 
-    getCategories,
-    createCategory,
-    deleteCategory,
-    updateCategoryOrder,
-    canDeleteCategory,
-    loading
-  } = useStores();
+
 
   //  요청사항 카테고리 자동 추가 함수
   const ensureRequestCategory = (categoriesData) => {
@@ -51,7 +64,7 @@ const EditCategory = ({ title = "메뉴 카테고리" }) => {
   };
 
   //  categories는 항상 요청사항이 포함된 데이터
-  const categories = getEnhancedCategories();
+  //const categories = getEnhancedCategories();
 
   //  요청사항 카테고리인지 확인하는 함수
   const isRequiredCategory = (categoryName) => {
@@ -108,75 +121,78 @@ const EditCategory = ({ title = "메뉴 카테고리" }) => {
 
   //  카테고리 삭제 (요청사항 카테고리는 삭제 불가)
   const handleDelete = async (categoryId) => {
-    const category = localCategories.find(cat => cat.categoryId === categoryId);
+    // const category = localCategories.find(cat => cat.categoryId === categoryId);
     
-    if (isRequiredCategory(category?.name)) {
-      alert('요청사항 카테고리는 삭제할 수 없습니다.');
-      return;
-    }
+    // if (isRequiredCategory(category?.name)) {
+    //   alert('요청사항 카테고리는 삭제할 수 없습니다.');
+    //   return;
+    // }
 
-    if (!canDeleteCategory(categoryId)) {
-      alert('메뉴가 있는 카테고리는 삭제할 수 없습니다.');
-      return;
-    }
+    // if (!canDeleteCategory(categoryId)) {
+    //   alert('메뉴가 있는 카테고리는 삭제할 수 없습니다.');
+    //   return;
+    // }
 
-    //  요청사항 카테고리는 실제 API로 삭제 요청하지 않음 (프론트에서만 존재하므로)
-    const result = await deleteCategory(categoryId);
-    if (result.success) {
-      setLocalCategories(prev => prev.filter(cat => cat.categoryId !== categoryId));
-    } else {
-      alert('삭제 실패: ' + result.error);
-    }
+    // //  요청사항 카테고리는 실제 API로 삭제 요청하지 않음 (프론트에서만 존재하므로)
+    // const result = await deleteCategory(categoryId);
+    // if (result.success) {
+    //   setLocalCategories(prev => prev.filter(cat => cat.categoryId !== categoryId));
+    // } else {
+    //   alert('삭제 실패: ' + result.error);
+    // }
+    console.log('카테고리 삭제 클릭:', categoryId);
   };
 
   //  새 카테고리 추가 (요청사항 중복 방지)
   const handleAddNew = () => {
-    setIsAddingNew(true);
-    setNewCategoryName('');
+    console.log('새 카테고리 추가 클릭');
   };
 
-  const handleSaveNew = async () => {
-    if (!newCategoryName.trim()) {
-      alert('카테고리명을 입력해주세요.');
-      return;
-    }
 
-    //  요청사항 카테고리 중복 방지
-    if (isRequiredCategory(newCategoryName.trim())) {
-      alert('요청사항 카테고리는 이미 존재합니다.');
-      return;
-    }
+  //  새 카테고리 저장 처리 체크 표시. 
+  // const handleSaveNew = async () => {
+  //   if (!newCategoryName.trim()) {
+  //     alert('카테고리명을 입력해주세요.');
+  //     return;
+  //   }
 
-    //  기존 카테고리명 중복 확인
-    const isDuplicate = localCategories.some(cat => 
-      cat.name.toLowerCase() === newCategoryName.trim().toLowerCase()
-    );
+  //   //  요청사항 카테고리 중복 방지
+  //   // if (isRequiredCategory(newCategoryName.trim())) {
+  //   //   alert('요청사항 카테고리는 이미 존재합니다.');
+  //   //   return;
+  //   // }
 
-    if (isDuplicate) {
-      alert('이미 존재하는 카테고리명입니다.');
-      return;
-    }
+  //   //  기존 카테고리명 중복 확인
+  //   const isDuplicate = localCategories.some(cat => 
+  //     cat.name.toLowerCase() === newCategoryName.trim().toLowerCase()
+  //   );
 
-    const result = await createCategory(newCategoryName.trim());
-    if (result.success) {
-      const newCategory = {
-        categoryId: result.data.categoryId,
-        name: newCategoryName.trim(),
-        order: localCategories.length,
-        menuCount: 0
-      };
-      setLocalCategories(prev => [...prev, newCategory]);
-      setIsAddingNew(false);
-      setNewCategoryName('');
-    } else {
-      alert('추가 실패: ' + result.error);
-    }
-  };
+  //   if (isDuplicate) {
+  //     alert('이미 존재하는 카테고리명입니다.');
+  //     return;
+  //   }
 
-  const handleCancelNew = () => {
-    setIsAddingNew(false);
-    setNewCategoryName('');
-  };
+  //   const result = await createCategory(newCategoryName.trim());
+  //   if (result.success) {
+  //     const newCategory = {
+  //       categoryId: result.data.categoryId,
+  //       name: newCategoryName.trim(),
+  //       order: localCategories.length,
+  //       menuCount: 0
+  //     };
+  //     setLocalCategories(prev => [...prev, newCategory]);
+  //     setIsAddingNew(false);
+  //     setNewCategoryName('');
+  //   } else {
+  //     alert('추가 실패: ' + result.error);
+  //   }
+  // };
+
+  // 새 카테고리 추가 취소  X
+  // const handleCancelNew = () => {
+  //   setIsAddingNew(false);
+  //   setNewCategoryName('');
+  // };
 
   //저장 처리 (요청사항 카테고리는 제외하고 API 전송)
 const handleSave = async () => {
@@ -222,7 +238,7 @@ const handleSave = async () => {
           <ModalContent onClick={(e) => e.stopPropagation()}>
             <ModalHeader>
               <ModalTitle>카테고리 편집</ModalTitle>
-              <Save onClick={handleSave} disabled={loading}>
+              <Save onClick={handleSave}>
                 저장
               </Save>
             </ModalHeader>
@@ -271,24 +287,24 @@ const handleSave = async () => {
                     value={newCategoryName}
                     onChange={(e) => setNewCategoryName(e.target.value)}
                     autoFocus
-                    onKeyPress={(e) => {
-                      if (e.key === 'Enter') {
-                        handleSaveNew();
-                      } else if (e.key === 'Escape') {
-                        handleCancelNew();
-                      }
-                    }}
+                    // onKeyPress={(e) => {
+                    //   if (e.key === 'Enter') {
+                    //     handleSaveNew();
+                    //   } else if (e.key === 'Escape') {
+                    //     handleCancelNew();
+                    //   }
+                    // }}
                   />
                   <MenuCount2>0개</MenuCount2>
                     </MenuHeader>
-                  <ActionButtons>
+                  {/* <ActionButtons>
                     <SaveButton onClick={handleSaveNew}>
                       <CheckIcon />
                     </SaveButton>
                     <CancelButton onClick={handleCancelNew}>
                       <CancelIcon />
                     </CancelButton>
-                  </ActionButtons>
+                  </ActionButtons> */}
                 </CategoryRow>
               )}
             </CategoryList>
