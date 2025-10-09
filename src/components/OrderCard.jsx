@@ -4,12 +4,13 @@ import styled from 'styled-components';
 import CancelCompleteButton from './CancelCompleteButton';
 import ConfirmModal from './ConfirmModal';
 
-import { display_small, display_xl, display_large} from "../styles/font";
+import {reg14, bold36, reg24, bold24} from "../styles/font";
 
 const OrderCard = ({ order, onAccept, onReject }) => {
   // 로컬 터치 상태 관리 (API와 별개)
   const [isTouched, setIsTouched] = useState(false);
   const [showCompleteModal, setShowCompleteModal] = useState(false);
+  const [showCancelModal, setShowCancelModal] = useState(false);
   const [isCompleting, setIsCompleting] = useState(false); // 완료 애니메이션 상태
 
   const handleCardClick = () => {
@@ -26,7 +27,7 @@ const OrderCard = ({ order, onAccept, onReject }) => {
   };
   //취소 버튼 클릭
     const handleRejectClick = () => {
-    onReject && onReject();
+    setShowCancelModal(true);
   };
 
   const handleConfirmComplete = () => {
@@ -37,6 +38,13 @@ const OrderCard = ({ order, onAccept, onReject }) => {
     setTimeout(() => {
       onAccept && onAccept();
     }, 500); // 0.5초 후 완료 처리
+  };
+
+  const handleConfirmCancel = () => {
+    setShowCancelModal(false);
+    setIsCompleting(true); // 완료 애니메이션 시작
+    // 취소 처리 로직 추가
+    onReject && onReject();
   };
 
   // 요청사항이 있는지 확인
@@ -93,10 +101,16 @@ const OrderCard = ({ order, onAccept, onReject }) => {
     </CardWrapper>
 
     <ConfirmModal
+        isOpen={showCancelModal}
+        onClose={() => setShowCancelModal(false)}
+        onConfirm={handleConfirmCancel}
+        message="주문을 취소하시겠습니까? \n손님에게 취소 사유를 전달해주세요."
+      />
+    <ConfirmModal
         isOpen={showCompleteModal}
         onClose={() => setShowCompleteModal(false)}
         onConfirm={handleConfirmComplete}
-        message="주문을 완료로 처리하시겠습니까?"
+        message="주문을 완료하시겠습니까?"
       />
     </>
   );
@@ -148,29 +162,29 @@ const Right = styled.div`
   align-items: flex-end;
   `;
 const OrderTime = styled.span`
-  ${display_small}
+  ${reg14}
   color: var(--black);
 `;
 
 const TableNumber = styled.div`
-  ${display_xl}
+  ${bold36}
   color: var(--black);
   text-align: center;
   margin-bottom: ${props => props.hasRequest ? '8px' : '12px'};
 `;
 
 const OrderTitle = styled.span`
-  ${display_small}
+  ${reg14}
   color: var(--black);
 `;
 
 const OrderNumber = styled.span`
-  ${display_xl}
+  ${bold36}
   color: var(--black);
 `;
 
 const RequestSection = styled.div`
-  ${display_large}
+  ${reg24}
   display: flex;
   align-items: center;
   padding: 1.25rem;
@@ -193,11 +207,11 @@ const MenuItem = styled.div`
 `;
 
 const MenuName = styled.span`
-  ${display_large}
+  ${reg24}
 `;
 
 const MenuQuantity = styled.span`
-  ${display_large}
+  ${bold24}
   text-align: right;
   font-weight: 700;
 `;

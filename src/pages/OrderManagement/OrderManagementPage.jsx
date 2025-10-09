@@ -4,10 +4,12 @@ import Sidebar from '../../components/Sidebar';
 import OrderCard from '../../components/OrderCard';
 import RequestCard from '../../components/RequestCard';
 
-import { display_xl, display_large } from '../../styles/font';
+import {bold36, bold24 } from '../../styles/font';
 
 import { useOrders } from '../../hooks/useOrders';
 import { useRequests } from '../../hooks/useRequests';
+
+import DividerIcon from '../../assets/icons/divider-icon.svg?react';
 
 const OrderManagementPage = () => {
   const { orders, completeOrder, rejectOrder } = useOrders();
@@ -41,18 +43,7 @@ const OrderManagementPage = () => {
               처리 중
             </TabButton>
             <TabDivider>
-              <svg
-                width="3"
-                height="23"
-                viewBox="0 0 3 23"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M2.04688 0.640625V22.3906H0.3125V0.640625H2.04688Z"
-                  fill="#999999"
-                />
-              </svg>
+              <DividerIcon />
             </TabDivider>
             <TabButton
               active={activeTab === 'completed'}
@@ -123,7 +114,7 @@ const OrderStatus = styled.div`
 `;
 
 const OrderTitle = styled.div`
-  ${display_xl}
+  ${bold36}
   color: var(--black);
 `;
 
@@ -134,7 +125,7 @@ const TabContainer = styled.div`
 `;
 
 const TabButton = styled.button`
-  ${display_large}
+  ${bold24}
   background: none;
   border: none;
   color: ${(props) => (props.active ? 'var(--primary)' : 'var(--gray500)')};
@@ -148,12 +139,12 @@ const TabButton = styled.button`
 `;
 
 const TabDivider = styled.span`
-  ${display_large}
+  ${bold24}
   color: var(--gray300);
 `;
 
 const EmptyMessage = styled.div`
-  ${display_large}
+  ${bold24}
   display: flex;
   justify-content: center;
   align-items: center;
