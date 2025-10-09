@@ -69,10 +69,12 @@ const DailyStatsPage = () => {
   const dropdownRef = useRef();
   const SORT_OPTIONS = [
     { value: 'sales', label: '매출순' },
-    { value: 'review', label: '리뷰순' }
+    { value: 'review', label: '리뷰순' },
   ];
-  const selectedSortLabel = SORT_OPTIONS.find(option => option.value === sortType)?.label;
-  
+  const selectedSortLabel = SORT_OPTIONS.find(
+    (option) => option.value === sortType
+  )?.label;
+
   const sortedMenuData = [...rankSalesData].sort((a, b) => {
     if (sortType === 'sales') {
       return b.sales - a.sales; // 매출순 (높은 순)
@@ -82,8 +84,7 @@ const DailyStatsPage = () => {
   });
 
   return (
-    <Layout>
-      <Sidebar />
+    <>
       <MainContent>
         <Header>
           <Title>일별 매출 통계</Title>
@@ -95,7 +96,9 @@ const DailyStatsPage = () => {
             <StatsRow>
               <StatBlock>
                 <StatLabel>총 매출</StatLabel>
-                <StatValue>{todaySalesData[0]?.sales?.toLocaleString() || 0} 원</StatValue>
+                <StatValue>
+                  {todaySalesData[0]?.sales?.toLocaleString() || 0} 원
+                </StatValue>
               </StatBlock>
               <StatBlock>
                 <StatLabel>주문 건수</StatLabel>
@@ -141,10 +144,9 @@ const DailyStatsPage = () => {
               <MenuList>
                 {sortedMenuData.map((item, idx) => (
                   <MenuListItem key={item.menuId}>
-                    
                     <MenuRank>{idx + 1}.</MenuRank>
                     <MenuName>{item.name}</MenuName>
-                    
+
                     <MenuRating>
                         <MenuRatingIcon />
                         {item.reviewCount}</MenuRating>
@@ -160,19 +162,19 @@ const DailyStatsPage = () => {
             <TimeSection>
               <SectionTitle>시간대별 매출 현황</SectionTitle>
               <TimeList>
-                  {timeSalesData.map((slot) => (
-                    <MenuListItem key={slot.hour}>
-                      <MenuName>{slot.hour}시</MenuName>
-                      <MenuCount2>{slot.orderCount}건</MenuCount2>
-                      <MenuSales>{slot.sales?.toLocaleString()}원</MenuSales>
-                    </MenuListItem>
-                  ))}
+                {timeSalesData.map((slot) => (
+                  <MenuListItem key={slot.hour}>
+                    <MenuName>{slot.hour}시</MenuName>
+                    <MenuCount2>{slot.orderCount}건</MenuCount2>
+                    <MenuSales>{slot.sales?.toLocaleString()}원</MenuSales>
+                  </MenuListItem>
+                ))}
               </TimeList>
             </TimeSection>
           </RightColumn>
         </ContentRow>
       </MainContent>
-    </Layout>
+    </>
   );
 };
 export default DailyStatsPage;
@@ -246,7 +248,7 @@ const MenuSection = styled.div`
   flex: 1;
   display: flex;
   flex-direction: column;
-  min-height: 0; 
+  min-height: 0;
   box-sizing: border-box; /**/
   overflow: hidden;
 `;
@@ -261,7 +263,7 @@ const SortSelect = styled.div`
   position: relative;
 `;
 
-const SortButton = styled.button` 
+const SortButton = styled.button`
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -280,7 +282,7 @@ const SortText = styled.span`
 const Sort = styled.div`
   display: flex;
   transition: transform 0.2s;
-  transform: ${props => props.$open ? 'rotate(180deg)' : 'rotate(0deg)'};
+  transform: ${(props) => (props.$open ? 'rotate(180deg)' : 'rotate(0deg)')};
 `;
 
 const SortDropdown = styled.div`
@@ -296,7 +298,7 @@ const SortDropdownItem = styled.div`
   ${body_large}
   padding: 0.75rem 1rem;
   cursor: pointer;
-  color: ${props => props.$selected ? 'var(--primary)' : 'var(--black)'};
+  color: ${(props) => (props.$selected ? 'var(--primary)' : 'var(--black)')};
 
   &:not(:last-child) {
     border-bottom: 1px solid var(--gray100);
@@ -308,8 +310,8 @@ const MenuList = styled.div`
   flex-direction: column;
   flex: 1;
   gap: 0.5rem;
-  overflow-y: auto; 
-  
+  overflow-y: auto;
+
   /* 스크롤바 스타일 */
   &::-webkit-scrollbar {
     width: 6px;
@@ -431,7 +433,7 @@ const TimeList = styled.div`
   gap: 0.5rem;
   flex: 1; /* TimeSection의 나머지 공간 차지 */
   overflow-y: auto;
-  
+
   /* 스크롤바 스타일 */
   &::-webkit-scrollbar {
     width: 6px;

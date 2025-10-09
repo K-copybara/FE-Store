@@ -11,7 +11,6 @@ import CalendarIcon from '../assets/icons/Sidebar/calendar-icon.svg?react';
 import DailyStatsIcon from '../assets/icons/Sidebar/dailystats-icon.svg?react';
 
 const Sidebar = () => {
-
   const [showSalesDropdown, setShowSalesDropdown] = useState(false);
 
   const toggleSalesDropdown = () => {
@@ -38,7 +37,7 @@ const Sidebar = () => {
               <DropArrowIcon />
             </DropdownArrow>
           </SalesMenuItem>
-          
+
           <DropdownMenu isOpen={showSalesDropdown}>
             <SubMenuItem>
               <StyledNavLink to="/SalesReport/Calendar">
@@ -73,10 +72,11 @@ const SidebarWrapper = styled.aside`
   padding: 1.25rem;
   flex-direction: column;
   align-items: flex-start;
-  gap:3.75rem;
+  gap: 3.75rem;
 
-  width: 22.1875rem;
-  flex-shrink: 0; 
+  width: 20%;
+  min-width: 20rem;
+  flex-shrink: 0;
   height: 100%;
   background-color: var(--white);
   border-radius: 1.25rem;
@@ -105,12 +105,12 @@ const MenuList = styled.ul`
 
 const Line = styled.div`
   border-bottom: 1px solid var(--gray300);
-  width: 100%;  
+  width: 100%;
 `;
 // 각 메뉴 아이템을 위한 li 태그 (보통 스타일은 링크에 직접 줍니다)
 const MenuItem = styled.li`
-  alig-items: flex-start;
-  align-self-stretch;
+  align-items: flex-start;
+  align-self: stretch;
   padding: 0.62rem;
 `;
 
@@ -149,11 +149,10 @@ const SalesMenuItem = styled.div`
   &:hover {
     color: var(--black);
   }
-
 `;
 
 const DropdownArrow = styled.div`
-  transform: ${props => props.isOpen ? 'rotate(180deg)' : 'rotate(0deg)'};
+  transform: ${(props) => (props.isOpen ? 'rotate(180deg)' : 'rotate(0deg)')};
   transition: transform 0.3s ease;
   display: flex;
   align-items: center;
@@ -161,20 +160,20 @@ const DropdownArrow = styled.div`
 `;
 
 const DropdownMenu = styled.div`
-  max-height: ${props => props.isOpen ? '200px' : '0'};
+  max-height: ${(props) => (props.isOpen ? '200px' : '0')};
   overflow: hidden;
   transition: max-height 0.3s ease;
   padding-left: 1rem;
-  margin-top: ${props => props.isOpen ? '0.5rem' : '0'};
+  margin-top: ${(props) => (props.isOpen ? '0.5rem' : '0')};
 `;
 
 const SubMenuItem = styled.div`
   margin: 0.25rem 0;
-  
+
   ${StyledNavLink} {
     padding: 0.5rem 0.75rem;
     font-size: 1rem;
-    
+
     svg {
       width: 20px;
       height: 20px;

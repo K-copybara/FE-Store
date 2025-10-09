@@ -1,7 +1,7 @@
 import styled from 'styled-components';
 import { useState } from 'react';
 import Sidebar from '../../components/Sidebar';
-import OrderCard from '../../components/OrderCard'; 
+import OrderCard from '../../components/OrderCard';
 import RequestCard from '../../components/RequestCard';
 
 import {bold36, bold24 } from '../../styles/font';
@@ -12,18 +12,13 @@ import { useRequests } from '../../hooks/useRequests';
 import DividerIcon from '../../assets/icons/divider-icon.svg?react';
 
 const OrderManagementPage = () => {
+  const { orders, completeOrder, rejectOrder } = useOrders();
 
-  const { 
-    orders, 
-    completeOrder,
-    rejectOrder
-  } = useOrders();
-
-  const { sortedRequests, completeRequest } = useRequests(); 
+  const { sortedRequests, completeRequest } = useRequests();
   const [activeTab, setActiveTab] = useState('processing');
-  
-    // 탭에 따라 주문 필터링
-  const filteredOrders = orders.filter(order => {
+
+  // 탭에 따라 주문 필터링
+  const filteredOrders = orders.filter((order) => {
     if (activeTab === 'processing') {
       return order.status === 'PENDING';
     } else {
@@ -36,14 +31,13 @@ const OrderManagementPage = () => {
   };
 
   return (
-    <Layout>
-      <Sidebar />
+    <>
       <OrderContainer>
         <OrderStatus>
           <OrderTitle>주문</OrderTitle>
           <TabContainer>
-            <TabButton 
-              active={activeTab === 'processing'} 
+            <TabButton
+              active={activeTab === 'processing'}
               onClick={() => setActiveTab('processing')}
             >
               처리 중
@@ -51,8 +45,8 @@ const OrderManagementPage = () => {
             <TabDivider>
               <DividerIcon />
             </TabDivider>
-            <TabButton 
-              active={activeTab === 'completed'} 
+            <TabButton
+              active={activeTab === 'completed'}
               onClick={() => setActiveTab('completed')}
             >
               완료
@@ -61,11 +55,13 @@ const OrderManagementPage = () => {
         </OrderStatus>
         {filteredOrders.length === 0 ? (
           <EmptyMessage>
-            {activeTab === 'processing' ? '처리 중인 주문이 없습니다.' : '완료된 주문이 없습니다.'}
+            {activeTab === 'processing'
+              ? '처리 중인 주문이 없습니다.'
+              : '완료된 주문이 없습니다.'}
           </EmptyMessage>
         ) : (
-          filteredOrders.map(order => (
-            <OrderCard 
+          filteredOrders.map((order) => (
+            <OrderCard
               key={order.orderId}
               order={order}
               onAccept={() => handleCompleteOrder(order.orderId)}
@@ -79,7 +75,7 @@ const OrderManagementPage = () => {
         {sortedRequests.length === 0 ? (
           <EmptyMessage>요청사항이 없습니다.</EmptyMessage>
         ) : (
-          sortedRequests.map(request => (
+          sortedRequests.map((request) => (
             <RequestCard
               key={request.requestId}
               request={request}
@@ -88,20 +84,11 @@ const OrderManagementPage = () => {
           ))
         )}
       </RequestContainer>
-    </Layout>
+    </>
   );
 };
 
 export default OrderManagementPage;
-
-const Layout = styled.div`
-  display: flex;
-  flex-direction: row;
-  align-items: flex-start;
-  gap: 1.25rem;
-  width: 100%;
-  height: 100%;
-`;
 
 const OrderContainer = styled.div`
   display: flex;
@@ -115,7 +102,7 @@ const OrderContainer = styled.div`
   flex: 1;
   height: 100%;
   overflow-y: auto;
-  box-sizing: border-box; 
+  box-sizing: border-box;
 `;
 
 const OrderStatus = styled.div`
@@ -141,11 +128,11 @@ const TabButton = styled.button`
   ${bold24}
   background: none;
   border: none;
-  color: ${props => props.active ? 'var(--primary)' : 'var(--gray500)'};
+  color: ${(props) => (props.active ? 'var(--primary)' : 'var(--gray500)')};
   cursor: pointer;
   padding: 0.5rem 0;
   transition: all 0.2s ease;
-  
+
   &:hover {
     color: var(--primary);
   }
