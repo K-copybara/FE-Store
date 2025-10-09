@@ -1,6 +1,7 @@
 import styled from 'styled-components';
 import { useState, useRef } from 'react';
 import Sidebar from '../../components/Sidebar';
+import { useLocation } from 'react-router-dom';
 import { body_large, bold36, bold24, bold18, reg24} from '../../styles/font';
 
 import MenuRatingIcon from '../../assets/icons/DailyStats/menurating-icon.svg?react';
@@ -8,8 +9,29 @@ import SortIcon from '../../assets/icons/DailyStats/sortarrow-icon.svg?react';
 
 const DailyStatsPage = () => {
 
+  const location = useLocation();
+
+  // 오늘 날짜 구하기. 매출조회/일별매출통계 바로 클릭 시 실행
+  const getTodayString = () => {
+    const today = new Date();
+    const formatter = new Intl.DateTimeFormat('ko-KR', {
+      timeZone: 'Asia/Seoul',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit'
+    });
+
+    const parts = formatter.formatToParts(today);
+    const year = parts.find(part => part.type === 'year').value;
+    const month = parts.find(part => part.type === 'month').value;
+    const day = parts.find(part => part.type === 'day').value;
+    
+    return `${year}-${month}-${day}`;
+  };
+  const selectedDate = location.state?.date || getTodayString(); //달력에서 받아온 날짜 || 오늘 날짜
+  
   const todaySalesData = [
-    { date: "2025-09-29", sales: 19180400, orders: 42 },
+    { date: selectedDate, sales: 19180400, orders: 42 },
   ];
 
   const timeSalesData = [

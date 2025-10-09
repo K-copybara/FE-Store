@@ -16,7 +16,7 @@ function App() {
             <Route path="/SalesReport/Calendar" element={<CalendarPage />} />
             <Route path="/SalesReport/DailyStats" element={<DailyStatsPage />} />
             <Route path="/StoreInfo" element={<StoreInfoPage />} />
-            </Routes>
+       </Routes>
     </RequestProvider>
   </OrderProvider>
 
