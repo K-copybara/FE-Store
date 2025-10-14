@@ -17,7 +17,7 @@ export const SSEOrderProvider = ({ children }) => {
         eventSourceRef.current.close();
       }
       eventSourceRef.current = new EventSourcePolyfill(
-        `${import.meta.env.VITE_SERVER_URL}/api/merchant/notify/stream`,
+        `${import.meta.env.VITE_SERVER_URL}/alarm/api/merchant/notify/stream`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
