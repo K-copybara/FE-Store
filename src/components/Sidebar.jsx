@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
-import {bold36, bold24} from "../styles/font"; 
-import {NavLink} from 'react-router-dom';
+import { bold36, bold24, reg24 } from '../styles/font';
+import { NavLink, replace, useNavigate } from 'react-router-dom';
 
 import OrderIcon from '../assets/icons/Sidebar/order-icon.svg?react';
 import SalesIcon from '../assets/icons/Sidebar/sales-icon.svg?react';
@@ -9,18 +9,32 @@ import StoreInfoIcon from '../assets/icons/Sidebar/storeinfo-icon.svg?react';
 import DropArrowIcon from '../assets/icons/Sidebar/droparrow-icon.svg?react';
 import CalendarIcon from '../assets/icons/Sidebar/calendar-icon.svg?react';
 import DailyStatsIcon from '../assets/icons/Sidebar/dailystats-icon.svg?react';
+import { postLogout } from '../api/auth';
 
 const Sidebar = () => {
   const [showSalesDropdown, setShowSalesDropdown] = useState(false);
+  const navigate = useNavigate();
 
   const toggleSalesDropdown = () => {
     setShowSalesDropdown(!showSalesDropdown);
   };
 
+  const handleLogout = async () => {
+    if (confirm('로그아웃 하시겠습니까?')) {
+      try {
+        window.localStorage.removeItem('token');
+        const res = await postLogout();
+      } catch (err) {
+        console.error(err);
+      } finally {
+        navigate('/login', { replace: true });
+      }
+    }
+  };
+
   return (
     <SidebarWrapper>
       <StoreName>딤딤섬 명동점</StoreName>
-
       <MenuList>
         <MenuItem>
           <StyledNavLink to="/">
@@ -61,6 +75,10 @@ const Sidebar = () => {
           </StyledNavLink>
         </MenuItem>
       </MenuList>
+      <LogoutContainer>
+        <BottomLine />
+        <LogoutButton onClick={handleLogout}>로그아웃</LogoutButton>
+      </LogoutContainer>
     </SidebarWrapper>
   );
 };
@@ -104,7 +122,7 @@ const MenuList = styled.ul`
 `;
 
 const Line = styled.div`
-  border-bottom: 1px solid var(--gray300);
+  border-bottom: 0.5px solid var(--gray300);
   width: 100%;
 `;
 // 각 메뉴 아이템을 위한 li 태그 (보통 스타일은 링크에 직접 줍니다)
@@ -179,4 +197,28 @@ const SubMenuItem = styled.div`
       height: 20px;
     }
   }
+`;
+
+const LogoutContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  margin-top: auto;
+`;
+
+const BottomLine = styled.div`
+  width: 100%;
+  height: 1px;
+  background-color: var(--gray300);
+`;
+
+const LogoutButton = styled.div`
+  width: 100%;
+  display: flex;
+  padding: 0.8rem 1.25rem;
+  padding-bottom: 0;
+  ${reg24}
+  color: var(--gray500);
+
+  cursor: pointer;
 `;
