@@ -36,6 +36,15 @@ export const getMenuInfo = async () => {
   }
 };
 
+export const getMenuDetail = async () => {
+  try {
+    const res = await client.get(`/api/merchant/store/menu/${menuId}`);
+    return res.data.data;
+  } catch (err) {
+    throw err;
+  }
+};
+
 export const postMenuInfo = async (data, imgFile) => {
   try {
     const formData = new FormData();
