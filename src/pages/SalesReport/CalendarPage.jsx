@@ -210,7 +210,6 @@ const CalendarPage = () => {
  
  return (
   <Layout>
-   <Sidebar />
    <CalendarContainer>
     {/* 달력 헤더 */}
     <CalendarHeader>

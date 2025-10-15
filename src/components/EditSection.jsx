@@ -4,6 +4,8 @@ import { bold24, reg14, reg18, bold18 } from '../styles/font';
 
 import EditIcon from '../assets/icons/EditCategory/edit-icon.svg?react';
 
+import { getStoreInfo, patchStoreNotice, patchStoreHours } from '../api/store';
+
 const EditSection = ({ 
   title = "섹션 제목",
   type = "text", // "text" | "business-hours"
@@ -16,10 +18,14 @@ const EditSection = ({
   const [businessHours, setBusinessHours] = useState([]);
   const [saving, setSaving] = useState(false);
 
-    // 요일 순서 정의
+  const [storeData, setStoreData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // 요일 순서 정의
   const DAY_ORDER = ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"];
 
-  // 요일 영어-한국어 매핑
+  //요일 영어-한국어 매핑
   const dayOfWeekMap = {
     "MONDAY": "월",
     "TUESDAY": "화", 
@@ -30,120 +36,102 @@ const EditSection = ({
     "SUNDAY": "일"
   };
 
-  const storeInfo = [{
-      storeId: 1,
-      shopName: "딤딤섬",
-      notice: "안녕하세요 딤딤섬입니다. 1인 2주문 해주세요.",
-      businessHoursDetail: [
-        {
-          dayOfWeek: "MONDAY",
-          openTime: "11:00",
-          closeTime: "23:00",
-          breakOpenTime: "15:00",
-          breakCloseTime: "17:00"
-        },
-        {
-          dayOfWeek: "TUESDAY", 
-          openTime: "11:00",
-          closeTime: "23:00",
-          breakOpenTime: "15:00",
-          breakCloseTime: "17:00"
-        },
-        {
-          dayOfWeek: "WEDNESDAY",
-          openTime: "11:00", 
-          closeTime: "23:00",
-          breakOpenTime: "15:00",
-          breakCloseTime: "17:00"
-        },
-        {
-          dayOfWeek: "THURSDAY",
-          openTime: "11:00",
-          closeTime: "23:00", 
-          breakOpenTime: "15:00",
-          breakCloseTime: "17:00"
-        },
-        {
-          dayOfWeek: "FRIDAY",
-          openTime: "11:00",
-          closeTime: "23:00",
-          breakOpenTime: "15:00", 
-          breakCloseTime: "17:00"
-        },
-        {
-          dayOfWeek: "SATURDAY",
-          openTime: "10:00",
-          closeTime: "24:00",
-          breakOpenTime: null,
-          breakCloseTime: null
-        },
-        {
-          dayOfWeek: "SUNDAY",
-          openTime: "10:00",
-          closeTime: "22:00",
-          breakOpenTime: null,
-          breakCloseTime: null
-        }
-      ]
-}];
+  useEffect(() => {
+    const fetchStoreInfo = async () => {
+      setLoading(true);
+      try {
+        const data = await getStoreInfo();
+        console.log('가게 정보 조회 성공:', data);
+        setStoreData(data);
+      } catch (error) {
+        setError(error);
+        console.error('가게 정보 조회 실패', error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  // 영업시간 업데이트 (EditSection 형식 → API 형식 변환)
+    fetchStoreInfo();
+  }, []);
+
+  //브레이크 타임, 영업시간 초기값 설정
+  useEffect(() => {
+    if (!storeData) return;
+    if (type === 'text' && field === 'notice') {
+      setValue(storeData.notice || '');
+    } else if (type === 'business-hours') {
+      const formattedBusinessHours = DAY_ORDER.map(dayOfWeek => {
+        const found = storeData.businessHoursDetail.find(item => item.dayOfWeek === dayOfWeek);
+        const item = found || {
+          dayOfWeek,
+          openTime: "00:00",
+          closeTime: "00:00", 
+          breakOpenTime: "00:00",
+          breakCloseTime: "00:00"
+        };
+        
+        return {
+          day: dayOfWeekMap[item.dayOfWeek],
+          dayEng: item.dayOfWeek.toLowerCase(),
+          startTime: item.openTime || '00:00',
+          endTime: item.closeTime || '00:00',
+          breakStart: item.breakOpenTime || '00:00',
+          breakEnd: item.breakCloseTime || '00:00'
+        };
+      });
+      setBusinessHours(formattedBusinessHours);
+    }
+  }, [storeData, type, field]);
+
+
+  // 영업시간 업데이트 
   const updateBusinessHours = async (editSectionFormat) => {
-    console.log('영업시간 업데이트 요청:', editSectionFormat);
+    try {
+      const apiFormat = editSectionFormat.map(item => ({
+        dayOfWeek: item.dayEng.toUpperCase(),
+        openTime: item.startTime,
+        closeTime: item.endTime,
+        breakOpenTime: item.breakStart === '00:00' ? null : item.breakStart,
+        breakCloseTime: item.breakEnd === '00:00' ? null : item.breakEnd
+      }));
+      
+      const requestData = {
+        businessHours: apiFormat
+      };
+      
+      console.log('영업시간 업데이트 요청:', requestData);
+      
+     
+      const response = await patchStoreHours(requestData);
+      console.log('영업시간 업데이트 성공:', response);
+      
+      return { success: true };
+    } catch (error) {
+      console.error('영업시간 업데이트 실패:', error);
+      return { success: false, error: error.message };
+    }
   };
-
-  // API 형식을 EditSection 형식으로 변환 (요일 순서대로 정렬)
-
-
-  // 공지사항 가져오기 함수
-  // const getNotice = () => {
-  //   return storeInfo?.notice || '';
-  // };
-
-
-
 
 
   //공지사항 업데이트
-    const updateNotice = async (newNotice) => {
-      console.log('Updating notice to:', newNotice);
+  const updateNotice = async (newNotice) => {
+    try {
+      const requestData = {
+        notice: newNotice 
+      };
+      
+      console.log('공지사항 업데이트 요청:', requestData);
+      
+      const response = await patchStoreNotice(requestData);
+      console.log('공지사항 업데이트 성공:', response);
+      
+      return { success: true };
+    } catch (error) {
+      console.error('공지사항 업데이트 실패:', error);
+      return { success: false, error: error.message };
+    }
   };
-  // const getBusinessHoursForEdit = () => {
-  //   if (!storeInfo?.businessHoursDetail) return null;
 
-  //   // 요일 순서대로 정렬
-  //   const sortedHours = DAY_ORDER.map(dayOfWeek => {
-  //     const found = storeInfo.businessHoursDetail.find(item => item.dayOfWeek === dayOfWeek);
-  //     return found || {
-  //       dayOfWeek,
-  //       openTime: "11:00",
-  //       closeTime: "21:00", 
-  //       breakOpenTime: "15:00",
-  //       breakCloseTime: "17:00"
-  //     };
-  //   });
-
-  //   return sortedHours.map(item => ({
-  //     day: dayOfWeekMap[item.dayOfWeek],
-  //     dayEng: item.dayOfWeek.toLowerCase(),
-  //     startTime: item.openTime,
-  //     endTime: item.closeTime,
-  //     breakStart: item.breakOpenTime || '',
-  //     breakEnd: item.breakCloseTime || ''
-  //   }));
-  // };
-  // useEffect(() => {
-  //   if (!storeInfo) return;
-
-  //   if (type === 'text' && field === 'notice') {
-  //     setValue(getNotice()); //  StoreInfoProvider 함수 사용
-  //   } else if (type === 'business-hours') {
-  //     const editFormat = getBusinessHoursForEdit(); //  StoreInfoProvider 함수 사용
-  //     if (editFormat) {
-  //       setBusinessHours(editFormat);
-  //     }
-  //   }
-  // }, [storeInfo, type, field, getNotice, getBusinessHoursForEdit]);
 
   // 시간 포맷팅 함수
   const formatTimeInput = (value) => {
@@ -186,35 +174,18 @@ const EditSection = ({
     }
   };
 
-    // 더미데이터 직접 설정
-  useEffect(() => {
-    if (type === 'text' && field === 'notice') {
-      setValue(storeInfo[0]?.notice || '');
-    } else if (type === 'business-hours') {
-      // 더미데이터를 직접 변환해서 설정
-      const dummyBusinessHours = DAY_ORDER.map(dayOfWeek => {
-        const found = storeInfo[0].businessHoursDetail.find(item => item.dayOfWeek === dayOfWeek);
-        const item = found || {
-          dayOfWeek,
-          openTime: "11:00",
-          closeTime: "21:00", 
-          breakOpenTime: "15:00",
-          breakCloseTime: "17:00"
-        };
-        
-        return {
-          day: dayOfWeekMap[item.dayOfWeek],
-          dayEng: item.dayOfWeek.toLowerCase(),
-          startTime: item.openTime,
-          endTime: item.closeTime,
-          breakStart: item.breakOpenTime || '',
-          breakEnd: item.breakCloseTime || ''
-        };
-      });
-      setBusinessHours(dummyBusinessHours);
+    // 영업시간 입력 때 자동으로 00:00 포맷 맞추기
+  const updateBusinessHour = (dayIndex, fieldName, newValue) => {
+    const formattedValue = formatTimeInput(newValue);
+    
+    if (validateTime(formattedValue)) {
+      const updated = [...businessHours];
+      updated[dayIndex][fieldName] = formattedValue;
+      setBusinessHours(updated);
     }
-  }, [type, field]);
+  };
 
+  // 저장 처리
   const handleSave = async () => {
     setSaving(true);
     
@@ -222,7 +193,7 @@ const EditSection = ({
       let result;
       
       if (type === 'text' && field === 'notice') {
-        result = await updateNotice(value); //  StoreInfoProvider 함수 사용
+        result = await updateNotice(value);
       } else if (type === 'business-hours') {
         const completedHours = businessHours.map(hour => ({
           ...hour,
@@ -233,11 +204,17 @@ const EditSection = ({
         }));
         
         setBusinessHours(completedHours);
-        result = await updateBusinessHours(completedHours); //  StoreInfoProvider 함수 사용
+        result = await updateBusinessHours(completedHours);
       }
 
       if (result && result.success !== false) {
         setIsEditing(false);
+        
+        //저장 성공 후 최신 데이터 다시 불러오기
+        const updatedData = await getStoreInfo();
+        setStoreData(updatedData);
+        
+        alert('저장 성공'); 
       } else {
         alert('저장 실패: ' + (result?.error || '알 수 없는 오류'));
       }
@@ -249,16 +226,9 @@ const EditSection = ({
     }
   };
 
-  const updateBusinessHour = (dayIndex, fieldName, newValue) => {
-    const formattedValue = formatTimeInput(newValue);
-    
-    if (validateTime(formattedValue)) {
-      const updated = [...businessHours];
-      updated[dayIndex][fieldName] = formattedValue;
-      setBusinessHours(updated);
-    }
-  };
 
+  if (loading) return <Container>로딩중...</Container>;
+  if (error) return <Container>에러 발생: {error.message}</Container>;
 
   return (
     <Container>
@@ -370,7 +340,6 @@ const EditSection = ({
 
 export default EditSection;
 
-// 스타일 컴포넌트들 (이전과 동일)
 const Container = styled.div`
   background: var(--white);
   padding: 1.875rem;
