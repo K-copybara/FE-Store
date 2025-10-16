@@ -6,24 +6,31 @@ import ConfirmModal from './ConfirmModal';
 import { body_large, bold24, reg24, bold18, reg18, reg14 } from '../styles/font';
 
 import MenuEditIcon from '../assets/icons/menuedit-icon.svg?react';
+import NoImageIcon from '../assets/icons/MenuManagement/noimage-icon.svg?react';
+
+import {getMenuInfo} from '../api/store';
 
 const MenuManagement = ({ title = "메뉴 관리" }) => {
-    const menusdummy = [
-      {
-      "menuId": 1,
-      "name": "아메리카노",
-      "menuInfo" :"~~~~~",
-      "price": 4000,
-      "status": "ON_SALE"
-    },
-    {
-      "menuId": 2,
-      "name": "카페라떼",
-      "menuInfo" :"~~~~~",
-      "price": 4500,
-      "status": "SOLD_OUT"
-    }
-  ];
+  //   const menus = [
+  //     {
+  //     "menuId": 1,
+  //     "name": "아메리카노",
+  //     "menuInfo" :"~~~~~",
+  //     "price": 4000,
+  //     "status": "ON_SALE"
+  //   },
+  //   {
+  //     "menuId": 2,
+  //     "name": "카페라떼",
+  //     "menuInfo" :"~~~~~",
+  //     "price": 4500,
+  //     "status": "SOLD_OUT"
+  //   }
+  // ];
+
+  const [menus, setMenus] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   const [showAddModal, setShowAddModal] = useState(false);
   
@@ -40,6 +47,33 @@ const MenuManagement = ({ title = "메뉴 관리" }) => {
   //  드롭다운 위치 계산을 위한 ref
   const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0 });
   const editButtonRefs = useRef({});
+
+  useEffect(() => {
+    const fetchMenus = async () => {
+      try {
+        const data = await getMenuInfo();
+        console.log('메뉴 데이터 조회 성공:', data);
+        setMenus(data);
+      } catch (error){
+        setError(error);
+        console.error('메뉴 데이터 조회 실패:', error); 
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchMenus();
+  }, []);
+
+  // //메뉴 데이터 새로고침하기
+  // const refreshMenus = async () => {
+  //   try{
+  //     const data = await getMenuInfo();
+  //     setMenus(data);
+  //   } catch (error) {
+  //     console.error('메뉴 데이터 조회 실패:', error);
+  //   }
+  // };
 
   //  드롭다운 토글
   const handleDropdownToggle = (menuId, event) => {
@@ -103,6 +137,10 @@ const MenuManagement = ({ title = "메뉴 관리" }) => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  
+  if (loading) return <Container>로딩중...</Container>;
+  if (error) return <Container>에러 발생: {error.message}</Container>;
+
   return (
     <Container onClick={handleOutsideClick}>
       <Header>
@@ -111,10 +149,10 @@ const MenuManagement = ({ title = "메뉴 관리" }) => {
       </Header>
 
      <MenuList>
-      {menusdummy.length === 0 ? (
+      {menus.length === 0 ? (
         <EmptyState>등록된 메뉴가 없습니다.</EmptyState>
       ) : (
-        menusdummy.map((menu) => {
+        menus.map((menu) => {
           const detail = menu;
           
           // SOLD_OUT 상태 확인
@@ -132,13 +170,20 @@ const MenuManagement = ({ title = "메뉴 관리" }) => {
                 </CategoryTag>
 
                 {/* 메뉴 이미지 */}
-                <MenuImage 
-                  src={menu.image}
-                  alt={menu.name}
-                  onError={(e) => {
-                    e.target.src = "src/assets/images/mandoo.svg";
-                  }}
-                />
+                {menu.image ? (
+                  <MenuImage 
+                    src={menu.image}
+                    alt={menu.name}
+                    onError={(e) => {
+                      e.target.style.display = "none";
+                    }}
+                  />
+                  //이미지 없을 때
+                  ) : (
+                  <NoMenuImage>
+                    <NoImageIcon />
+                  </NoMenuImage>
+                  )}
 
                 {/* 메뉴 상세 정보 */}
                 <MenuInfo>
@@ -198,7 +243,7 @@ const MenuManagement = ({ title = "메뉴 관리" }) => {
 
       {/*  메뉴 등록 모달 */}
       {showAddModal && (
-        <MenuModal onClose={() => setShowAddModal(true)} />
+        <MenuModal onClose={() => setShowAddModal(false)} />
       )}
 
       {/*  메뉴 편집 모달 */}
@@ -327,6 +372,22 @@ const MenuContent = styled.div`
 const MenuImage = styled.img`
   height: 100%;
   aspect-ratio: 1;
+  max-width: 60px;
+  max-height: 60px;
+  min-width: 60px;
+  min-height: 60px;
+  object-fit: cover;
+  border-radius: 0.5rem;
+  background: var(--gray100);
+  flex-shrink: 0;
+`;
+
+const NoMenuImage = styled.div`
+  height: 100%;
+  aspect-ratio: 1;
+  justify-content: center;
+  display: flex;
+  align-items: center;
   max-width: 60px;
   max-height: 60px;
   min-width: 60px;

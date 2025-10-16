@@ -1,40 +1,61 @@
 import styled from 'styled-components';
 import {  bold18, bold24, reg14, reg18, title_medium} from '../styles/font';
-import { useState } from 'react';
+import { useState, useEffect} from 'react';
 
 import EditIcon from '../assets/icons/EditCategory/edit-icon.svg?react';
 import DragIcon from '../assets/icons/EditCategory/drag-icon.svg?react';
 import DeleteIcon from '../assets/icons/EditCategory/delete-icon.svg?react';
 import PlusIcon from '../assets/icons/EditCategory/categoryplus-icon.svg?react';
 
+import { getCategories } from '../api/store';
+
 const EditCategory = ({ title = "메뉴 카테고리" }) => {
 
-    const categories = [
-      {categoryId: 1, name: '신메뉴', order: 0, menuCount: 1},
-      {categoryId: 2, name: '딤섬', order: 1, menuCount: 0},
-      {categoryId: 3, name: '식사류', order: 2, menuCount: 0},
-      {categoryId: 4, name: '음료', order: 3, menuCount: 0}
-    ];
-
-  //  카테고리 순서 변경
-  const updateCategoryOrder = async (categoryOrders) => {
-    console.log('카테고리 순서 변경 요청:', categoryOrders);
-  };
-  //  헬퍼 함수 - 현재 카테고리 정렬된 상태로 반환. 필요한가??
-  const getCategories = () => {
-    return categories.sort((a, b) => a.order - b.order);
-  };
-
-  //  카테고리 삭제 가능 여부 확인 (메뉴가 없는 경우에만 가능)
-  const canDeleteCategory = (categoryId) => {
-    console.log('카테고리 삭제 가능 여부 확인:', categoryId);
-  };
+  const [categories, setCategories] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   const [showModal, setShowModal] = useState(false);
   const [localCategories, setLocalCategories] = useState([]);
   const [draggedIndex, setDraggedIndex] = useState(null);
   const [isAddingNew, setIsAddingNew] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState('');
+
+  //카테고리 조회
+  useEffect(() => {
+    const fetchCategories = async () => {
+      setLoading(true);
+      try {
+        const data = await getCategories();
+        console.log('카테고리 조회 성공:', data);
+        setCategories(data);
+      } catch (error) {
+        setError(error);
+        console.error('카테고리 조회 실패:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchCategories();
+  }, []);
+
+    // const categories = [
+    //   {categoryId: 1, name: '신메뉴', order: 0, menuCount: 1},
+    //   {categoryId: 2, name: '딤섬', order: 1, menuCount: 0},
+    //   {categoryId: 3, name: '식사류', order: 2, menuCount: 0},
+    //   {categoryId: 4, name: '음료', order: 3, menuCount: 0}
+    // ];
+
+  //  카테고리 순서 변경
+  const updateCategoryOrder = async (categoryOrders) => {
+    console.log('카테고리 순서 변경 요청:', categoryOrders);
+  };
+
+
+  //  카테고리 삭제 가능 여부 확인 (메뉴가 없는 경우에만 가능)
+  const canDeleteCategory = (categoryId) => {
+    console.log('카테고리 삭제 가능 여부 확인:', categoryId);
+  };
 
 
   //  요청사항 카테고리 자동 추가 함수
@@ -61,9 +82,13 @@ const EditCategory = ({ title = "메뉴 카테고리" }) => {
     return categoriesData;
   };
 
+  const getCategoriesSorted = () => {
+    return [...categories].sort((a, b) => a.order - b.order);
+  };
+
   //  카테고리 데이터 가져올 때마다 요청사항 카테고리 보장
   const getEnhancedCategories = () => {
-    const originalCategories = getCategories();
+    const originalCategories = getCategoriesSorted();
     return ensureRequestCategory(originalCategories);
   };
 
@@ -216,6 +241,8 @@ const handleSave = async () => {
   }
 };
 
+  if (loading) return <Container>로딩중...</Container>;
+  if (error) return <Container>에러 발생: {error.message}</Container>;
   return (
     <>
       <Container>
@@ -263,9 +290,9 @@ const handleSave = async () => {
                   </DragHandle>
 
                   {/* 카테고리명 */}
-                <CategoryInputName>
-                {category.name}
-                </CategoryInputName>
+                  <CategoryInputName>
+                    {category.name}
+                  </CategoryInputName>
 
                   {/* 메뉴 개수 */}
                   <MenuCount2>{category.menuCount}개</MenuCount2>

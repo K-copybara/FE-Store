@@ -109,7 +109,7 @@ export const patchMenuInfo = async (menuId, data, imgFile) => {
 };
 
 //메뉴 삭제
-export const deleteMenu = async () => {
+export const deleteMenu = async (menuId) => {
   try {
     const res = await authClient.delete(
       `/shop/api/merchant/store/menu/${menuId}`
