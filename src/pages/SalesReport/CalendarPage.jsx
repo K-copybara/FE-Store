@@ -1,4 +1,4 @@
-import {React, useState, useEffect, use} from 'react';
+import {React, useState, useEffect} from 'react';
 import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
 import { bold36, reg24 } from '../../styles/font';
@@ -15,55 +15,11 @@ const CalendarPage = () => {
     const [selectedMonth, setSelectedMonth] = useState(new Date()); 
 
     const [dailySalesData, setDailySalesData] = useState([]);
+    const [weeklySalesArray, setWeeklySalesArray] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
     const navigate = useNavigate();
-
-    
-    // const dailySalesData = [
-    // { date: "2025-09-01", sales: 152000 },
-    // { date: "2025-09-02", sales: 98000 },
-    // { date: "2025-09-03", sales: 175000 },
-    // { date: "2025-09-04", sales: 134000 },
-    // { date: "2025-09-05", sales: 189000 },
-    // { date: "2025-09-06", sales: 225000 },
-    // { date: "2025-09-07", sales: 167000 },
-    // { date: "2025-09-08", sales: 143000 },
-    // { date: "2025-09-09", sales: 156000 },
-    // { date: "2025-09-10", sales: 198000 },
-    // { date: "2025-09-11", sales: 176000 },
-    // { date: "2025-09-12", sales: 187000 },
-    // { date: "2025-09-13", sales: 234000 },
-    // { date: "2025-09-14", sales: 201000 },
-    // { date: "2025-09-15", sales: 165000 },
-    // { date: "2025-09-16", sales: 142000 },
-    // { date: "2025-09-17", sales: 159000 },
-    // { date: "2025-09-18", sales: 183000 },
-    // { date: "2025-09-19", sales: 177000 },
-    // { date: "2025-09-20", sales: 195000 },
-    // { date: "2025-09-21", sales: 251000 },
-    // { date: "2025-09-22", sales: 189000 },
-    // { date: "2025-09-23", sales: 167000 },
-    // { date: "2025-09-24", sales: 145000 },
-    // { date: "2025-09-25", sales: 178000 },
-    // { date: "2025-09-26", sales: 192000 },
-    // { date: "2025-09-27", sales: 186000 },
-    // { date: "2025-09-28", sales: 203000 },
-    // { date: "2025-09-29", sales: 219000 },
-    // { date: "2025-09-30", sales: 174000 }
-    // ];
-
-
-    const weeklySalesArray = [
-    { weekday: "MONDAY", sales: 520000 },
-    { weekday: "TUESDAY", sales: 430000 },
-    { weekday: "WEDNESDAY", sales: 610000 },
-    { weekday: "THURSDAY", sales: 480000 },
-    { weekday: "FRIDAY", sales: 750000 },
-    { weekday: "SATURDAY", sales: 880000 },
-    { weekday: "SUNDAY", sales: 790000 }
-    ];
 
     useEffect(() => {
         const fetchMonthlySales = async () => {
@@ -71,10 +27,19 @@ const CalendarPage = () => {
             setError(null);
             try {
                 const monthString = getMonthString(selectedMonth);
-                console.log('월별 매출 조회:', monthString);
-                const data = await getMonthlySales(monthString);
-                console.log('월별 매출 데이터:', data);
-                setDailySalesData(data);
+                console.log('데이터 조회 시작:', monthString);
+                
+                // 두 API를 동시에 호출
+                const [dailyData, weeklyData] = await Promise.all([
+                    getMonthlySales(monthString),
+                    getWeekDaySales(monthString)
+                ]);
+                
+                console.log('일별 매출 데이터:', dailyData);
+                console.log('요일별 매출 데이터:', weeklyData);
+                
+                setDailySalesData(dailyData);
+                setWeeklySalesArray(weeklyData);
             } catch (error) {
                 setError(error);
                 console.error('월별 매출 조회 실패:', error);
@@ -85,13 +50,14 @@ const CalendarPage = () => {
         fetchMonthlySales();
     }, [selectedMonth]); //달 변경시마다 호출
 
+
     const weeklySalesData = weeklySalesArray.reduce((acc, item) => {
-    const dayMapping = {
-    "SUNDAY": "일", "MONDAY": "월", "TUESDAY": "화", "WEDNESDAY": "수",
-    "THURSDAY": "목", "FRIDAY": "금", "SATURDAY": "토"
-    };
-    acc[dayMapping[item.weekday]] = item.sales;
-    return acc;
+        const dayMapping = {
+            "SUNDAY": "일", "MONDAY": "월", "TUESDAY": "화", "WEDNESDAY": "수",
+            "THURSDAY": "목", "FRIDAY": "금", "SATURDAY": "토"
+        };
+        acc[dayMapping[item.weekday]] = item.sales;
+        return acc;
     }, {});
 
     // 선택된 달이 바뀔 때마다 데이터 불러오기
