@@ -1,33 +1,28 @@
 import { create } from 'zustand';
-import { getStoreInfo } from '../api/store';
+import { jwtDecode } from 'jwt-decode';
 
 export const useUserStore = create((set) => ({
   storeId: null,
-  //storeInfo: null,
-  isLoading: false,
-  error: null,
 
-  // storeId 가져오기
-  fetchStoreInfo: async () => {
-    set({ isLoading: true, error: null });
+  loadStoreId: () => {
     try {
-      const data = await getStoreInfo();
-      set({ 
-        storeId: data.storeId,  // 또는 data.id
-        //storeInfo: data,
-        isLoading: false 
-      });
+      const tokenString = localStorage.getItem('token');
+      const token = JSON.parse(tokenString);
+      
+      if (!token?.accessToken) {
+        console.warn('토큰 없음');
+        return;
+      }
+      
+      const decoded = jwtDecode(token.accessToken);
+      console.log('디코딩된 토큰:', decoded);
+      
+      set({ storeId: decoded.storeId });
     } catch (error) {
-      set({ error, isLoading: false });
-      console.error('상점 정보 조회 실패:', error);
+      console.error('토큰 디코딩 실패:', error);
     }
   },
 
   // 초기화 (로그아웃 시)
-  reset: () => set({ 
-    storeId: null, 
-    //storeInfo: null, 
-    isLoading: false, 
-    error: null 
-  }),
+  reset: () => set({ storeId: null }),
 }));

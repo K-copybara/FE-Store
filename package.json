@@ -12,6 +12,7 @@
   "dependencies": {
     "@tosspayments/tosspayments-sdk": "^2.4.0",
     "axios": "1.11.0",
+    "jwt-decode": "^4.0.0",
     "prettier-eslint": "16.4.2",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",

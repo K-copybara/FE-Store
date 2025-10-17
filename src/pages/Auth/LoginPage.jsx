@@ -9,8 +9,7 @@ import { postLogin } from '../../api/auth';
 const LoginPage = () => {
   const [login, setLogin] = useState({ email: '', password: '' });
   const navigate = useNavigate();
-  const fetchStoreInfo = useUserStore((state) => state.fetchStoreInfo);
-
+  
   const onChangeLogin = (e) => {
     const { name, value } = e.target;
     setLogin({ ...login, [name]: value });
@@ -36,7 +35,9 @@ const LoginPage = () => {
           expiresIn: res.accessTokenExpiresIn,
         };
         localStorage.setItem('token', JSON.stringify(token));
-        await fetchStoreInfo();
+
+        const loadStoreId = useUserStore.getState().loadStoreId;
+        loadStoreId();
         navigate('/', { replace: true });
       } catch (err) {
         console.error(err);

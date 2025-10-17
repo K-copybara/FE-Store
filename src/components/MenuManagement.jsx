@@ -8,27 +8,12 @@ import { body_large, bold24, reg24, bold18, reg18, reg14 } from '../styles/font'
 import MenuEditIcon from '../assets/icons/menuedit-icon.svg?react';
 import NoImageIcon from '../assets/icons/MenuManagement/noimage-icon.svg?react';
 
-import {getMenuInfo} from '../api/store';
+import {getMenuInfo, deleteMenu, postSoldout, getMenuDetail} from '../api/store';
 
 const MenuManagement = ({ title = "메뉴 관리" }) => {
-  //   const menus = [
-  //     {
-  //     "menuId": 1,
-  //     "name": "아메리카노",
-  //     "menuInfo" :"~~~~~",
-  //     "price": 4000,
-  //     "status": "ON_SALE"
-  //   },
-  //   {
-  //     "menuId": 2,
-  //     "name": "카페라떼",
-  //     "menuInfo" :"~~~~~",
-  //     "price": 4500,
-  //     "status": "SOLD_OUT"
-  //   }
-  // ];
 
   const [menus, setMenus] = useState([]);
+  const [menuDetails, setMenuDetails] = useState({}); 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -49,40 +34,78 @@ const MenuManagement = ({ title = "메뉴 관리" }) => {
   const editButtonRefs = useRef({});
 
   useEffect(() => {
-    const fetchMenus = async () => {
+    const fetchData = async () => {
       try {
-        const data = await getMenuInfo();
-        console.log('메뉴 데이터 조회 성공:', data);
-        setMenus(data);
-      } catch (error){
+        //메뉴 목록 가져오기
+        const menuData = await getMenuInfo();
+        console.log('메뉴 목록:', menuData);
+        setMenus(menuData);
+        
+        //각 메뉴의 상세 정보 가져오기
+        const detailsPromises = menuData.map(menu => 
+          getMenuDetail(menu.menuId)
+            .then(detail => ({ menuId: menu.menuId, detail }))
+            .catch(err => {
+              console.error(`메뉴 ${menu.menuId} 상세 조회 실패:`, err);
+              return { menuId: menu.menuId, detail: null };
+            })
+        );
+        
+        const detailsArray = await Promise.all(detailsPromises);
+        
+        //menuId를 키로 하는 객체로 변환
+        const detailsMap = {};
+        detailsArray.forEach(({ menuId, detail }) => {
+          detailsMap[menuId] = detail;
+        });
+        
+        console.log('메뉴 상세 정보:', detailsMap);
+        setMenuDetails(detailsMap);
+        
+      } catch (error) {
         setError(error);
-        console.error('메뉴 데이터 조회 실패:', error); 
+        console.error('데이터 조회 실패:', error);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchMenus();
+    fetchData();
   }, []);
 
-  // //메뉴 데이터 새로고침하기
-  // const refreshMenus = async () => {
-  //   try{
-  //     const data = await getMenuInfo();
-  //     setMenus(data);
-  //   } catch (error) {
-  //     console.error('메뉴 데이터 조회 실패:', error);
-  //   }
-  // };
+  //메뉴 데이터 새로고침하기
+  const refreshMenus = async () => {
+    try {
+      const menuData = await getMenuInfo();
+      setMenus(menuData);
+      
+      //상세 정보 가져오기
+      const detailsPromises = menuData.map(menu => 
+        getMenuDetail(menu.menuId)
+          .then(detail => ({ menuId: menu.menuId, detail }))
+          .catch(() => ({ menuId: menu.menuId, detail: null }))
+      );
+      
+      const detailsArray = await Promise.all(detailsPromises);
+      const detailsMap = {};
+      detailsArray.forEach(({ menuId, detail }) => {
+        detailsMap[menuId] = detail;
+      });
+      
+      setMenuDetails(detailsMap);
+    } catch (error) {
+      console.error('데이터 조회 실패:', error);
+    }
+  };
 
-  //  드롭다운 토글
+  //드롭다운 토글
   const handleDropdownToggle = (menuId, event) => {
     event.stopPropagation();
     
     if (openDropdownId === menuId) {
       setOpenDropdownId(null);
     } else {
-      //  버튼 위치 계산
+      //버튼 위치 계산
       const buttonElement = editButtonRefs.current[menuId];
       if (buttonElement) {
         const rect = buttonElement.getBoundingClientRect();
@@ -95,7 +118,7 @@ const MenuManagement = ({ title = "메뉴 관리" }) => {
     }
   };
 
-  //  메뉴 편집
+  //메뉴 편집
   const handleEditMenu = (menuId) => {
     // setEditingMenuId(menuId);
     // setShowEditModal(true);
@@ -103,19 +126,72 @@ const MenuManagement = ({ title = "메뉴 관리" }) => {
     console.log('메뉴 편집 클릭:', menuId);
   };
 
-  //  일시품절 토글 (SOLD_OUT ↔ ON_SALE)
+  //일시품절 토글 (SOLD_OUT ↔ ON_SALE)
   const handleToggleOutOfStock = async (menuId) => {
-    console.log('일시품절 토글 클릭:', menuId);
+    try {
+      const menu = menus.find(m => m.menuId === menuId);
+      const currentStatus = menu?.status;
+      
+      console.log('일시품절 시작:', menuId, '현재 상태:', currentStatus);
+      
+      await postSoldout(menuId);
+      
+      console.log('일시품절 성공');
+      
+      //상태에 따라 다른 메시지 표시
+      if (currentStatus === 'ON_SALE') {
+        alert(`'${menu.name}' 메뉴가 일시품절로 설정되었습니다.`);
+      } else {
+        alert(`'${menu.name}' 메뉴의 일시품절이 해제되었습니다.`);
+      }
+      
+      // 드롭다운 닫기
+      setOpenDropdownId(null);
+      
+      // 메뉴 목록 새로고침
+      await refreshMenus();
+      
+    } catch (error) {
+      console.error('일시품절 실패:', error);
+      alert('일시품절 설정 변경에 실패했습니다.');
+    }
   };
+
 
   //  메뉴 삭제
   const handleDeleteMenuClick = (menuId) => {
-    console.log('삭제 클릭:', menuId);
+    const menu = menus.find(m => m.menuId === menuId);
+    setMenuToDelete(menu);  //삭제할 메뉴 정보 저장
+    setShowConfirmModal(true);  // 확인 모달 표시
+    setOpenDropdownId(null);  //드롭다운 닫기
+    console.log('삭제 확인 모달 열림:', menu);
   };
-  //  삭제 확인 시 실제 삭제 실행
+
+  // 삭제 확인 시 실제 삭제 실행
   const handleConfirmDelete = async () => {
-    console.log('삭제 확인:', menuToDelete);
+    if (!menuToDelete) return;
+    
+    try {
+      console.log('메뉴 삭제 시작:', menuToDelete.menuId);
+      
+      await deleteMenu(menuToDelete.menuId);
+      
+      console.log('메뉴 삭제 성공');
+      alert(`'${menuToDelete.name}' 메뉴가 삭제되었습니다.`);
+      
+      // 모달 닫기
+      setShowConfirmModal(false);
+      setMenuToDelete(null);
+      
+      // 메뉴 목록 새로고침
+      await refreshMenus();
+      
+    } catch (error) {
+      console.error('메뉴 삭제 실패:', error);
+      alert('메뉴 삭제에 실패했습니다.');
+    }
   };
+
 
   //  삭제 취소
   const handleCancelDelete = () => {
@@ -153,9 +229,7 @@ const MenuManagement = ({ title = "메뉴 관리" }) => {
         <EmptyState>등록된 메뉴가 없습니다.</EmptyState>
       ) : (
         menus.map((menu) => {
-          const detail = menu;
-          
-          // SOLD_OUT 상태 확인
+          const detail = menuDetails[menu.menuId];
           const isSoldOut = detail?.status === 'SOLD_OUT';
           
           return (
@@ -166,7 +240,7 @@ const MenuManagement = ({ title = "메뉴 관리" }) => {
               <MenuContent>
                 {/* 카테고리 */}
                 <CategoryTag>
-                  신메뉴
+                  {detail?.category?.categoryName || '로딩중...'}
                 </CategoryTag>
 
                 {/* 메뉴 이미지 */}
@@ -220,14 +294,16 @@ const MenuManagement = ({ title = "메뉴 관리" }) => {
           }}
           onClick={(e) => e.stopPropagation()}
         >
-          {/*  메뉴 편집 (항상 표시) */}
+          {/*  메뉴 편집 */}
           <DropdownItem onClick={() => handleEditMenu(openDropdownId)}>
             메뉴 편집
           </DropdownItem>
           
           {/*  일시품절 설정/해제 (상태에 따라 텍스트 변경) */}
           <DropdownItem onClick={() => handleToggleOutOfStock(openDropdownId)}>
-            일시품절 설정
+            {menus.find(m => m.menuId === openDropdownId)?.status === 'SOLD_OUT' 
+              ? '일시품절 해제' 
+              : '일시품절 설정'}
           </DropdownItem>
           
           {/*  메뉴 삭제 (항상 표시) */}

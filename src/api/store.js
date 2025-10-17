@@ -41,7 +41,7 @@ export const getMenuInfo = async () => {
 };
 
 //메뉴 상세 조회
-export const getMenuDetail = async () => {
+export const getMenuDetail = async (menuId) => {
   try {
     const res = await authClient.get(`/shop/api/merchant/store/menu/${menuId}`);
     return res.data.data;
@@ -170,7 +170,7 @@ export const deleteCategory = async (catId) => {
 //카테고리 순서 변경
 export const patchCategoryOrder = async (data) => {
   try {
-    const res = authClient.patch(
+    const res = await authClient.patch(
       `/shop/api/merchant/store/category/order`,
       data
     );
