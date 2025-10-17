@@ -9,7 +9,15 @@ export const client = axios.create({
   withCredentials: true,
 });
 
-client.interceptors.request.use(
+export const authClient = axios.create({
+  baseURL: `${import.meta.env.VITE_SERVER_URL}`,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  withCredentials: true,
+});
+
+authClient.interceptors.request.use(
   (config) => {
     const tokenString = localStorage.getItem('token');
     const token = JSON.parse(tokenString);
@@ -39,7 +47,7 @@ const processQueue = (error, token = null) => {
   failedQueue = [];
 };
 
-client.interceptors.response.use(
+authClient.interceptors.response.use(
   (res) => res,
   async (error) => {
     const originalRequest = error.config;

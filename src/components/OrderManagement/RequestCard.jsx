@@ -1,7 +1,7 @@
 // components/RequestCard.jsx
 import React, { useState } from 'react';
 import styled from 'styled-components';
-import { display_small, display_xl, display_large } from '../../styles/font';
+import { reg14, reg24, bold24, bold36 } from '../styles/font';
 import ConfirmModal from './ConfirmModal';
 import { formatDateTime } from '../../utils/formatTime';
 
@@ -98,17 +98,17 @@ const Left = styled.div`
 `;
 
 const RequestTime = styled.span`
-  ${display_small}
+  ${reg14}
   color: var(--black);
 `;
 
 const TableNumber = styled.div`
-  ${display_xl}
+  ${bold36}
   color: var(--black);
 `;
 
 const RequestNote = styled.div`
-  ${display_large}
+  ${reg24}
   color: var(--black);
   align-self: stretch;
 `;
@@ -131,11 +131,11 @@ const ItemRow = styled.div`
 `;
 
 const ItemName = styled.span`
-  ${display_large}
+  ${reg24}
 `;
 
 const ItemQuantity = styled.span`
-  ${display_large}
+  ${bold24}
   text-align: right;
   font-weight: 700;
 `;
@@ -149,7 +149,7 @@ const CompleteButtonWrapper = styled.div`
 `;
 
 const CompleteButton = styled.button`
-  ${display_large}
+  ${bold24}
   display: flex;
   padding: 0.625rem 1.5rem;
   justify-content: center;

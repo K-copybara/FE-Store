@@ -1,8 +1,8 @@
-import { client } from './client';
+import { authClient } from './client';
 
 export const getStoreInfo = async (storeId) => {
   try {
-    const res = await client.get(`/api/merchant/store/${storeId}`);
+    const res = await authClient.get(`/shop/api/merchant/store/${storeId}`);
     return res.data.data;
   } catch (err) {
     throw err;
@@ -11,7 +11,7 @@ export const getStoreInfo = async (storeId) => {
 
 export const patchStoreInfo = async () => {
   try {
-    const res = await client.patch(`/api/merchant/store/notice`, data);
+    const res = await authClient.patch(`/shop/api/merchant/store/notice`, data);
     return res.data;
   } catch (err) {
     throw err;
@@ -20,7 +20,7 @@ export const patchStoreInfo = async () => {
 
 export const patchStoreHours = async () => {
   try {
-    const res = await client.patch(`/api/merchant/store/hours`, data);
+    const res = await authClient.patch(`/shop/api/merchant/store/hours`, data);
     return res.data;
   } catch (err) {
     throw err;
@@ -29,7 +29,16 @@ export const patchStoreHours = async () => {
 
 export const getMenuInfo = async () => {
   try {
-    const res = await client.get(`/api/merchant/store/menu`);
+    const res = await authClient.get(`/shop/api/merchant/store/menu`);
+    return res.data.data;
+  } catch (err) {
+    throw err;
+  }
+};
+
+export const getMenuDetail = async () => {
+  try {
+    const res = await authClient.get(`/shop/api/merchant/store/menu/${menuId}`);
     return res.data.data;
   } catch (err) {
     throw err;
@@ -49,11 +58,15 @@ export const postMenuInfo = async (data, imgFile) => {
       formData.append('image', imgFile);
     }
 
-    const res = await client.post(`/api/merchant/store/menu`, formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    });
+    const res = await authClient.post(
+      `/shop/api/merchant/store/menu`,
+      formData,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      }
+    );
     return res.data;
   } catch (err) {
     throw err;
@@ -72,8 +85,8 @@ export const patchMenuInfo = async (menuId, data, imgFile) => {
       formData.append('image', imgFile);
     }
 
-    const res = await client.patch(
-      `/api/merchant/store/menu/${menuId}`,
+    const res = await authClient.patch(
+      `/shop/api/merchant/store/menu/${menuId}`,
       formData,
       {
         headers: {
@@ -89,7 +102,9 @@ export const patchMenuInfo = async (menuId, data, imgFile) => {
 
 export const deleteMenu = async () => {
   try {
-    const res = await client.delete(`/api/merchant/store/menu/${menuId}`);
+    const res = await authClient.delete(
+      `/shop/api/merchant/store/menu/${menuId}`
+    );
     return res.data;
   } catch (err) {
     throw err;
@@ -98,7 +113,9 @@ export const deleteMenu = async () => {
 
 export const postSoldout = async (menuId) => {
   try {
-    const res = await client.post(`/api/merchant/store/menu/${menuId}/soldout`);
+    const res = await authClient.post(
+      `/shop/api/merchant/store/menu/${menuId}/soldout`
+    );
     return res.data;
   } catch (err) {
     throw err;
@@ -107,7 +124,7 @@ export const postSoldout = async (menuId) => {
 
 export const getCategories = async () => {
   try {
-    const res = await client.get(`/api/merchant/store/category`);
+    const res = await authClient.get(`/shop/api/merchant/store/category`);
     return res.data.data;
   } catch (err) {
     throw err;
@@ -116,7 +133,10 @@ export const getCategories = async () => {
 
 export const postCategory = async (data) => {
   try {
-    const res = await client.post(`/api/merchant/store/category`, data);
+    const res = await authClient.post(
+      `/shop/api/merchant/store/category`,
+      data
+    );
     return res.data.data;
   } catch (err) {
     throw err;
@@ -125,7 +145,9 @@ export const postCategory = async (data) => {
 
 export const deleteCategory = async (catId) => {
   try {
-    const res = await client.delete(`/api/merchant/store/category/${catId}`);
+    const res = await authClient.delete(
+      `/shop/api/merchant/store/category/${catId}`
+    );
     return res.data;
   } catch (err) {
     throw err;
@@ -134,7 +156,10 @@ export const deleteCategory = async (catId) => {
 
 export const patchCategoryOrder = async (data) => {
   try {
-    const res = client.patch(`/api/merchant/store/category/order`, data);
+    const res = authClient.patch(
+      `/shop/api/merchant/store/category/order`,
+      data
+    );
     return res.data.data;
   } catch (err) {
     throw err;

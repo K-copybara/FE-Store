@@ -1,7 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
-import { display_large } from '../../styles/font';
-
+import { bold24 } from '../styles/font';
+import DividerIcon from '../assets/icons/divider-icon.svg?react';
 const CancelCompleteButton = ({
   leftButton = { text: '취소', type: 'cancel' },
   rightButton = { text: '완료', type: 'accept' },
@@ -13,7 +13,9 @@ const CancelCompleteButton = ({
       <ActionButton type={leftButton.type} onClick={onLeftClick}>
         {leftButton.text}
       </ActionButton>
-      <ActionDivider>|</ActionDivider>
+      <ActionDivider>
+        <DividerIcon />
+      </ActionDivider>
       <ActionButton type={rightButton.type} onClick={onRightClick}>
         {rightButton.text}
       </ActionButton>
@@ -31,7 +33,7 @@ const ActionsContainer = styled.div`
 `;
 
 const ActionButton = styled.button`
-  ${display_large}
+  ${bold24}
   display: flex;
   padding: 0.625rem;
   justify-content: center;
@@ -57,7 +59,7 @@ const ActionButton = styled.button`
 `;
 
 const ActionDivider = styled.span`
-  ${display_large}
+  ${bold24}
   color: var(--gray500);
   flex-shrink: 0;
 `;

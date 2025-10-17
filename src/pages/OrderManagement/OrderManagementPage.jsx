@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import OrderCard from '../../components/OrderManagement/OrderCard';
 import RequestCard from '../../components/OrderManagement/RequestCard';
 
-import { display_xl, display_large } from '../../styles/font';
+import { bold36, bold24 } from '../../styles/font';
 
 const dummyPending = [
   {
@@ -195,6 +195,8 @@ const dummyRequest = [
   },
 ];
 
+import DividerIcon from '../../assets/icons/divider-icon.svg?react';
+
 const OrderManagementPage = () => {
   const [activeTab, setActiveTab] = useState('PENDING');
   const [orders, setOrders] = useState([]);
@@ -236,7 +238,9 @@ const OrderManagementPage = () => {
             >
               처리 중
             </TabButton>
-            <TabDivider>|</TabDivider>
+            <TabDivider>
+              <DividerIcon />
+            </TabDivider>
             <TabButton
               active={activeTab === 'COMPLETED'}
               onClick={() => setActiveTab('COMPLETED')}
@@ -312,7 +316,7 @@ const OrderStatus = styled.div`
 `;
 
 const OrderTitle = styled.div`
-  ${display_xl}
+  ${bold36}
   color: var(--black);
 `;
 
@@ -323,7 +327,7 @@ const TabContainer = styled.div`
 `;
 
 const TabButton = styled.button`
-  ${display_large}
+  ${bold24}
   background: none;
   border: none;
   color: ${(props) => (props.active ? 'var(--primary)' : 'var(--gray500)')};
@@ -337,12 +341,12 @@ const TabButton = styled.button`
 `;
 
 const TabDivider = styled.span`
-  ${display_large}
+  ${bold24}
   color: var(--gray300);
 `;
 
 const EmptyMessage = styled.div`
-  ${display_large}
+  ${bold24}
   display: flex;
   justify-content: center;
   align-items: center;

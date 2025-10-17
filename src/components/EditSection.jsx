@@ -1,6 +1,8 @@
 import styled from 'styled-components';
 import { useState, useEffect} from 'react';
-import { display_large, body_medium, title_semi } from '../styles/font';
+import { bold24, reg14, reg18, bold18 } from '../styles/font';
+
+import EditIcon from '../assets/icons/EditCategory/edit-icon.svg?react';
 
 const EditSection = ({ 
   title = "섹션 제목",
@@ -382,7 +384,7 @@ const Header = styled.div`
 `;
 
 const SectionTitle = styled.h3`
-  ${display_large}
+  ${bold24}
   color: var(--black);
 `;
 
@@ -394,7 +396,7 @@ const ActionButton = styled.button`
   border-radius: 0.5rem;
   transition: all 0.2s;
   flex-shrink: 0;
-  ${body_medium}
+  ${reg14}
   color: var(--gray500);
   &:hover {
     background: var(--gray100);
@@ -413,7 +415,7 @@ const EditingArea = styled.div`
 `;
 
 const TextArea = styled.textarea`
-  ${title_semi}
+  ${reg18}
   width: 100%;
   min-height: 25vh;
   padding: 1.5rem;
@@ -442,7 +444,7 @@ const TextArea = styled.textarea`
 `;
 
 const TextDisplay = styled.div`
-  ${title_semi}
+  ${reg18}
   width: 100%;
   height: 25vh;
   padding: 1.5rem;     /* TextArea와 동일한 패딩 */
@@ -485,7 +487,7 @@ const BusinessHourRow = styled.div`
 `;
 
 const DayLabel = styled.div`
-  ${title_semi}
+  ${bold18}
   color: var(--black);
 `;
 
@@ -495,14 +497,14 @@ const TimeGroup = styled.div`
   gap: 0.5rem;
 `;
 const TimeInput2 = styled.div`
-  ${title_semi}
+  ${reg18}
   color: var(--black);
   width: 100%;
   text-align: center;
 `;
 
 const TimeInput = styled.input`
-  ${title_semi}
+  ${reg18}
   color: var(--black);
   width: 100%;
   text-align: center;
@@ -514,18 +516,13 @@ const TimeInput = styled.input`
 `;
 
 const TimeSeparator = styled.span`
-    ${title_semi}
+    ${reg18}
   color: var(--black);
 `;
 
 const BreakLabel = styled.div`
-  ${title_semi}
+  ${bold18}
   color: var(--black);
   text-align: right;
 `;
 
-const EditIcon = () => (
-    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M1.675 19.85C1.375 19.9333 1.09167 19.9083 0.825 19.775C0.558334 19.6417 0.358334 19.4417 0.225 19.175C0.0916668 18.9083 0.0666667 18.625 0.15 18.325L1.1 14.475L13.85 1.75C14.25 1.35 14.7083 1.08333 15.225 0.949999C15.7417 0.799999 16.2583 0.799999 16.775 0.949999C17.2917 1.08333 17.75 1.35 18.15 1.75L18.25 1.85C18.65 2.25 18.9167 2.70833 19.05 3.225C19.2 3.74167 19.2 4.25833 19.05 4.775C18.9167 5.29167 18.65 5.75 18.25 6.15L5.525 18.9L1.675 19.85ZM2.075 18.85C2.09167 18.8 2.09167 18.725 2.075 18.625C2.075 18.525 2.05833 18.4 2.025 18.25C1.99167 18.0833 1.94167 17.9167 1.875 17.75L4.475 17.1L16.85 4.75C17.1167 4.48333 17.25 4.23333 17.25 4C17.25 3.76667 17.1167 3.51667 16.85 3.25L16.75 3.15C16.4833 2.88333 16.2333 2.75 16 2.75C15.7667 2.75 15.5167 2.88333 15.25 3.15L2.9 15.525L2.075 18.85ZM12.3 4.7L13.7 3.3L16.7 6.3L15.3 7.7L12.3 4.7Z" fill="#999999"/>
-    </svg>
-);
