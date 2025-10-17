@@ -2,12 +2,14 @@ import styled from 'styled-components';
 import backgroundUrl from '../../assets/background.svg';
 import LOGO from '../../assets/logo.svg?react';
 import { useState } from 'react';
-import { replace, useNavigate } from 'react-router-dom';
+import {  useNavigate } from 'react-router-dom';
+import {useUserStore} from '../../store/useUserStore';
 import { postLogin } from '../../api/auth';
 
 const LoginPage = () => {
   const [login, setLogin] = useState({ email: '', password: '' });
   const navigate = useNavigate();
+  const fetchStoreInfo = useUserStore((state) => state.fetchStoreInfo);
 
   const onChangeLogin = (e) => {
     const { name, value } = e.target;
@@ -19,21 +21,22 @@ const LoginPage = () => {
     console.log(email, password);
     if (email?.trim() && password?.trim()) {
       try {
-        //const res = await postLogin(login);
-        const res = {
-          grantType: 'Bearer',
-          accessToken:
-            'eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJzdG9yZTAxQHRlc3QuY29tIiwiYXV0aCI6IlJPTEVfU1RPUkUiLCJleHAiOjE3NTg4MTg4MTJ9.4FheOIvS2kqz_RAG2fqSsJK1vqA4FJBpB3DXP8hr3Kdg_BIxKjVIsPUgHungJQfLfUgysT6oUFJzNZ-QJmPHCw',
-          refreshToken:
-            'eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJzdG9yZTAxQHRlc3QuY29tIiwiYXV0aCI6IlJPTEVfU1RPUkUiLCJleHAiOjE3NTkzMzcyMTIsImlzUmVmcmVzaFRva2VuIjp0cnVlfQ.TxTblOBulVZRe6f9Dcw9Lm63SDW8lKI_YlQqs56wSBoAu42Y-hQfscdT0-ji_dMobGgaoDjngWp10hIxhkToig',
-          accessTokenExpiresIn: 1758818812244,
-        };
+        const res = await postLogin(login);
+        // const res = {
+        //   grantType: 'Bearer',
+        //   accessToken:
+        //     'eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJzdG9yZTAxQHRlc3QuY29tIiwiYXV0aCI6IlJPTEVfU1RPUkUiLCJleHAiOjE3NTg4MTg4MTJ9.4FheOIvS2kqz_RAG2fqSsJK1vqA4FJBpB3DXP8hr3Kdg_BIxKjVIsPUgHungJQfLfUgysT6oUFJzNZ-QJmPHCw',
+        //   refreshToken:
+        //     'eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJzdG9yZTAxQHRlc3QuY29tIiwiYXV0aCI6IlJPTEVfU1RPUkUiLCJleHAiOjE3NTkzMzcyMTIsImlzUmVmcmVzaFRva2VuIjp0cnVlfQ.TxTblOBulVZRe6f9Dcw9Lm63SDW8lKI_YlQqs56wSBoAu42Y-hQfscdT0-ji_dMobGgaoDjngWp10hIxhkToig',
+        //   accessTokenExpiresIn: 1758818812244,
+        // };
         const token = {
           accessToken: res.accessToken,
           refreshToken: res.refreshToken,
           expiresIn: res.accessTokenExpiresIn,
         };
         localStorage.setItem('token', JSON.stringify(token));
+        await fetchStoreInfo();
         navigate('/', { replace: true });
       } catch (err) {
         console.error(err);

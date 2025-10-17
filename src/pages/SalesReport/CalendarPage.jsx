@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
 import { bold36, reg24 } from '../../styles/font';
 import Sidebar from '../../components/Sidebar';
-
+import { useUserStore } from '../../store/useUserStore';
 
 import PrevMonthIcon from '../../assets/icons/Calendar/prevmonth-icon.svg?react';
 import NextMonthIcon from '../../assets/icons/Calendar/nextmonth-icon.svg?react';
@@ -11,6 +11,8 @@ import NextMonthIcon from '../../assets/icons/Calendar/nextmonth-icon.svg?react'
 import { getMonthlySales, getWeekDaySales } from '../../api/stats';
 
 const CalendarPage = () => {
+
+    const storeId = useUserStore((state) => state.storeId);
 
     const [selectedMonth, setSelectedMonth] = useState(new Date()); 
 
@@ -27,12 +29,12 @@ const CalendarPage = () => {
             setError(null);
             try {
                 const monthString = getMonthString(selectedMonth);
-                console.log('데이터 조회 시작:', monthString);
+                console.log('데이터 조회 시작:', monthString, 'storeId:', storeId);
                 
                 // 두 API를 동시에 호출
                 const [dailyData, weeklyData] = await Promise.all([
-                    getMonthlySales(monthString),
-                    getWeekDaySales(monthString)
+                    getMonthlySales(monthString, storeId),
+                    getWeekDaySales(monthString, storeId)
                 ]);
                 
                 console.log('일별 매출 데이터:', dailyData);
@@ -48,7 +50,7 @@ const CalendarPage = () => {
             }
         };
         fetchMonthlySales();
-    }, [selectedMonth]); //달 변경시마다 호출
+    }, [selectedMonth, storeId]); //달 변경시마다 호출
 
 
     const weeklySalesData = weeklySalesArray.reduce((acc, item) => {
