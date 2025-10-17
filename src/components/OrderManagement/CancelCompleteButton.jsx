@@ -1,4 +1,3 @@
-import React from 'react';
 import styled from 'styled-components';
 import { bold24 } from '../../styles/font';
 import DividerIcon from '../../assets/icons/divider-icon.svg?react';
@@ -13,9 +12,9 @@ const CancelCompleteButton = ({
       <ActionButton type={leftButton.type} onClick={onLeftClick}>
         {leftButton.text}
       </ActionButton>
-      <ActionDivider>
-        <DividerIcon />
-      </ActionDivider>
+
+      <DividerIcon />
+
       <ActionButton type={rightButton.type} onClick={onRightClick}>
         {rightButton.text}
       </ActionButton>
