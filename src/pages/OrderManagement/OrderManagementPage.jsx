@@ -1,6 +1,5 @@
 import styled from 'styled-components';
 import { useEffect, useState } from 'react';
-import Sidebar from '../../components/Sidebar';
 import OrderCard from '../../components/OrderManagement/OrderCard';
 import RequestCard from '../../components/OrderManagement/RequestCard';
 
@@ -298,7 +297,10 @@ const OrderContainer = styled.div`
   height: 100%;
   overflow-y: auto;
   box-sizing: border-box;
-  box-sizing: border-box;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
 `;
 
 const OrderStatus = styled.div`
@@ -324,7 +326,6 @@ const TabButton = styled.button`
   ${display_large}
   background: none;
   border: none;
-  color: ${(props) => (props.active ? 'var(--primary)' : 'var(--gray500)')};
   color: ${(props) => (props.active ? 'var(--primary)' : 'var(--gray500)')};
   cursor: pointer;
   padding: 0.5rem 0;

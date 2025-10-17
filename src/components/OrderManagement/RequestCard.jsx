@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import styled from 'styled-components';
 import { display_small, display_xl, display_large } from '../../styles/font';
 import ConfirmModal from './ConfirmModal';
+import { formatDateTime } from '../../utils/formatTime';
 
 const RequestCard = ({ request }) => {
   const [isNew, setIsNew] = useState(false);
@@ -18,17 +19,12 @@ const RequestCard = ({ request }) => {
     //요청 완료 api
   };
 
-  const formatTime = (timestamp) => {
-    const date = new Date(timestamp);
-    return `${date.getHours()}:${date.getMinutes().toString().padStart(2, '0')}`;
-  };
-
   return (
     <>
       <CardWrapper status={request.status} isNew={isNew}>
         <CardHeader>
           <Left>
-            <RequestTime>{formatTime(request.requestedAt)}</RequestTime>
+            <RequestTime>{formatDateTime(request.requestedAt)}</RequestTime>
             <TableNumber>{request.tableId}번</TableNumber>
           </Left>
         </CardHeader>

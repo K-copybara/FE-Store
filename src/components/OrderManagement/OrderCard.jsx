@@ -5,6 +5,7 @@ import CancelCompleteButton from './CancelCompleteButton';
 import ConfirmModal from './ConfirmModal';
 
 import { display_small, display_xl, display_large } from '../../styles/font';
+import { formatDateTime } from '../../utils/formatTime';
 
 const OrderCard = ({ order }) => {
   const [isNew, setIsNew] = useState(false);
@@ -50,7 +51,7 @@ const OrderCard = ({ order }) => {
         {/* 상단: 주문 시간과 주문 번호 */}
         <CardHeader>
           <Left>
-            <OrderTime>{order.orderedAt}</OrderTime>
+            <OrderTime>{formatDateTime(order.orderedAt)}</OrderTime>
             <TableNumber hasRequest={hasRequest}>{order.tableId}번</TableNumber>
           </Left>
           <Right>
