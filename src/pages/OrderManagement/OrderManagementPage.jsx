@@ -1,9 +1,9 @@
 import styled from 'styled-components';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, useCallback } from 'react';
 import OrderCard from '../../components/OrderManagement/OrderCard';
 import RequestCard from '../../components/OrderManagement/RequestCard';
 
-import { bold36, bold24 } from '../../styles/font';
+import { bold36, bold24, reg24 } from '../../styles/font';
 
 const dummyPending = [
   {
@@ -109,54 +109,7 @@ const dummyCompleted = [
   },
 ];
 
-const dummyCanceled = [
-  {
-    orderId: 'h7i2j5k6-dh6f-9g7g-ehah-ck9f7i8h6g5j',
-    tableId: 12,
-    orderedAt: '2025-10-07T17:01:15.123Z',
-    status: 'CANCELED',
-    requestNote: '주문 실수로 취소합니다.',
-    items: [{ menuId: 203, menuName: '마파두부', amount: 1 }],
-  },
-  {
-    orderId: 'i8j3k6l7-ei7g-ah8h-fibj-dlah8j9i7h6k',
-    tableId: 3,
-    orderedAt: '2025-10-07T17:02:30.456Z',
-    status: 'CANCELED',
-    requestNote: '메뉴를 변경하려고 취소합니다.',
-    items: [
-      { menuId: 102, menuName: '하가우', amount: 2 },
-      { menuId: 103, menuName: '쇼마이', amount: 2 },
-    ],
-  },
-  {
-    orderId: 'j9k4l7m8-fj8h-bi9i-gjck-embj9ka08i7l',
-    tableId: 5,
-    orderedAt: '2025-10-07T17:03:45.789Z',
-    status: 'CANCELED',
-    requestNote: '일행이 도착하지 않아 취소합니다.',
-    items: [
-      { menuId: 404, menuName: '꿔바로우', amount: 1 },
-      { menuId: 301, menuName: '계란 볶음밥', amount: 2 },
-    ],
-  },
-  {
-    orderId: 'k0l5m8n9-gk9i-cjaj-hkdl-fncjakb19j8m',
-    tableId: 1,
-    orderedAt: '2025-10-07T17:04:55.912Z',
-    status: 'CANCELED',
-    requestNote: '재료 소진으로 인한 가게 측 취소',
-    items: [{ menuId: 501, menuName: '오늘의 특선', amount: 1 }],
-  },
-  {
-    orderId: 'l1m6n9o0-hlaj-dkbk-ilfm-godlbkc2ak9n',
-    tableId: 10,
-    orderedAt: '2025-10-07T17:05:20.333Z',
-    status: 'CANCELED',
-    requestNote: '요청사항 반영이 어려워 취소 처리되었습니다.',
-    items: [{ menuId: 105, menuName: '마라 우육면', amount: 1 }],
-  },
-];
+const dummyCanceled = [];
 
 import { getOrders, getRequests, postRequestComplete } from '../../api/order';
 
@@ -182,14 +135,22 @@ const OrderManagementPage = () => {
     fetchOrders();
   }, [activeTab]);
 
-  const fetchRequests = async () => {
+  const fetchRequests = useCallback(async () => {
     const res = await getRequests();
     setRequests(res);
-  };
+  }, []);
 
   useEffect(() => {
     fetchRequests();
-  }, []);
+  }, [fetchRequests]);
+
+  useEffect(() => {
+    const onCreated = () => {
+      fetchRequests();
+    };
+    window.addEventListener('request:created', onCreated);
+    return () => window.removeEventListener('request:created', onCreated);
+  }, [fetchRequests]);
 
   const filteredRequests = useMemo(() => {
     return requests.filter((r) => r.status === activeReq);
@@ -290,7 +251,7 @@ const OrderContainer = styled.div`
   display: flex;
   padding: 1.25rem 1.5625rem;
   flex-direction: column;
-  align-items: flex-start;
+  align-items: center;
   gap: 1.25rem;
 
   border-radius: 1.25rem;
@@ -344,7 +305,7 @@ const TabDivider = styled.span`
 `;
 
 const EmptyMessage = styled.div`
-  ${bold24}
+  ${reg24}
   display: flex;
   justify-content: center;
   align-items: center;
