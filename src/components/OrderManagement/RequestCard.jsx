@@ -1,11 +1,11 @@
 // components/RequestCard.jsx
 import React, { useState } from 'react';
 import styled from 'styled-components';
-import { reg14, reg24, bold24, bold36 } from '../styles/font';
+import { reg14, reg24, bold24, bold36 } from '../../styles/font';
 import ConfirmModal from './ConfirmModal';
 import { formatDateTime } from '../../utils/formatTime';
 
-const RequestCard = ({ request }) => {
+const RequestCard = ({ request, onComplete }) => {
   const [isNew, setIsNew] = useState(false);
   const [showCompleteModal, setShowCompleteModal] = useState(false);
 
@@ -13,10 +13,13 @@ const RequestCard = ({ request }) => {
     setShowCompleteModal(true);
   };
 
-  const handleConfirmComplete = () => {
-    setShowCompleteModal(false);
-
-    //요청 완료 api
+  const handleConfirmComplete = async () => {
+    try {
+      onComplete(request.requestId);
+      setShowCompleteModal(false);
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   return (
@@ -43,10 +46,11 @@ const RequestCard = ({ request }) => {
             ))}
           </ItemList>
         )}
-
-        <CompleteButtonWrapper>
-          <CompleteButton onClick={handleCompleteClick}>완료</CompleteButton>
-        </CompleteButtonWrapper>
+        {request.status === 'PENDING' && (
+          <CompleteButtonWrapper>
+            <CompleteButton onClick={handleCompleteClick}>완료</CompleteButton>
+          </CompleteButtonWrapper>
+        )}
       </CardWrapper>
 
       <ConfirmModal
@@ -71,17 +75,8 @@ const CardWrapper = styled.div`
 
   background: var(--white);
   border-radius: 1.25rem;
-  border: 2px solid
-    ${(props) => {
-      if (props.isNew) return 'var(--yellow)';
-      if (!props.isNew) return 'var(--secondary)';
-      return 'var(--secondary)';
-    }};
-  box-shadow: ${(props) => {
-    if (!props.isNew) return '0 4px 8px 0 rgba(252, 201, 0, 0.20)';
-    if (props.isNew) return '0 4px 8px 0 rgba(130, 152, 255, 0.20)';
-    return '0 4px 8px 0 rgba(130, 152, 255, 0.20)';
-  }};
+  border: 2px solid var(--secondary);
+  box-shadow: '0 4px 8px 0 rgba(130, 152, 255, 0.20)';
 `;
 
 const CardHeader = styled.div`

@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import OrderCard from '../../components/OrderManagement/OrderCard';
 import RequestCard from '../../components/OrderManagement/RequestCard';
 
@@ -158,53 +158,18 @@ const dummyCanceled = [
   },
 ];
 
-const dummyRequest = [
-  {
-    requestId: 2,
-    tableId: 5,
-    requestedAt: '2025-10-05T22:19:12.333612',
-    status: 'PENDING',
-    requestNote: '요청사항 들어!!',
-    items: [
-      {
-        name: '요청사항 메뉴명',
-        amount: 2,
-      },
-      {
-        name: '메뉴명',
-        amount: 1,
-      },
-    ],
-  },
-  {
-    requestId: 1,
-    tableId: 5,
-    requestedAt: '2025-10-05T22:18:27.708145',
-    status: 'PENDING',
-    requestNote: null,
-    items: [
-      {
-        name: '요청사항 메뉴명',
-        amount: 2,
-      },
-      {
-        name: '메뉴명',
-        amount: 1,
-      },
-    ],
-  },
-];
-
-import DividerIcon from '../../assets/icons/divider-icon.svg?react';
+import { getOrders, getRequests, postRequestComplete } from '../../api/order';
 
 const OrderManagementPage = () => {
   const [activeTab, setActiveTab] = useState('PENDING');
+  const [activeReq, setActiveReq] = useState('PENDING');
   const [orders, setOrders] = useState([]);
   const [requests, setRequests] = useState([]);
 
   useEffect(() => {
     const fetchOrders = async () => {
-      //const res = await getOrders();
+      // const res = await getOrders(2, activeTab);
+      // setOrders(res);
       if (activeTab === 'PENDING') {
         setOrders(dummyPending);
       } else if (activeTab === 'COMPLETED') {
@@ -217,14 +182,28 @@ const OrderManagementPage = () => {
     fetchOrders();
   }, [activeTab]);
 
-  useEffect(() => {
-    const fetchRequests = async () => {
-      //const res = await getRequests();
-      setRequests(dummyRequest);
-    };
+  const fetchRequests = async () => {
+    const res = await getRequests();
+    setRequests(res);
+  };
 
+  useEffect(() => {
     fetchRequests();
   }, []);
+
+  const filteredRequests = useMemo(() => {
+    return requests.filter((r) => r.status === activeReq);
+  }, [requests, activeReq]);
+
+  const completeRequest = async (requestId) => {
+    try {
+      const res = await postRequestComplete(requestId);
+      await fetchRequests();
+    } catch (err) {
+      alert('처리에 실패했습니다. 다시 시도해주세요.');
+      console.error(err);
+    }
+  };
 
   return (
     <>
@@ -238,9 +217,7 @@ const OrderManagementPage = () => {
             >
               처리 중
             </TabButton>
-            <TabDivider>
-              <DividerIcon />
-            </TabDivider>
+            <TabDivider>|</TabDivider>
             <TabButton
               active={activeTab === 'COMPLETED'}
               onClick={() => setActiveTab('COMPLETED')}
@@ -268,20 +245,41 @@ const OrderManagementPage = () => {
           orders.map((order) => <OrderCard key={order.orderId} order={order} />)
         )}
       </OrderContainer>
-      <RequestContainer>
-        <OrderTitle>요청</OrderTitle>
-        {requests.length === 0 ? (
-          <EmptyMessage>요청사항이 없습니다.</EmptyMessage>
+      <OrderContainer>
+        <OrderStatus>
+          <OrderTitle>요청</OrderTitle>
+          <TabContainer>
+            <TabButton
+              active={activeReq === 'PENDING'}
+              onClick={() => setActiveReq('PENDING')}
+            >
+              처리 중
+            </TabButton>
+            <TabDivider>|</TabDivider>
+            <TabButton
+              active={activeReq === 'COMPLETED'}
+              onClick={() => setActiveReq('COMPLETED')}
+            >
+              완료
+            </TabButton>
+          </TabContainer>
+        </OrderStatus>
+        {filteredRequests.length === 0 ? (
+          <EmptyMessage>
+            {activeReq === 'PENDING'
+              ? '처리 중인 요청이 없습니다.'
+              : '완료된 요청이 없습니다.'}
+          </EmptyMessage>
         ) : (
-          requests.map((request) => (
+          filteredRequests.map((request) => (
             <RequestCard
               key={request.requestId}
               request={request}
-              onComplete={() => completeRequest(request.requestId)}
+              onComplete={completeRequest}
             />
           ))
         )}
-      </RequestContainer>
+      </OrderContainer>
     </>
   );
 };
@@ -352,19 +350,4 @@ const EmptyMessage = styled.div`
   align-items: center;
   color: var(--gray500);
   height: 12rem;
-`;
-
-const RequestContainer = styled.div`
-  display: flex;
-  padding: 1.25rem 1.5625rem;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 1.75rem;
-
-  border-radius: 1.25rem;
-  background-color: var(--white);
-  flex: 1;
-  height: 100%;
-  box-sizing: border-box;
-  overflow-y: auto;
 `;
