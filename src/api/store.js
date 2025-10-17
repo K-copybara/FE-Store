@@ -1,15 +1,17 @@
 import { authClient } from './client';
 
-export const getStoreInfo = async (storeId) => {
+//상점 정보 조회
+export const getStoreInfo = async () => {
   try {
-    const res = await authClient.get(`/shop/api/merchant/store/${storeId}`);
+    const res = await authClient.get(`/shop/api/merchant/store/me`);
     return res.data.data;
   } catch (err) {
     throw err;
   }
 };
 
-export const patchStoreInfo = async () => {
+//상점 정보 수정:공지
+export const patchStoreNotice = async (data) => {
   try {
     const res = await authClient.patch(`/shop/api/merchant/store/notice`, data);
     return res.data;
@@ -18,7 +20,8 @@ export const patchStoreInfo = async () => {
   }
 };
 
-export const patchStoreHours = async () => {
+//상점 정보 수정:영업시간
+export const patchStoreHours = async (data) => {
   try {
     const res = await authClient.patch(`/shop/api/merchant/store/hours`, data);
     return res.data;
@@ -27,6 +30,7 @@ export const patchStoreHours = async () => {
   }
 };
 
+//메뉴 조회
 export const getMenuInfo = async () => {
   try {
     const res = await authClient.get(`/shop/api/merchant/store/menu`);
@@ -36,7 +40,8 @@ export const getMenuInfo = async () => {
   }
 };
 
-export const getMenuDetail = async () => {
+//메뉴 상세 조회
+export const getMenuDetail = async (menuId) => {
   try {
     const res = await authClient.get(`/shop/api/merchant/store/menu/${menuId}`);
     return res.data.data;
@@ -45,6 +50,8 @@ export const getMenuDetail = async () => {
   }
 };
 
+
+//메뉴 등록
 export const postMenuInfo = async (data, imgFile) => {
   try {
     const formData = new FormData();
@@ -73,6 +80,7 @@ export const postMenuInfo = async (data, imgFile) => {
   }
 };
 
+//메뉴 수정
 export const patchMenuInfo = async (menuId, data, imgFile) => {
   try {
     // bool값 확인하기
@@ -100,7 +108,8 @@ export const patchMenuInfo = async (menuId, data, imgFile) => {
   }
 };
 
-export const deleteMenu = async () => {
+//메뉴 삭제
+export const deleteMenu = async (menuId) => {
   try {
     const res = await authClient.delete(
       `/shop/api/merchant/store/menu/${menuId}`
@@ -111,6 +120,7 @@ export const deleteMenu = async () => {
   }
 };
 
+//일시 품절 설정
 export const postSoldout = async (menuId) => {
   try {
     const res = await authClient.post(
@@ -122,6 +132,7 @@ export const postSoldout = async (menuId) => {
   }
 };
 
+//카테고리 조회
 export const getCategories = async () => {
   try {
     const res = await authClient.get(`/shop/api/merchant/store/category`);
@@ -131,6 +142,7 @@ export const getCategories = async () => {
   }
 };
 
+//카테고리 생성
 export const postCategory = async (data) => {
   try {
     const res = await authClient.post(
@@ -143,6 +155,7 @@ export const postCategory = async (data) => {
   }
 };
 
+//카테고리 삭제
 export const deleteCategory = async (catId) => {
   try {
     const res = await authClient.delete(
@@ -154,9 +167,10 @@ export const deleteCategory = async (catId) => {
   }
 };
 
+//카테고리 순서 변경
 export const patchCategoryOrder = async (data) => {
   try {
-    const res = authClient.patch(
+    const res = await authClient.patch(
       `/shop/api/merchant/store/category/order`,
       data
     );

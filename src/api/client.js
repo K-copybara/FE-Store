@@ -61,7 +61,7 @@ authClient.interceptors.response.use(
         })
           .then((token) => {
             originalRequest.headers.Authorization = `Bearer ${token}`;
-            return client(originalRequest);
+            return authClient(originalRequest); //client -> authClient로 바꿨음
           })
           .catch((err) => Promise.reject(err));
       }
@@ -69,7 +69,7 @@ authClient.interceptors.response.use(
       isRefreshing = true;
       try {
         const res = await getReissueToken();
-        const newAccessToken = res.payload.access_token;
+        const newAccessToken = res.accessToken; //payload.access_token->accessToken으로 바꿨음
         const tokenString = localStorage.getItem('token');
         const existingToken = tokenString ? JSON.parse(tokenString) : {};
         const updatedToken = {
@@ -85,6 +85,7 @@ authClient.interceptors.response.use(
       } catch (err) {
         processQueue(err, null);
         localStorage.removeItem('token');
+        window.location.href = '/login'; //추가했음
         return Promise.reject(err);
       } finally {
         isRefreshing = false;

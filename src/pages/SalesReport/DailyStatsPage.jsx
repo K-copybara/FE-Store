@@ -1,14 +1,18 @@
 import styled from 'styled-components';
-import { useState, useRef } from 'react';
-import Sidebar from '../../components/Sidebar';
+import { useState, useRef, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { body_large, bold36, bold24, bold18, reg24} from '../../styles/font';
+import { useUserStore } from '../../store/useUserStore';
 
 import MenuRatingIcon from '../../assets/icons/DailyStats/menurating-icon.svg?react';
 import SortIcon from '../../assets/icons/DailyStats/sortarrow-icon.svg?react';
 
+import { getDailyOrderSales, getHourlySales, getMenuSales } from '../../api/stats';
+
+
 const DailyStatsPage = () => {
 
+  const storeId = useUserStore((state) => state.storeId);
   const location = useLocation();
 
   // 오늘 날짜 구하기. 매출조회/일별매출통계 바로 클릭 시 실행
@@ -30,41 +34,14 @@ const DailyStatsPage = () => {
   };
   const selectedDate = location.state?.date || getTodayString(); //달력에서 받아온 날짜 || 오늘 날짜
   
-  const todaySalesData = [
-    { date: selectedDate, sales: 19180400, orders: 42 },
-  ];
-
-  const timeSalesData = [
-    { "hour": "09", "sales": 25000, "orderCount": 3 },
-    { "hour": "10", "sales": 48000, "orderCount": 5 },
-    { "hour": "11", "sales": 92000, "orderCount": 9 },
-    { "hour": "12", "sales": 134000, "orderCount": 12 },
-    { "hour": "13", "sales": 25000, "orderCount": 3 },
-    { "hour": "10", "sales": 48000, "orderCount": 5 },
-    { "hour": "11", "sales": 92000, "orderCount": 9 },
-    { "hour": "12", "sales": 134000, "orderCount": 12 },
-    { "hour": "09", "sales": 25000, "orderCount": 3 },
-    { "hour": "10", "sales": 48000, "orderCount": 5 },
-    { "hour": "11", "sales": 92000, "orderCount": 9 },
-    { "hour": "12", "sales": 134000, "orderCount": 12 },
-  ];  
-
-  const rankSalesData = [
-    { "menuId": 1, "name": "아메리카노", "sales": 120000, "reviewCount": 4.5, "orderCount": 20},
-    { "menuId": 2, "name": "카페라떼", "sales": 95000, "reviewCount": 4, "orderCount": 15 },
-    { "menuId": 3, "name": "바닐라라떼", "sales": 60000, "reviewCount": 5, "orderCount": 10 },
-    { "menuId": 4, "name": "아메리카노", "sales": 120000, "reviewCount": 4.5, "orderCount": 20},
-    { "menuId": 5, "name": "카페라떼", "sales": 95000, "reviewCount": 4, "orderCount": 15 },
-    { "menuId": 6, "name": "바닐라라떼", "sales": 60000, "reviewCount": 5, "orderCount": 10 },
-    { "menuId": 7, "name": "아메리카노", "sales": 120000, "reviewCount": 4.5, "orderCount": 20},
-    { "menuId": 8, "name": "카페라떼", "sales": 95000, "reviewCount": 4, "orderCount": 15 },
-    { "menuId": 9, "name": "바닐라라떼", "sales": 60000, "reviewCount": 5, "orderCount": 10 },
-    { "menuId": 10, "name": "아메리카노", "sales": 120000, "reviewCount": 4.5, "orderCount": 20},
-    { "menuId": 11, "name": "카페라떼", "sales": 95000, "reviewCount": 4, "orderCount": 15 },
-    { "menuId": 12, "name": "바닐라라떼", "sales": 60000, "reviewCount": 5, "orderCount": 10 }
-    ];
-
-  const [sortType, setSortType] = useState('sales');
+  const [todaySalesData, setTodaySalesData] = useState([ //해당 날짜 매출, 주문건수
+    { date: selectedDate, sales: 0, orders: 0 }
+   ]);
+  const [timeSalesData, setTimeSalesData] = useState([]); //시간별 매출 조회
+  const [rankSalesData, setRankSalesData] = useState([]); //메뉴별 매출순, 리뷰순 조회
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+    const [sortType, setSortType] = useState('sales');
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef();
   const SORT_OPTIONS = [
@@ -74,14 +51,53 @@ const DailyStatsPage = () => {
   const selectedSortLabel = SORT_OPTIONS.find(
     (option) => option.value === sortType
   )?.label;
+  const sortedMenuData = rankSalesData;
 
-  const sortedMenuData = [...rankSalesData].sort((a, b) => {
-    if (sortType === 'sales') {
-      return b.sales - a.sales; // 매출순 (높은 순)
-    } else {
-      return b.reviewCount - a.reviewCount; // 리뷰순 (높은 순)
-    }
-  });
+  useEffect(() => {
+    const fetchDailyStats = async () => {
+      setLoading(true);
+      setError(null);
+
+      if (!storeId) {
+        setError(new Error('storeId가 없습니다.'));
+        setLoading(false);
+        return;
+      }
+
+      try{
+        const [dailyData, hourlyData, menuData] = await Promise.all([
+          getDailyOrderSales(selectedDate, storeId),
+          getHourlySales(selectedDate, storeId),
+          getMenuSales(selectedDate, sortType, storeId)
+        ]);
+        console.log('일별 매출 데이터:', dailyData);
+        console.log('시간대별 매출 데이터:', hourlyData);
+        console.log('메뉴별 매출 데이터:', menuData);
+
+        setTodaySalesData([{
+          date: selectedDate,
+          sales: dailyData.sales || 0,
+          orders: dailyData.orders || 0
+        }])
+
+        setTimeSalesData(hourlyData);
+        setRankSalesData(menuData);
+
+      } catch (error) {
+        setError(error);
+        console.error('일별 매출 조회 실패:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDailyStats();
+  }, [selectedDate, sortType, storeId]); //날짜, 정렬 변경될 때마다 실행
+
+
+
+  if (loading) return <MenuSection>로딩중...</MenuSection>;
+  if (error) return <MainContent>에러 발생: {error.message}</MainContent>;
 
   return (
     <>
@@ -162,8 +178,8 @@ const DailyStatsPage = () => {
             <TimeSection>
               <SectionTitle>시간대별 매출 현황</SectionTitle>
               <TimeList>
-                {timeSalesData.map((slot) => (
-                  <MenuListItem key={slot.hour}>
+                {timeSalesData.map((slot, index) => (
+                  <MenuListItem key={index}>
                     <MenuName>{slot.hour}시</MenuName>
                     <MenuCount2>{slot.orderCount}건</MenuCount2>
                     <MenuSales>{slot.sales?.toLocaleString()}원</MenuSales>

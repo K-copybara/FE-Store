@@ -43,7 +43,7 @@ export const getReissueToken = async () => {
       {},
       {
         headers: {
-          Authorization: `Bearer ${refreshToken}`,
+          Authorization: `Bearer ${token.refreshToken}`, // token. 추가
         },
         withCredentials: true,
       }
