@@ -10,9 +10,10 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@microsoft/fetch-event-source": "^2.0.1",
     "@tosspayments/tosspayments-sdk": "^2.4.0",
     "axios": "1.11.0",
-    "event-source-polyfill": "^1.0.31",
+    "dayjs": "^1.11.18",
     "prettier-eslint": "16.4.2",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
