@@ -1,7 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
-import { bold24 } from '../styles/font';
-import DividerIcon from '../assets/icons/divider-icon.svg?react';
+import { bold24 } from '../../styles/font';
+import DividerIcon from '../../assets/icons/divider-icon.svg?react';
 const CancelCompleteButton = ({
   leftButton = { text: '취소', type: 'cancel' },
   rightButton = { text: '완료', type: 'accept' },

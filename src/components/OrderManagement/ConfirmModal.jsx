@@ -1,9 +1,8 @@
 // components/ConfirmModal.jsx
 import React from 'react';
 import styled from 'styled-components';
-import { reg24 } from '../styles/font';
+import { reg24 } from '../../styles/font';
 import CancelCompleteButton from './CancelCompleteButton';
-import { display_large } from '../../styles/font';
 
 const ConfirmModal = ({ isOpen, onClose, onConfirm, message }) => {
   if (!isOpen) return null;

@@ -4,7 +4,7 @@ import styled from 'styled-components';
 import CancelCompleteButton from './CancelCompleteButton';
 import ConfirmModal from './ConfirmModal';
 
-import { display_small, display_xl, display_large } from '../../styles/font';
+import { reg14, reg24, bold24, bold36 } from '../../styles/font';
 import { formatDateTime } from '../../utils/formatTime';
 
 const OrderCard = ({ order }) => {
@@ -144,29 +144,29 @@ const Right = styled.div`
   align-items: flex-end;
 `;
 const OrderTime = styled.span`
-  ${display_small}
+  ${reg14}
   color: var(--black);
 `;
 
 const TableNumber = styled.div`
-  ${display_xl}
+  ${bold36}
   color: var(--black);
   text-align: center;
   margin-bottom: ${(props) => (props.hasRequest ? '8px' : '12px')};
 `;
 
 const OrderTitle = styled.span`
-  ${display_small}
+  ${reg14}
   color: var(--black);
 `;
 
 const OrderNumber = styled.span`
-  ${display_xl}
+  ${bold36}
   color: var(--black);
 `;
 
 const RequestSection = styled.div`
-  ${display_large}
+  ${reg24}
   display: flex;
   align-items: center;
   padding: 1.25rem;
@@ -188,11 +188,11 @@ const MenuItem = styled.div`
 `;
 
 const MenuName = styled.span`
-  ${display_large}
+  ${reg24}
 `;
 
 const MenuQuantity = styled.span`
-  ${display_large}
+  ${bold24}
   text-align: right;
   font-weight: 700;
 `;

@@ -2,7 +2,7 @@ import styled from 'styled-components';
 import { useState, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import MenuModal from './MenuModal';
-import ConfirmModal from './ConfirmModal';
+import ConfirmModal from '../components/OrderManagement/ConfirmModal';
 import {
   body_large,
   bold24,
