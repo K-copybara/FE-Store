@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { bold36, bold24, reg24 } from '../styles/font';
-import { NavLink, replace, useNavigate } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 
 import OrderIcon from '../assets/icons/Sidebar/order-icon.svg?react';
 import SalesIcon from '../assets/icons/Sidebar/sales-icon.svg?react';
@@ -10,15 +10,40 @@ import DropArrowIcon from '../assets/icons/Sidebar/droparrow-icon.svg?react';
 import CalendarIcon from '../assets/icons/Sidebar/calendar-icon.svg?react';
 import DailyStatsIcon from '../assets/icons/Sidebar/dailystats-icon.svg?react';
 import { postLogout } from '../api/auth';
+import { getStoreInfo } from '../api/store';
 
 const Sidebar = () => {
   const [showSalesDropdown, setShowSalesDropdown] = useState(false);
+  const [storeData, setStoreData] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
   const navigate = useNavigate();
 
   const toggleSalesDropdown = () => {
     setShowSalesDropdown(!showSalesDropdown);
   };
 
+
+
+  useEffect(() => {
+    const fetchStoreInfo = async () => {
+      setLoading(true);
+      try {
+        const data = await getStoreInfo();
+        console.log('가게 정보 조회 성공:', data);
+        setStoreData(data);
+      } catch (error) {
+        setError(error);
+        console.error('가게 정보 조회 실패', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+  
+      fetchStoreInfo();
+    }, []);
+
+    
   const handleLogout = async () => {
     if (confirm('로그아웃 하시겠습니까?')) {
       try {
@@ -34,7 +59,7 @@ const Sidebar = () => {
 
   return (
     <SidebarWrapper>
-      <StoreName>딤딤섬 명동점</StoreName>
+      <StoreName>{storeData?.shopName}</StoreName>
       <MenuList>
         <MenuItem>
           <StyledNavLink to="/">
