@@ -11,8 +11,8 @@ import CancelIcon from '../assets/icons/EditCategory/cancel-icon.svg?react';
 
 import { getCategories, postCategory, deleteCategory, patchCategoryOrder } from '../api/store';
 
-const EditCategory = ({ title = "메뉴 카테고리" }) => {
-
+const EditCategory = ({ title = "메뉴 카테고리", refreshKey = 0 }) => {
+console.log('📁 [EditCategory] 렌더링, refreshKey:', refreshKey);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -23,23 +23,26 @@ const EditCategory = ({ title = "메뉴 카테고리" }) => {
   const [isAddingNew, setIsAddingNew] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState('');
 
-  //카테고리 조회
+  // 카테고리 조회 함수 분리
+  const fetchCategories = async () => {
+    setLoading(true);
+    try {
+      const data = await getCategories();
+      console.log('카테고리 조회 성공:', data);
+      setCategories(data);
+    } catch (error) {
+      setError(error);
+      console.error('카테고리 조회 실패:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // 초기 로드 및 refreshKey 변경 시 재조회
   useEffect(() => {
-    const fetchCategories = async () => {
-      setLoading(true);
-      try {
-        const data = await getCategories();
-        console.log('카테고리 조회 성공:', data);
-        setCategories(data);
-      } catch (error) {
-        setError(error);
-        console.error('카테고리 조회 실패:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchCategories();
-  }, []);
+  }, [refreshKey]);  // refreshKey가 변경될 때마다 재조회
+  
 
   // 새 카테고리 추가
   const handleAddNew = () => {
@@ -92,13 +95,6 @@ const EditCategory = ({ title = "메뉴 카테고리" }) => {
     setIsAddingNew(false);
     setNewCategoryName('');
   };
-
-
-  //  카테고리 순서 변경
-  // const updateCategoryOrder = async (categoryOrders) => {
-  //   console.log('카테고리 순서 변경 요청:', categoryOrders);
-  // };
-
 
   // 카테고리 삭제 가능 여부 확인
   const canDeleteCategory = (categoryId) => {
