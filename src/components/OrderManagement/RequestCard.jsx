@@ -6,7 +6,6 @@ import ConfirmModal from './ConfirmModal';
 import { formatDateTime } from '../../utils/formatTime';
 
 const RequestCard = ({ request, onComplete }) => {
-  const [isNew, setIsNew] = useState(false);
   const [showCompleteModal, setShowCompleteModal] = useState(false);
 
   const handleCompleteClick = () => {
@@ -24,7 +23,7 @@ const RequestCard = ({ request, onComplete }) => {
 
   return (
     <>
-      <CardWrapper status={request.status} isNew={isNew}>
+      <CardWrapper status={request.status}>
         <CardHeader>
           <Left>
             <RequestTime>{formatDateTime(request.requestedAt)}</RequestTime>

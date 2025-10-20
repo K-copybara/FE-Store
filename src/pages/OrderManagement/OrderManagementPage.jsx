@@ -2,159 +2,79 @@ import styled from 'styled-components';
 import { useEffect, useMemo, useState, useCallback } from 'react';
 import OrderCard from '../../components/OrderManagement/OrderCard';
 import RequestCard from '../../components/OrderManagement/RequestCard';
-
 import { bold36, bold24, reg24 } from '../../styles/font';
-
-const dummyPending = [
-  {
-    orderId: 'f694f148-3950-41a4-8df9-b01611645c05',
-    tableId: 5,
-    orderedAt: '2025-10-07T16:50:11.755Z',
-    status: 'PENDING',
-    requestNote: '땅콩은 빼주세요.',
-    items: [
-      { menuId: 101, menuName: '탄탄지 샐러드', amount: 1 },
-      { menuId: 105, menuName: '마라 우육면', amount: 1 },
-    ],
-  },
-  {
-    orderId: 'a1b2c3d4-e5f6-7890-1234-567890abcdef',
-    tableId: 2,
-    orderedAt: '2025-10-07T16:51:25.421Z',
-    status: 'PENDING',
-    requestNote: '냅킨 좀 더 챙겨주세요.',
-    items: [{ menuId: 202, menuName: '어향가지', amount: 2 }],
-  },
-  {
-    orderId: '12345678-abcd-efgh-ijkl-mnopqrstuv',
-    tableId: 8,
-    orderedAt: '2025-10-07T16:52:45.100Z',
-    status: 'PENDING',
-    requestNote: '공기밥 1개 추가요.',
-    items: [
-      { menuId: 301, menuName: '계란 볶음밥', amount: 1 },
-      { menuId: 102, menuName: '하가우', amount: 3 },
-    ],
-  },
-  {
-    orderId: 'zyxw9876-vuts-rqpo-nmlk-jihgfedcba',
-    tableId: 3,
-    orderedAt: '2025-10-07T16:53:15.832Z',
-    status: 'PENDING',
-    requestNote: '아이 의자 하나 필요해요.',
-    items: [{ menuId: 404, menuName: '꿔바로우', amount: 1 }],
-  },
-  {
-    orderId: 'f0e1d2c3-b4a5-6789-fedc-ba9876543210',
-    tableId: 11,
-    orderedAt: '2025-10-07T16:54:02.555Z',
-    status: 'PENDING',
-    requestNote: '소스 많이 주세요!',
-    items: [
-      { menuId: 103, menuName: '쇼마이', amount: 2 },
-      { menuId: 205, menuName: '멘보샤', amount: 1 },
-    ],
-  },
-];
-
-const dummyCompleted = [
-  {
-    orderId: 'a2c7e0f1-8c1a-4b2b-9e5d-7f4a2d3c1b0e',
-    tableId: 1,
-    orderedAt: '2025-10-07T14:30:55.123Z',
-    status: 'COMPLETED',
-    requestNote: '앞접시 2개 부탁드려요.',
-    items: [
-      { menuId: 201, menuName: '유린기', amount: 1 },
-      { menuId: 302, menuName: '해물 짬뽕', amount: 1 },
-    ],
-  },
-  {
-    orderId: 'b3d8f1g2-9d2b-5c3c-ad6e-8g5b3e4d2c1f',
-    tableId: 4,
-    orderedAt: '2025-10-07T14:32:10.642Z',
-    status: 'COMPLETED',
-    requestNote: '단무지 많이 주세요.',
-    items: [{ menuId: 303, menuName: '잡채밥', amount: 2 }],
-  },
-  {
-    orderId: 'c4e9g2h3-ae3c-6d4d-be7f-9h6c4f5e3d2g',
-    tableId: 7,
-    orderedAt: '2025-10-07T14:35:05.311Z',
-    status: 'COMPLETED',
-    requestNote: null,
-    items: [
-      { menuId: 104, menuName: '소룡포', amount: 2 },
-      { menuId: 401, menuName: '칭따오', amount: 1 },
-    ],
-  },
-  {
-    orderId: 'd5f0h3i4-bf4d-7e5e-cf8g-ai7d5g6f4e3h',
-    tableId: 6,
-    orderedAt: '2025-10-07T14:38:22.987Z',
-    status: 'COMPLETED',
-    requestNote: '덜 맵게 해주세요.',
-    items: [{ menuId: 105, menuName: '마라 우육면', amount: 1 }],
-  },
-  {
-    orderId: 'e6g1i4j5-cg5e-8f6f-dg9h-bj8e6h7g5f4i',
-    tableId: 9,
-    orderedAt: '2025-10-07T14:40:18.490Z',
-    status: 'COMPLETED',
-    requestNote: '고수 빼주세요.',
-    items: [
-      { menuId: 101, menuName: '탄탄지 샐러드', amount: 1 },
-      { menuId: 404, menuName: '꿔바로우', amount: 1 },
-    ],
-  },
-];
-
-const dummyCanceled = [];
-
-import { getOrders, getRequests, postRequestComplete } from '../../api/order';
+import {
+  getOrders,
+  getRequests,
+  postRequestComplete,
+  postOrderCancel,
+  postOrderComplete,
+} from '../../api/order';
+import { useUserStore } from '../../store/useUserStore';
 
 const OrderManagementPage = () => {
   const [activeTab, setActiveTab] = useState('PENDING');
   const [activeReq, setActiveReq] = useState('PENDING');
   const [orders, setOrders] = useState([]);
   const [requests, setRequests] = useState([]);
+  const { storeId } = useUserStore();
+
+  // 주문, 요청사항 불러오기
+  const fetchOrders = useCallback(async () => {
+    const res = await getOrders(storeId, activeTab);
+    setOrders(res);
+  }, [storeId, activeTab]);
 
   useEffect(() => {
-    const fetchOrders = async () => {
-      // const res = await getOrders(2, activeTab);
-      // setOrders(res);
-      if (activeTab === 'PENDING') {
-        setOrders(dummyPending);
-      } else if (activeTab === 'COMPLETED') {
-        setOrders(dummyCompleted);
-      } else {
-        setOrders(dummyCanceled);
-      }
-    };
-
     fetchOrders();
-  }, [activeTab]);
+  }, [fetchOrders]);
 
   const fetchRequests = useCallback(async () => {
-    const res = await getRequests();
+    const res = await getRequests(storeId);
     setRequests(res);
-  }, []);
+  }, [storeId]);
 
   useEffect(() => {
     fetchRequests();
   }, [fetchRequests]);
 
+  // 알림 수신 시 주문 요청 다시 불러오기
   useEffect(() => {
-    const onCreated = () => {
+    const onOrderCreated = () => {
+      fetchOrders();
+    };
+    window.addEventListener('order:created', onOrderCreated);
+    return () => window.removeEventListener('order:created', onOrderCreated);
+  }, [fetchOrders]);
+
+  useEffect(() => {
+    const onRequestCreated = () => {
       fetchRequests();
     };
-    window.addEventListener('request:created', onCreated);
-    return () => window.removeEventListener('request:created', onCreated);
+    window.addEventListener('request:created', onRequestCreated);
+    return () =>
+      window.removeEventListener('request:created', onRequestCreated);
   }, [fetchRequests]);
 
-  const filteredRequests = useMemo(() => {
-    return requests.filter((r) => r.status === activeReq);
-  }, [requests, activeReq]);
+  const completeOrder = async (orderId) => {
+    try {
+      const res = await postOrderComplete(orderId);
+      await fetchOrders();
+    } catch (err) {
+      alert('처리에 실패했습니다. 다시 시도해주세요.');
+      console.error(err);
+    }
+  };
+
+  const cancelOrder = async (orderId) => {
+    try {
+      const res = await postOrderCancel(orderId);
+      await fetchOrders();
+    } catch (err) {
+      alert('처리에 실패했습니다. 다시 시도해주세요.');
+      console.error(err);
+    }
+  };
 
   const completeRequest = async (requestId) => {
     try {
@@ -165,6 +85,10 @@ const OrderManagementPage = () => {
       console.error(err);
     }
   };
+
+  const filteredRequests = useMemo(() => {
+    return requests.filter((r) => r.status === activeReq);
+  }, [requests, activeReq]);
 
   return (
     <>
@@ -203,7 +127,14 @@ const OrderManagementPage = () => {
                 : '취소된 주문이 없습니다.'}
           </EmptyMessage>
         ) : (
-          orders.map((order) => <OrderCard key={order.orderId} order={order} />)
+          orders.map((order) => (
+            <OrderCard
+              key={order.orderId}
+              order={order}
+              onComplete={completeOrder}
+              onCancel={cancelOrder}
+            />
+          ))
         )}
       </OrderContainer>
       <OrderContainer>

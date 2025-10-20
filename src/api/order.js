@@ -20,9 +20,11 @@ export const postOrderComplete = async (orderId) => {
   }
 };
 
-export const getRequests = async () => {
+export const getRequests = async (storeId) => {
   try {
-    const res = await authClient.get(`/order/api/merchant/orders/requests`);
+    const res = await authClient.get(
+      `/order/api/merchant/orders/requests?storeId=${storeId}`
+    );
     return res.data.data;
   } catch (err) {
     throw err;
@@ -40,12 +42,16 @@ export const postRequestComplete = async (requestId) => {
   }
 };
 
-export const postOrderCancle = async (paymentKey, data) => {
+export const postOrderCancel = async (orderId) => {
   try {
+    const data = {
+      cancelReason: '취소 사유',
+    };
     const res = await authClient.post(
-      `/order/v1/payments/${paymentKey}/cancel`,
+      `/order/v1/payments/order/${orderId}/cancel`,
       data
     );
+    console.log(res);
     return res.data;
   } catch (err) {
     throw err;

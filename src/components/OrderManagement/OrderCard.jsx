@@ -7,16 +7,9 @@ import ConfirmModal from './ConfirmModal';
 import { reg14, reg24, bold24, bold36 } from '../../styles/font';
 import { formatDateTime } from '../../utils/formatTime';
 
-const OrderCard = ({ order }) => {
-  const [isNew, setIsNew] = useState(false);
+const OrderCard = ({ order, onComplete, onCancel }) => {
   const [showCompleteModal, setShowCompleteModal] = useState(false);
   const [showCancelModal, setShowCancelModal] = useState(false);
-
-  const handleCardClick = () => {
-    if (order.status === 'PENDING' && isNew) {
-      setIsNew(false);
-    }
-  };
 
   // 완료 버튼 클릭 시 모달 열기
   const handleCompleteClick = () => {
@@ -28,14 +21,22 @@ const OrderCard = ({ order }) => {
     setShowCancelModal(true);
   };
 
-  const handleConfirmComplete = () => {
-    setShowCompleteModal(false);
-    // 완료 api 호출
+  const handleConfirmComplete = async () => {
+    try {
+      onComplete(order.orderId);
+      setShowCompleteModal(false);
+    } catch (err) {
+      console.error(err);
+    }
   };
 
-  const handleConfirmCancel = () => {
-    setShowCancelModal(false);
-    // 취소 api 호출
+  const handleConfirmCancel = async () => {
+    try {
+      onCancel(order.orderId);
+      setShowCancelModal(false);
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   // 요청사항이 있는지 확인
@@ -43,11 +44,7 @@ const OrderCard = ({ order }) => {
 
   return (
     <>
-      <CardWrapper
-        status={order.status}
-        isNew={isNew}
-        onClick={handleCardClick}
-      >
+      <CardWrapper status={order.status}>
         {/* 상단: 주문 시간과 주문 번호 */}
         <CardHeader>
           <Left>
@@ -56,7 +53,7 @@ const OrderCard = ({ order }) => {
           </Left>
           <Right>
             <OrderTitle>주문번호</OrderTitle>
-            <OrderNumber>{order.orderId.substr(0, 1)}</OrderNumber>
+            <OrderNumber>{order.orderId.split('-')[0]}</OrderNumber>
           </Right>
         </CardHeader>
 
@@ -111,19 +108,8 @@ const CardWrapper = styled.div`
 
   background: var(--white);
   border-radius: 1.25rem;
-  border: 2px solid
-    ${(props) => {
-      if (props.status === 'PENDING' && props.isNew) return 'var(--yellow)';
-      if (props.status === 'PENDING' && !props.isNew) return 'var(--secondary)';
-      return 'var(--secondary)';
-    }};
-  box-shadow: ${(props) => {
-    if (props.status === 'PENDING' && !props.isNew)
-      return '0 4px 8px 0 rgba(252, 201, 0, 0.20)';
-    if (props.status === 'PENDING' && props.isNew)
-      return '0 4px 8px 0 rgba(130, 152, 255, 0.20)';
-    return '0 4px 8px 0 rgba(130, 152, 255, 0.20)';
-  }};
+  border: 2px solid var(--secondary);
+  box-shadow: 0 4px 8px 0 rgba(130, 152, 255, 0.2);
   cursor: ${(props) => (props.status === 'PENDING' ? 'pointer' : 'default')};
 `;
 
