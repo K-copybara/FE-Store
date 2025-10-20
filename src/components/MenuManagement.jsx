@@ -219,7 +219,7 @@ const handleToggleOutOfStock = async (menuId) => {
   }, []);
 
   
-  if (loading) return <Container>로딩중...</Container>;
+  if (loading) return <Container></Container>;
   if (error) return <Container>에러 발생: {error.message}</Container>;
 
   return (
@@ -245,7 +245,7 @@ const handleToggleOutOfStock = async (menuId) => {
               <MenuContent>
                 {/* 카테고리 */}
                 <CategoryTag>
-                  {detail?.category?.categoryName || '로딩중...'}
+                  {detail?.category?.categoryName}
                 </CategoryTag>
 
                 {/* 메뉴 이미지 */}
@@ -267,7 +267,7 @@ const handleToggleOutOfStock = async (menuId) => {
                 {/* 메뉴 상세 정보 */}
                 <MenuInfo>
                   <MenuName>{menu.name}</MenuName>
-                  <MenuDescription>{detail?.description || menu.menuInfo}</MenuDescription>
+                  <MenuDescription>{menu.menuInfo}</MenuDescription>
                 </MenuInfo>
 
                 {/* 가격 */}

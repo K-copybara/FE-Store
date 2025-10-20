@@ -340,7 +340,7 @@ const handleFinalSubmit = async () => {
   }
 };
 
-  if (loading) return <FormContainer>로딩중...</FormContainer>;
+  if (loading) return <FormContainer></FormContainer>;
   if (error) return <FormContainer>에러 발생: {error.message}</FormContainer>;
 
   // 1단계 렌더링 (타이틀 편집/등록 구분)

@@ -321,7 +321,7 @@ console.log('📁 [EditCategory] 렌더링, refreshKey:', refreshKey);
 
 
 
-  if (loading) return <Container>로딩중...</Container>;
+  if (loading) return <Container></Container>;
   if (error) return <Container>에러 발생: {error.message}</Container>;
   return (
     <>
