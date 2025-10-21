@@ -1,6 +1,5 @@
 import styled from 'styled-components';
 import { useState } from 'react';
-import Sidebar from '../../components/Sidebar';
 import OrderCard from '../../components/OrderCard';
 import RequestCard from '../../components/RequestCard';
 

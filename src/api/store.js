@@ -3,7 +3,7 @@ import { authClient } from './client';
 //상점 정보 조회
 export const getStoreInfo = async () => {
   try {
-    const res = await authClient.get(`/shop/api/merchant/store/me`);
+    const res = await authClient.get(`api/merchant/store/me`);
     return res.data.data;
   } catch (err) {
     throw err;
@@ -13,7 +13,7 @@ export const getStoreInfo = async () => {
 //상점 정보 수정:공지
 export const patchStoreNotice = async (data) => {
   try {
-    const res = await authClient.patch(`/shop/api/merchant/store/notice`, data);
+    const res = await authClient.patch(`api/merchant/store/notice`, data);
     return res.data;
   } catch (err) {
     throw err;
@@ -23,7 +23,7 @@ export const patchStoreNotice = async (data) => {
 //상점 정보 수정:영업시간
 export const patchStoreHours = async (data) => {
   try {
-    const res = await authClient.patch(`/shop/api/merchant/store/hours`, data);
+    const res = await authClient.patch(`api/merchant/store/hours`, data);
     return res.data;
   } catch (err) {
     throw err;
@@ -33,7 +33,7 @@ export const patchStoreHours = async (data) => {
 //메뉴 조회
 export const getMenuInfo = async () => {
   try {
-    const res = await authClient.get(`/shop/api/merchant/store/menu`);
+    const res = await authClient.get(`api/merchant/store/menu`);
     return res.data.data;
   } catch (err) {
     throw err;
@@ -43,7 +43,7 @@ export const getMenuInfo = async () => {
 //메뉴 상세 조회
 export const getMenuDetail = async (menuId) => {
   try {
-    const res = await authClient.get(`/shop/api/merchant/store/menu/${menuId}`);
+    const res = await authClient.get(`api/merchant/store/menu/${menuId}`);
     return res.data.data;
   } catch (err) {
     throw err;
@@ -66,7 +66,7 @@ export const postMenuInfo = async (data, imgFile) => {
     }
 
     const res = await authClient.post(
-      `/shop/api/merchant/store/menu`,
+      `api/merchant/store/menu`,
       formData,
       {
         headers: {
@@ -94,7 +94,7 @@ export const patchMenuInfo = async (menuId, data, imgFile) => {
     }
 
     const res = await authClient.patch(
-      `/shop/api/merchant/store/menu/${menuId}`,
+      `api/merchant/store/menu/${menuId}`,
       formData,
       {
         headers: {
@@ -112,7 +112,7 @@ export const patchMenuInfo = async (menuId, data, imgFile) => {
 export const deleteMenu = async (menuId) => {
   try {
     const res = await authClient.delete(
-      `/shop/api/merchant/store/menu/${menuId}`
+      `api/merchant/store/menu/${menuId}`
     );
     return res.data;
   } catch (err) {
@@ -121,10 +121,10 @@ export const deleteMenu = async (menuId) => {
 };
 
 //일시 품절 설정
-export const postSoldout = async (menuId) => {
+export const patchSoldout = async (menuId) => {
   try {
-    const res = await authClient.post(
-      `/shop/api/merchant/store/menu/${menuId}/soldout`
+    const res = await authClient.patch(
+      `api/merchant/store/menu/${menuId}/soldout`
     );
     return res.data;
   } catch (err) {
@@ -135,7 +135,7 @@ export const postSoldout = async (menuId) => {
 //카테고리 조회
 export const getCategories = async () => {
   try {
-    const res = await authClient.get(`/shop/api/merchant/store/category`);
+    const res = await authClient.get(`api/merchant/store/category`);
     return res.data.data;
   } catch (err) {
     throw err;
@@ -146,7 +146,7 @@ export const getCategories = async () => {
 export const postCategory = async (data) => {
   try {
     const res = await authClient.post(
-      `/shop/api/merchant/store/category`,
+      `api/merchant/store/category`,
       data
     );
     return res.data.data;
@@ -159,7 +159,7 @@ export const postCategory = async (data) => {
 export const deleteCategory = async (catId) => {
   try {
     const res = await authClient.delete(
-      `/shop/api/merchant/store/category/${catId}`
+      `api/merchant/store/category/${catId}`
     );
     return res.data;
   } catch (err) {
@@ -171,7 +171,7 @@ export const deleteCategory = async (catId) => {
 export const patchCategoryOrder = async (data) => {
   try {
     const res = await authClient.patch(
-      `/shop/api/merchant/store/category/order`,
+      `api/merchant/store/category/order`,
       data
     );
     return res.data.data;

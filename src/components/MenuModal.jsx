@@ -1,6 +1,6 @@
 // components/MenuModal.jsx
 import styled from 'styled-components';
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect} from 'react';
 import { body_small, bold18, reg24, reg18, reg14 } from '../styles/font';
 
 import ImageIcon from '../assets/icons/MenuModal/image-icon.svg?react';
@@ -8,21 +8,12 @@ import MenuPlusIcon from '../assets/icons/MenuModal/menuplus-icon.svg?react';
 import ImageRemoveIcon from '../assets/icons/MenuModal/imageremove-icon.svg?react';
 import AllergyRemoveIcon from '../assets/icons/MenuModal/allergyremove-icon.svg?react';
 
-const MenuModal = ({ onClose, editingMenuId = null }) => { 
-
-  //메뉴등록 (더미 함수로 변경)
-  const createMenu = async (menuData) => {
-    console.log('🍽️ 메뉴 등록 요청:', menuData);
-    
-    // 더미 응답 반환
-    return {
-      success: true,
-      data: { menuId: Date.now() } // 더미 메뉴 ID
-    };
-  };
+import { postMenuInfo, patchMenuInfo, getMenuDetail, getCategories } from '../api/store';
+const MenuModal = ({ onClose, editingMenuId = null, onSuccess }) => { 
 
   // 편집 모드 확인
   const isEditMode = !!editingMenuId;
+  const [originalImageUrl, setOriginalImageUrl] = useState(null);
 
   // 통합된 폼 데이터 상태
   const [formData, setFormData] = useState({
@@ -45,94 +36,121 @@ const MenuModal = ({ onClose, editingMenuId = null }) => {
   const [uploadedImage, setUploadedImage] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const [categories, setCategories] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // 이미지 삭제 여부 추적 (편집 모드 전용)
+  const [imageRemoved, setImageRemoved] = useState(false);
+
+  
+  const [menuDataLoaded, setMenuDataLoaded] = useState(false);
+
   const fileInputRef = useRef(null);
 
-  // useStores 훅 대신 더미 함수들로 대체
-  const getCategories = () => {
-    console.log('📋 카테고리 목록 조회');
-    return [
-      { categoryId: 1, name: '신메뉴' },
-      { categoryId: 2, name: '인기메뉴' },
-      { categoryId: 3, name: '음료' }
-    ];
-  };
-
-  const uploadMenuImage = async (menuId, imageFile) => {
-    console.log('📸 이미지 업로드 요청:', { menuId, imageFile });
-    return { success: true };
-  };
-
-  const updateMenu = async (menuId, updateData) => {
-    console.log('✏️ 메뉴 수정 요청:', { menuId, updateData });
-    return { success: true };
-  };
-
-  const getMenuById = (menuId) => {
-    console.log('🔍 메뉴 조회 요청:', menuId);
-    // 더미 메뉴 데이터 반환
-    return {
-      categoryId: 1,
-      name: '더미 메뉴',
-      price: 5000,
-      description: '더미 설명',
-      image: 'https://via.placeholder.com/300x300',
-      spicyLevel: 2,
-      allergies: ['견과류'],
-      extraInfo: '더미 추가 정보'
+  // 카테고리 목록 불러오기
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {    
+        const categoryData = await getCategories();
+        console.log('카테고리 조회 성공:', categoryData);
+        
+        setCategories(categoryData);
+      } catch (error) {
+        console.error('카테고리 목록 조회 실패:', error);
+        
+    
+        setCategories([]);
+      } finally {
+        setLoading(false);
+      }
     };
-  };
+
+    fetchCategories();
+  }, []); 
 
   const getCategoryById = (categoryId) => {
-    console.log('🏷️ 카테고리 조회 요청:', categoryId);
-    return { categoryId: 1, name: '신메뉴' };
+    return categories.find(cat => cat.categoryId === categoryId);
   };
 
-  const categories = getCategories();
 
   useEffect(() => {
-    if (isEditMode && editingMenuId) {
-      console.log('✏️ 편집 모드로 모달 열림. 메뉴 ID:', editingMenuId);
-      
-      const menuData = getMenuById(editingMenuId);
-      console.log('📋 기존 메뉴 데이터:', menuData);
-      
-      if (menuData) {
-        // 기존 데이터로 폼 초기화
-        setFormData({
-          categoryId: menuData.categoryId,
-          name: menuData.name,
-          price: menuData.price.toString(),
-          description: menuData.description || '',
-          image: menuData.image ? 'existing' : null,
-          spicyLevel: menuData.spicyLevel || 0,
-          allergies: menuData.allergies || [],
-          extraInfo: menuData.extraInfo || ''
-        });
-
-        // 카테고리 UI 상태 초기화
-        const category = getCategoryById(menuData.categoryId);
-        if (category) {
-          setSelectedCategory(category.name);
-        }
-
-        // 기존 이미지 설정
-        if (menuData.image) {
-          setUploadedImage({
-            id: 'existing-' + editingMenuId,
-            url: menuData.image,
-            name: 'existing-image',
-            isExisting: true
-          });
-        }
-
-        console.log('✅ 편집 데이터 로드 완료');
-      }
+    // 이미 로드했으면 다시 로드하지 않음
+    if (menuDataLoaded) {
+      console.log('⚠️ 이미 메뉴 데이터 로드됨. 스킵');
+      return;
     }
-  }, [isEditMode, editingMenuId]);
+
+      // 카테고리가 로드된 후에만 메뉴 데이터 로드
+      if (isEditMode && editingMenuId && !loading) {
+        const fetchMenuData = async () => {
+          try {
+            setLoading(true);
+            console.log('✏️ 편집 모드로 모달 열림. 메뉴 ID:', editingMenuId);
+            
+            const menuData = await getMenuDetail(editingMenuId);
+            console.log('📋 기존 메뉴 데이터:', menuData);
+            
+            if (menuData) {
+              // 기존 데이터로 폼 초기화
+              setFormData({
+                categoryId: menuData.category?.categoryId,
+                name: menuData.menuName,
+                price: menuData.menuPrice,
+                description: menuData.menuInfo || '',
+                image: null, 
+                spicyLevel: menuData.spicyLevel || 0,
+                allergies: menuData.allergies || [],
+                extraInfo: menuData.extraInfo || ''
+              });
+
+              
+              // 카테고리 UI 상태 초기화
+              const category = getCategoryById(menuData.category?.categoryId);
+              if (category) {
+                setSelectedCategory(category.name);
+                console.log('✅ 카테고리 설정 완료:', category.name);
+              } else {
+                console.warn('⚠️ 해당 카테고리를 찾을 수 없습니다:', menuData.category?.categoryId);
+              }
+
+              setOriginalImageUrl(menuData.menuPicture || null); 
+              console.log('이미지', originalImageUrl);
+              // 기존 이미지 설정
+              if (menuData.menuPicture) {
+                setUploadedImage({
+                  id: 'existing-' + editingMenuId,
+                  url: menuData.menuPicture,
+                  name: 'existing-image',
+                  isExisting: true
+                });
+                setImageRemoved(false);
+
+              } else {
+                setUploadedImage(null);
+                setImageRemoved(false);
+              }
+
+              setMenuDataLoaded(true);
+              console.log('✅ 편집 데이터 로드 완료');
+            }
+          } catch (error) {
+            setError(error);
+            console.error('❌ 메뉴 데이터 조회 실패:', error);
+            alert('메뉴 정보를 불러오는데 실패했습니다.');
+            onClose();
+          } finally {
+            setLoading(false);
+          }
+        };
+
+      fetchMenuData();
+    }
+  }, [isEditMode, editingMenuId, categories.length, menuDataLoaded]);
 
   // 공통 데이터 업데이트 함수
   const updateFormData = (field, value) => {
-    console.log('🔄 폼 데이터 업데이트:', { field, value });
+    console.log('폼 데이터 업데이트:', { field, value });
     setFormData(prev => ({
       ...prev,
       [field]: value
@@ -154,30 +172,23 @@ const MenuModal = ({ onClose, editingMenuId = null }) => {
       size: file.size,
       type: file.type
     });
-    
-    if (file.type.startsWith('image/')) {
       console.log('✅ 이미지 파일 확인됨');
       
       const reader = new FileReader();
       reader.onload = (e) => {
-        const imageData = {
+        setUploadedImage({
           id: Date.now() + Math.random(),
           file,
           url: e.target.result,
-          name: file.name
-        };
+          name: file.name,
+          isExisting: false
+        });
+        updateFormData('image', file);  // ⬅️ 새 파일만 저장
+        setImageRemoved(false);   
         
-        setUploadedImage(imageData);
-        updateFormData('image', file);
-        console.log('🔄 이미지 상태 업데이트 완료');
-      };
-      
+      };   
       reader.readAsDataURL(file);
-    } else {
-      alert('이미지 파일을 선택해주세요.');
-    }
-    
-    event.target.value = '';
+      event.target.value = '';
   };
 
   const handleAddImageClick = () => {
@@ -186,10 +197,19 @@ const MenuModal = ({ onClose, editingMenuId = null }) => {
   };
 
   // 미리보기 이미지 제거
+  // 삭제
   const handleRemoveImage = () => {
-    console.log('🗑️ 이미지 제거');
+    // 편집 모드: 삭제 = removeImage=true, UI는 빈 상태
+    if (isEditMode) {
+      setUploadedImage(null);        // ⬅️ 업로드 아이콘 보이도록
+      updateFormData('image', null); // ⬅️ 새 파일 없음
+      setImageRemoved(true);         // ⬅️ 삭제 의사 표시
+      return;
+    }
+    // 등록 모드
     setUploadedImage(null);
     updateFormData('image', null);
+    setImageRemoved(false);
   };
 
   const handleCategorySelect = (category) => {
@@ -252,7 +272,8 @@ const MenuModal = ({ onClose, editingMenuId = null }) => {
       return;
     }
     
-    if (!formData.image) {
+    // 이미지 필수 검사 (등록 모드일 때만)
+    if (!isEditMode && !formData.image) {
       alert('이미지를 등록해주세요.');
       return;
     }
@@ -263,123 +284,64 @@ const MenuModal = ({ onClose, editingMenuId = null }) => {
       name: formData.name,
       price: formData.price,
       description: formData.description,
-      hasImage: !!formData.image || !!uploadedImage
+      hasImage: !!formData.image,
+      hasUploadedImage: !!uploadedImage,
+      imageRemoved
     });
     
     setCurrentStep(2);
   };
 
-  // 최종 제출 (등록/편집 모드 구분)
-  const handleFinalSubmit = async () => {
-    console.log('🚀 최종 제출 시작');
-    
-    // 2단계 유효성 검사
-    if (!formData.extraInfo.trim()) {
-      alert('추가 정보를 입력해주세요.');
-      return;
-    }
+const handleFinalSubmit = async () => {
+  if (!formData.extraInfo.trim()) {
+    alert('추가 정보를 입력해주세요.');
+    return;
+  }
+  setIsSubmitting(true);
 
-    setIsSubmitting(true);
+  try {
+    const menuData = {
+      categoryId: formData.categoryId,
+      name: formData.name,
+      price: parseInt(formData.price),
+      description: formData.description,
+      spicyLevel: formData.spicyLevel,
+      allergies: formData.allergies,
+      extraInfo: formData.extraInfo
+    };
 
-    try {
-      console.log('=== 최종 제출 시작 ===');
-      console.log('편집 모드:', isEditMode);
-
-      if (isEditMode) {
-        // 편집 모드 - 메뉴 수정
-        console.log('📤 메뉴 수정 API 호출');
-        
-        const updateData = {
-          categoryId: formData.categoryId,
-          name: formData.name,
-          price: parseInt(formData.price),
-          description: formData.description,
-          spicyLevel: formData.spicyLevel,
-          allergies: formData.allergies,
-          extraInfo: formData.extraInfo
-        };
-
-        console.log('✏️ 수정할 데이터:', updateData);
-
-        const result = await updateMenu(editingMenuId, updateData);
-
-        if (!result.success) {
-          throw new Error(result.error || '메뉴 수정에 실패했습니다.');
-        }
-
-        console.log('✅ 메뉴 정보 수정 완료');
-
-        // 새 이미지가 있으면 별도 업로드
-        if (formData.image && formData.image !== 'existing') {
-          console.log('📤 새 이미지 업로드');
-          
-          const imageResult = await uploadMenuImage(editingMenuId, formData.image);
-          
-          if (!imageResult.success) {
-            console.warn('⚠️ 이미지 업로드 실패:', imageResult.error);
-            alert('메뉴는 수정되었지만 이미지 업로드에 실패했습니다.');
-          } else {
-            console.log('✅ 이미지 업로드 완료');
-          }
-        }
-
-        console.log('🎉 메뉴 수정 프로세스 완료!');
-        alert('메뉴가 성공적으로 수정되었습니다!');
-        onClose();
-
+    if (isEditMode) {
+      // 🔎 규칙에 맞춰 removeImage 결정
+      if (!formData.image) {
+        if (imageRemoved) {
+          menuData.removeImage = true; // ⬅️ 이미지 삭제
+        } // else: 유지(필드 넣지 않음)
       } else {
-        // 등록 모드
-        console.log('📤 메뉴 등록 API 호출');
-        
-        const menuData = {
-          categoryId: formData.categoryId,
-          name: formData.name,
-          price: parseInt(formData.price),
-          description: formData.description,
-          spicyLevel: formData.spicyLevel,
-          allergies: formData.allergies,
-          extraInfo: formData.extraInfo
-        };
-
-        console.log('🍽️ 등록할 메뉴 데이터:', menuData);
-
-        const menuResult = await createMenu(menuData);
-
-        if (!menuResult.success) {
-          throw new Error(menuResult.error || '메뉴 등록에 실패했습니다.');
-        }
-
-        console.log('✅ 메뉴 정보 등록 완료:', menuResult.data.menuId);
-
-        // 이미지가 있으면 별도로 업로드
-        if (formData.image) {
-          console.log('📤 이미지 업로드');
-          
-          const imageResult = await uploadMenuImage(
-            menuResult.data.menuId, 
-            formData.image
-          );
-
-          if (!imageResult.success) {
-            console.warn('⚠️ 이미지 업로드 실패:', imageResult.error);
-            alert('메뉴는 등록되었지만 이미지 업로드에 실패했습니다.');
-          } else {
-            console.log('✅ 이미지 업로드 완료');
-          }
-        }
-
-        console.log('🎉 메뉴 등록 프로세스 완료!');
-        alert('메뉴가 성공적으로 등록되었습니다!');
-        onClose();
+        // 새 파일 업로드하는 경우: removeImage = false (넣지 않아도 백엔드에서 false로 해석)
       }
-      
-    } catch (error) {
-      console.error('❌ 메뉴 처리 실패:', error);
-      alert(`메뉴 ${isEditMode ? '수정' : '등록'}에 실패했습니다: ` + error.message);
-    } finally {
-      setIsSubmitting(false);
+
+      await patchMenuInfo(editingMenuId, menuData, formData.image || null);
+      if (onSuccess) await onSuccess();
+      alert('메뉴가 성공적으로 수정되었습니다!');
+      onClose();
+    } else {
+      // 등록 모드: 이미지 파일 필수(기존 로직 유지)
+      await postMenuInfo(menuData, formData.image);
+      if (onSuccess) await onSuccess();
+      alert('메뉴가 성공적으로 등록되었습니다!');
+      onClose();
     }
-  };
+  } catch (error) {
+    setError(error);
+    console.error('❌ 메뉴 처리 실패:', error);
+    alert('메뉴 처리에 실패했습니다.');
+  } finally {
+    setIsSubmitting(false);
+  }
+};
+
+  if (loading) return <FormContainer></FormContainer>;
+  if (error) return <FormContainer>에러 발생: {error.message}</FormContainer>;
 
   // 1단계 렌더링 (타이틀 편집/등록 구분)
   const renderStep1 = () => (
@@ -469,18 +431,20 @@ const MenuModal = ({ onClose, editingMenuId = null }) => {
             onChange={handleFileUpload}
           />
 
-          {uploadedImage ? (
-            <ImagePreview>
-              <PreviewImage src={uploadedImage.url} alt={uploadedImage.name} />
-              <RemoveImageButton onClick={handleRemoveImage}>
-                <ImageRemoveIcon />
-              </RemoveImageButton>
-            </ImagePreview>
-          ) : (
-            <ImageUploadArea onClick={handleAddImageClick}>
-                <ImageIcon />
-            </ImageUploadArea>
-          )}
+      {uploadedImage ? (
+        <ImagePreview>
+        <PreviewImage src={uploadedImage.url} alt={uploadedImage.name} />
+        {!uploadedImage.isDefault && (
+          <RemoveImageButton onClick={handleRemoveImage}>
+          <ImageRemoveIcon />
+          </RemoveImageButton>
+        )}
+        </ImagePreview>
+      ) : (
+        <ImageUploadArea onClick={handleAddImageClick}>
+          <ImageIcon />
+        </ImageUploadArea>
+      )}
         </RightSection>
       </FormContainer>
 
