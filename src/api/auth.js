@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { client } from './client';
+import { authClient, client } from './client';
 
 export const postLogin = async (data) => {
   try {
@@ -23,7 +23,7 @@ export const postSignout = async () => {
 
 export const postLogout = async () => {
   try {
-    const res = await client.post(`/api/merchant/auth/logout`);
+    const res = await authClient.post(`/api/merchant/auth/logout`);
     return res.data.data;
   } catch (err) {
     throw err;
@@ -45,7 +45,7 @@ export const getReissueToken = async () => {
         headers: {
           Authorization: `Bearer ${token.refreshToken}`, // token. 추가
         },
-        //withCredentials: true,
+        withCredentials: true,
       }
     );
     return res.data.data;

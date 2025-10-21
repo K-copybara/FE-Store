@@ -23,8 +23,6 @@ const Sidebar = () => {
     setShowSalesDropdown(!showSalesDropdown);
   };
 
-
-
   useEffect(() => {
     const fetchStoreInfo = async () => {
       setLoading(true);
@@ -39,16 +37,15 @@ const Sidebar = () => {
         setLoading(false);
       }
     };
-  
-      fetchStoreInfo();
-    }, []);
 
-    
+    fetchStoreInfo();
+  }, []);
+
   const handleLogout = async () => {
     if (confirm('로그아웃 하시겠습니까?')) {
       try {
-        window.localStorage.removeItem('token');
         const res = await postLogout();
+        window.localStorage.removeItem('token');
       } catch (err) {
         console.error(err);
       } finally {
