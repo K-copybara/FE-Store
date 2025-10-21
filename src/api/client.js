@@ -6,7 +6,7 @@ export const client = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
-  //withCredentials: true,
+  withCredentials: true,
 });
 
 export const authClient = axios.create({
@@ -14,7 +14,7 @@ export const authClient = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
-  //withCredentials: true,
+  withCredentials: true,
 });
 
 authClient.interceptors.request.use(
