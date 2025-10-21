@@ -2,14 +2,14 @@ import styled from 'styled-components';
 import backgroundUrl from '../../assets/background.svg';
 import LOGO from '../../assets/logo.svg?react';
 import { useState } from 'react';
-import {  useNavigate } from 'react-router-dom';
-import {useUserStore} from '../../store/useUserStore';
+import { useNavigate } from 'react-router-dom';
+import { useUserStore } from '../../store/useUserStore';
 import { postLogin } from '../../api/auth';
 
 const LoginPage = () => {
   const [login, setLogin] = useState({ email: '', password: '' });
   const navigate = useNavigate();
-  
+
   const onChangeLogin = (e) => {
     const { name, value } = e.target;
     setLogin({ ...login, [name]: value });
@@ -21,14 +21,7 @@ const LoginPage = () => {
     if (email?.trim() && password?.trim()) {
       try {
         const res = await postLogin(login);
-        // const res = {
-        //   grantType: 'Bearer',
-        //   accessToken:
-        //     'eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJzdG9yZTAxQHRlc3QuY29tIiwiYXV0aCI6IlJPTEVfU1RPUkUiLCJleHAiOjE3NTg4MTg4MTJ9.4FheOIvS2kqz_RAG2fqSsJK1vqA4FJBpB3DXP8hr3Kdg_BIxKjVIsPUgHungJQfLfUgysT6oUFJzNZ-QJmPHCw',
-        //   refreshToken:
-        //     'eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJzdG9yZTAxQHRlc3QuY29tIiwiYXV0aCI6IlJPTEVfU1RPUkUiLCJleHAiOjE3NTkzMzcyMTIsImlzUmVmcmVzaFRva2VuIjp0cnVlfQ.TxTblOBulVZRe6f9Dcw9Lm63SDW8lKI_YlQqs56wSBoAu42Y-hQfscdT0-ji_dMobGgaoDjngWp10hIxhkToig',
-        //   accessTokenExpiresIn: 1758818812244,
-        // };
+
         const token = {
           accessToken: res.accessToken,
           refreshToken: res.refreshToken,
@@ -40,6 +33,7 @@ const LoginPage = () => {
         loadStoreId();
         navigate('/', { replace: true });
       } catch (err) {
+        alert('로그인에 실패했습니다. 이메일과 비밀번호를 다시 확인해주세요.');
         console.error(err);
       }
     }

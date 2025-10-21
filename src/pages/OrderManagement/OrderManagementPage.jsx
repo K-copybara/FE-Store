@@ -1,33 +1,94 @@
 import styled from 'styled-components';
-import { useState } from 'react';
-import OrderCard from '../../components/OrderCard';
-import RequestCard from '../../components/RequestCard';
-
-import {bold36, bold24 } from '../../styles/font';
-
-import { useOrders } from '../../hooks/useOrders';
-import { useRequests } from '../../hooks/useRequests';
-
-import DividerIcon from '../../assets/icons/divider-icon.svg?react';
+import { useEffect, useMemo, useState, useCallback } from 'react';
+import OrderCard from '../../components/OrderManagement/OrderCard';
+import RequestCard from '../../components/OrderManagement/RequestCard';
+import { bold36, bold24, reg24 } from '../../styles/font';
+import {
+  getOrders,
+  getRequests,
+  postRequestComplete,
+  postOrderCancel,
+  postOrderComplete,
+} from '../../api/order';
+import { useUserStore } from '../../store/useUserStore';
 
 const OrderManagementPage = () => {
-  const { orders, completeOrder, rejectOrder } = useOrders();
+  const [activeTab, setActiveTab] = useState('PENDING');
+  const [activeReq, setActiveReq] = useState('PENDING');
+  const [orders, setOrders] = useState([]);
+  const [requests, setRequests] = useState([]);
+  const { storeId } = useUserStore();
 
-  const { sortedRequests, completeRequest } = useRequests();
-  const [activeTab, setActiveTab] = useState('processing');
+  // 주문, 요청사항 불러오기
+  const fetchOrders = useCallback(async () => {
+    const res = await getOrders(storeId, activeTab);
+    setOrders(res);
+  }, [storeId, activeTab]);
 
-  // 탭에 따라 주문 필터링
-  const filteredOrders = orders.filter((order) => {
-    if (activeTab === 'processing') {
-      return order.status === 'PENDING';
-    } else {
-      return order.status === 'COMPLETED';
+  useEffect(() => {
+    fetchOrders();
+  }, [fetchOrders]);
+
+  const fetchRequests = useCallback(async () => {
+    const res = await getRequests(storeId);
+    setRequests(res);
+  }, [storeId]);
+
+  useEffect(() => {
+    fetchRequests();
+  }, [fetchRequests]);
+
+  // 알림 수신 시 주문 요청 다시 불러오기
+  useEffect(() => {
+    const onOrderCreated = () => {
+      fetchOrders();
+    };
+    window.addEventListener('order:created', onOrderCreated);
+    return () => window.removeEventListener('order:created', onOrderCreated);
+  }, [fetchOrders]);
+
+  useEffect(() => {
+    const onRequestCreated = () => {
+      fetchRequests();
+    };
+    window.addEventListener('request:created', onRequestCreated);
+    return () =>
+      window.removeEventListener('request:created', onRequestCreated);
+  }, [fetchRequests]);
+
+  const completeOrder = async (orderId) => {
+    try {
+      const res = await postOrderComplete(orderId);
+      await fetchOrders();
+    } catch (err) {
+      alert('처리에 실패했습니다. 다시 시도해주세요.');
+      console.error(err);
     }
-  });
-
-  const handleCompleteOrder = (orderId) => {
-    completeOrder(orderId);
   };
+
+  const cancelOrder = async (orderId) => {
+    try {
+      const res = await postOrderCancel(orderId);
+      await fetchOrders();
+    } catch (err) {
+      alert('처리에 실패했습니다. 다시 시도해주세요.');
+      console.error(err);
+    }
+  };
+
+  const completeRequest = async (requestId) => {
+    try {
+      const res = await postRequestComplete(requestId);
+      await fetchRequests();
+    } catch (err) {
+      alert('처리에 실패했습니다. 다시 시도해주세요.');
+      console.error(err);
+    }
+  };
+
+  const filteredRequests = useMemo(() => {
+    return requests.filter((r) => r.status === activeReq);
+  }, [requests, activeReq]);
 
   return (
     <>
@@ -36,53 +97,81 @@ const OrderManagementPage = () => {
           <OrderTitle>주문</OrderTitle>
           <TabContainer>
             <TabButton
-              active={activeTab === 'processing'}
-              onClick={() => setActiveTab('processing')}
+              active={activeTab === 'PENDING'}
+              onClick={() => setActiveTab('PENDING')}
             >
               처리 중
             </TabButton>
-            <TabDivider>
-              <DividerIcon />
-            </TabDivider>
+            <TabDivider>|</TabDivider>
             <TabButton
-              active={activeTab === 'completed'}
-              onClick={() => setActiveTab('completed')}
+              active={activeTab === 'COMPLETED'}
+              onClick={() => setActiveTab('COMPLETED')}
+            >
+              완료
+            </TabButton>
+            <TabDivider>|</TabDivider>
+            <TabButton
+              active={activeTab === 'CANCELED'}
+              onClick={() => setActiveTab('CANCELED')}
+            >
+              취소
+            </TabButton>
+          </TabContainer>
+        </OrderStatus>
+        {orders.length === 0 ? (
+          <EmptyMessage>
+            {activeTab === 'PENDING'
+              ? '처리 중인 주문이 없습니다.'
+              : activeTab === 'COMPLETED'
+                ? '완료된 주문이 없습니다.'
+                : '취소된 주문이 없습니다.'}
+          </EmptyMessage>
+        ) : (
+          orders.map((order) => (
+            <OrderCard
+              key={order.orderId}
+              order={order}
+              onComplete={completeOrder}
+              onCancel={cancelOrder}
+            />
+          ))
+        )}
+      </OrderContainer>
+      <OrderContainer>
+        <OrderStatus>
+          <OrderTitle>요청</OrderTitle>
+          <TabContainer>
+            <TabButton
+              active={activeReq === 'PENDING'}
+              onClick={() => setActiveReq('PENDING')}
+            >
+              처리 중
+            </TabButton>
+            <TabDivider>|</TabDivider>
+            <TabButton
+              active={activeReq === 'COMPLETED'}
+              onClick={() => setActiveReq('COMPLETED')}
             >
               완료
             </TabButton>
           </TabContainer>
         </OrderStatus>
-        {filteredOrders.length === 0 ? (
+        {filteredRequests.length === 0 ? (
           <EmptyMessage>
-            {activeTab === 'processing'
-              ? '처리 중인 주문이 없습니다.'
-              : '완료된 주문이 없습니다.'}
+            {activeReq === 'PENDING'
+              ? '처리 중인 요청이 없습니다.'
+              : '완료된 요청이 없습니다.'}
           </EmptyMessage>
         ) : (
-          filteredOrders.map((order) => (
-            <OrderCard
-              key={order.orderId}
-              order={order}
-              onAccept={() => handleCompleteOrder(order.orderId)}
-              onReject={() => rejectOrder(order.orderId)}
+          filteredRequests.map((request) => (
+            <RequestCard
+              key={request.requestId}
+              request={request}
+              onComplete={completeRequest}
             />
           ))
         )}
       </OrderContainer>
-      <RequestContainer>
-        <OrderTitle>요청</OrderTitle>
-        {sortedRequests.length === 0 ? (
-          <EmptyMessage>요청사항이 없습니다.</EmptyMessage>
-        ) : (
-          sortedRequests.map((request) => (
-            <RequestCard
-              key={request.requestId}
-              request={request}
-              onComplete={() => completeRequest(request.requestId)}
-            />
-          ))
-        )}
-      </RequestContainer>
     </>
   );
 };
@@ -93,7 +182,7 @@ const OrderContainer = styled.div`
   display: flex;
   padding: 1.25rem 1.5625rem;
   flex-direction: column;
-  align-items: flex-start;
+  align-items: center;
   gap: 1.25rem;
 
   border-radius: 1.25rem;
@@ -102,6 +191,10 @@ const OrderContainer = styled.div`
   height: 100%;
   overflow-y: auto;
   box-sizing: border-box;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
 `;
 
 const OrderStatus = styled.div`
@@ -143,25 +236,10 @@ const TabDivider = styled.span`
 `;
 
 const EmptyMessage = styled.div`
-  ${bold24}
+  ${reg24}
   display: flex;
   justify-content: center;
   align-items: center;
   color: var(--gray500);
   height: 12rem;
-`;
-
-const RequestContainer = styled.div`
-  display: flex;
-  padding: 1.25rem 1.5625rem;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 1.75rem;
-
-  border-radius: 1.25rem;
-  background-color: var(--white);
-  flex: 1;
-  height: 100%;
-  box-sizing: border-box;
-  overflow-y: auto;
 `;
