@@ -3,7 +3,7 @@ import { authClient } from './client';
 //상점 정보 조회
 export const getStoreInfo = async () => {
   try {
-    const res = await authClient.get(`api/merchant/store/me`);
+    const res = await authClient.get(`/api/merchant/store/me`);
     return res.data.data;
   } catch (err) {
     throw err;
@@ -13,7 +13,7 @@ export const getStoreInfo = async () => {
 //상점 정보 수정:공지
 export const patchStoreNotice = async (data) => {
   try {
-    const res = await authClient.patch(`api/merchant/store/notice`, data);
+    const res = await authClient.patch(`/api/merchant/store/notice`, data);
     return res.data;
   } catch (err) {
     throw err;
@@ -23,7 +23,7 @@ export const patchStoreNotice = async (data) => {
 //상점 정보 수정:영업시간
 export const patchStoreHours = async (data) => {
   try {
-    const res = await authClient.patch(`api/merchant/store/hours`, data);
+    const res = await authClient.patch(`/api/merchant/store/hours`, data);
     return res.data;
   } catch (err) {
     throw err;
@@ -33,7 +33,7 @@ export const patchStoreHours = async (data) => {
 //메뉴 조회
 export const getMenuInfo = async () => {
   try {
-    const res = await authClient.get(`api/merchant/store/menu`);
+    const res = await authClient.get(`/api/merchant/store/menu`);
     return res.data.data;
   } catch (err) {
     throw err;
@@ -43,13 +43,12 @@ export const getMenuInfo = async () => {
 //메뉴 상세 조회
 export const getMenuDetail = async (menuId) => {
   try {
-    const res = await authClient.get(`api/merchant/store/menu/${menuId}`);
+    const res = await authClient.get(`/api/merchant/store/menu/${menuId}`);
     return res.data.data;
   } catch (err) {
     throw err;
   }
 };
-
 
 //메뉴 등록
 export const postMenuInfo = async (data, imgFile) => {
@@ -65,15 +64,11 @@ export const postMenuInfo = async (data, imgFile) => {
       formData.append('image', imgFile);
     }
 
-    const res = await authClient.post(
-      `api/merchant/store/menu`,
-      formData,
-      {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      }
-    );
+    const res = await authClient.post(`/api/merchant/store/menu`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
     return res.data;
   } catch (err) {
     throw err;
@@ -94,7 +89,7 @@ export const patchMenuInfo = async (menuId, data, imgFile) => {
     }
 
     const res = await authClient.patch(
-      `api/merchant/store/menu/${menuId}`,
+      `/api/merchant/store/menu/${menuId}`,
       formData,
       {
         headers: {
@@ -111,9 +106,7 @@ export const patchMenuInfo = async (menuId, data, imgFile) => {
 //메뉴 삭제
 export const deleteMenu = async (menuId) => {
   try {
-    const res = await authClient.delete(
-      `api/merchant/store/menu/${menuId}`
-    );
+    const res = await authClient.delete(`/api/merchant/store/menu/${menuId}`);
     return res.data;
   } catch (err) {
     throw err;
@@ -124,7 +117,7 @@ export const deleteMenu = async (menuId) => {
 export const patchSoldout = async (menuId) => {
   try {
     const res = await authClient.patch(
-      `api/merchant/store/menu/${menuId}/soldout`
+      `/api/merchant/store/menu/${menuId}/soldout`
     );
     return res.data;
   } catch (err) {
@@ -135,7 +128,7 @@ export const patchSoldout = async (menuId) => {
 //카테고리 조회
 export const getCategories = async () => {
   try {
-    const res = await authClient.get(`api/merchant/store/category`);
+    const res = await authClient.get(`/api/merchant/store/category`);
     return res.data.data;
   } catch (err) {
     throw err;
@@ -145,10 +138,7 @@ export const getCategories = async () => {
 //카테고리 생성
 export const postCategory = async (data) => {
   try {
-    const res = await authClient.post(
-      `api/merchant/store/category`,
-      data
-    );
+    const res = await authClient.post(`/api/merchant/store/category`, data);
     return res.data.data;
   } catch (err) {
     throw err;
@@ -159,7 +149,7 @@ export const postCategory = async (data) => {
 export const deleteCategory = async (catId) => {
   try {
     const res = await authClient.delete(
-      `api/merchant/store/category/${catId}`
+      `/api/merchant/store/category/${catId}`
     );
     return res.data;
   } catch (err) {
@@ -171,7 +161,7 @@ export const deleteCategory = async (catId) => {
 export const patchCategoryOrder = async (data) => {
   try {
     const res = await authClient.patch(
-      `api/merchant/store/category/order`,
+      `/api/merchant/store/category/order`,
       data
     );
     return res.data.data;
