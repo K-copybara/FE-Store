@@ -1,125 +1,202 @@
 import styled from 'styled-components';
 import { useState, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { useStores } from '../hooks/useStores';
 import MenuModal from './MenuModal';
-import ConfirmModal from './ConfirmModal';
-import { display_large, body_large, body_medium, title_semi } from '../styles/font';
 
-const MenuManagement = ({ title = "메뉴 관리" }) => {
-  const { 
-    getMenus,
-    getMenuDetailById,
-    getCategoryById,
-    updateMenu,
-    deleteMenu
-  } = useStores();
+import { body_large, bold24, bold18, reg18, reg14 } from '../styles/font';
 
-  const menus = getMenus();
+import MenuEditIcon from '../assets/icons/menuedit-icon.svg?react';
+import NoImageIcon from '../assets/icons/MenuManagement/noimage-icon.svg?react';
+
+import {
+  getMenuInfo,
+  deleteMenu,
+  patchSoldout,
+  getMenuDetail,
+} from '../api/store';
+import ConfirmModal from './OrderManagement/ConfirmModal';
+
+const MenuManagement = ({ title = '메뉴 관리', onMenuChange }) => {
+  const [menus, setMenus] = useState([]);
+  const [menuDetails, setMenuDetails] = useState({});
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
   const [showAddModal, setShowAddModal] = useState(false);
-  
+
   //  편집 관련 상태
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingMenuId, setEditingMenuId] = useState(null);
   const [openDropdownId, setOpenDropdownId] = useState(null);
-  
+
   //  삭제 확인 모달 상태 추가
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [menuToDelete, setMenuToDelete] = useState(null);
 
-  
   //  드롭다운 위치 계산을 위한 ref
   const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0 });
   const editButtonRefs = useRef({});
 
-  //  드롭다운 토글
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        //메뉴 목록 가져오기
+        const menuData = await getMenuInfo();
+        console.log('메뉴 목록:', menuData);
+        console.log('첫 번째 메뉴 이미지:', menuData[0]?.imageUrl);
+        setMenus(menuData);
+
+        //각 메뉴의 상세 정보 가져오기
+        const detailsPromises = menuData.map((menu) =>
+          getMenuDetail(menu.menuId)
+            .then((detail) => ({ menuId: menu.menuId, detail }))
+            .catch((err) => {
+              console.error(`메뉴 ${menu.menuId} 상세 조회 실패:`, err);
+              return { menuId: menu.menuId, detail: null };
+            })
+        );
+
+        const detailsArray = await Promise.all(detailsPromises);
+
+        //menuId를 키로 하는 객체로 변환
+        const detailsMap = {};
+        detailsArray.forEach(({ menuId, detail }) => {
+          detailsMap[menuId] = detail;
+        });
+
+        console.log('메뉴 상세 정보:', detailsMap);
+        setMenuDetails(detailsMap);
+      } catch (error) {
+        setError(error);
+        console.error('데이터 조회 실패:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  //메뉴 데이터 새로고침하기
+  const refreshMenus = async () => {
+    try {
+      console.log('🔄 [MenuManagement] refreshMenus 시작');
+      const menuData = await getMenuInfo();
+      console.log('📋 [MenuManagement] 새로 불러온 메뉴 목록:', menuData);
+      setMenus(menuData);
+
+      //상세 정보 가져오기
+      const detailsPromises = menuData.map((menu) =>
+        getMenuDetail(menu.menuId)
+          .then((detail) => ({ menuId: menu.menuId, detail }))
+          .catch(() => ({ menuId: menu.menuId, detail: null }))
+      );
+
+      const detailsArray = await Promise.all(detailsPromises);
+      const detailsMap = {};
+      detailsArray.forEach(({ menuId, detail }) => {
+        detailsMap[menuId] = detail;
+      });
+
+      setMenuDetails(detailsMap);
+    } catch (error) {
+      console.error('데이터 조회 실패:', error);
+    }
+  };
+
+  //드롭다운 토글
   const handleDropdownToggle = (menuId, event) => {
     event.stopPropagation();
-    
+
     if (openDropdownId === menuId) {
       setOpenDropdownId(null);
     } else {
-      //  버튼 위치 계산
+      //버튼 위치 계산
       const buttonElement = editButtonRefs.current[menuId];
       if (buttonElement) {
         const rect = buttonElement.getBoundingClientRect();
         setDropdownPosition({
           top: rect.bottom + window.scrollY + 4,
-          left: rect.right + window.scrollX - 140
+          left: rect.right + window.scrollX - 140,
         });
       }
       setOpenDropdownId(menuId);
     }
   };
 
-  //  메뉴 편집
+  //메뉴 편집
   const handleEditMenu = (menuId) => {
     setEditingMenuId(menuId);
     setShowEditModal(true);
     setOpenDropdownId(null);
+    console.log('메뉴 편집 클릭:', menuId);
   };
 
-  //  일시품절 토글 (SOLD_OUT ↔ ON_SALE)
+  //일시품절 토글 (SOLD_OUT ↔ ON_SALE)
   const handleToggleOutOfStock = async (menuId) => {
     try {
-      const menuDetail = getMenuDetailById(menuId);
-      const currentStatus = menuDetail.status || 'ON_SALE';
-      
-      //  SOLD_OUT ↔ ON_SALE 토글
-      const newStatus = currentStatus === 'ON_SALE' ? 'SOLD_OUT' : 'ON_SALE';
-      
-      console.log(`상태 변경: ${currentStatus} → ${newStatus}`);
-      
-      const updateData = {
-        ...menuDetail,
-        status: newStatus
-      };
+      const before = menuDetails[menuId]?.menuStatus; // 'ON_SALE' | 'SOLD_OUT'
+      const optimistic = before === 'SOLD_OUT' ? 'ON_SALE' : 'SOLD_OUT';
 
-      const result = await updateMenu(menuId, updateData);
-      
-      if (result.success) {
-        console.log(` 메뉴 상태 변경 완료: ${newStatus}`);
-      } else {
-        alert('상태 변경에 실패했습니다.');
-      }
-    } catch (error) {
-      console.error('상태 변경 오류:', error);
-      alert('상태 변경 중 오류가 발생했습니다.');
+      setMenuDetails((prev) => ({
+        ...prev,
+        [menuId]: { ...(prev[menuId] || {}), menuStatus: optimistic },
+      }));
+
+      await patchSoldout(menuId); // 서버 토글
+
+      // 성공 시 드롭다운 닫고 토스트/알림
+      setOpenDropdownId(null);
+    } catch (e) {
+      // 실패 시 롤백 + 에러 알림
+      console.error('일시품절 설정 실패:', e);
+      await refreshMenus(); // 서버 상태로 복구
+      alert('일시품절 설정 변경에 실패했습니다.');
     }
-    setOpenDropdownId(null);
   };
 
   //  메뉴 삭제
   const handleDeleteMenuClick = (menuId) => {
-    const menu = getMenus().find(m => m.menuId === menuId);
-    if (menu) {
-      setMenuToDelete({ id: menuId, name: menu.name });
-      setShowConfirmModal(true);
-      setOpenDropdownId(null);
-    }
+    const menu = menus.find((m) => m.menuId === menuId);
+    setMenuToDelete(menu); //삭제할 메뉴 정보 저장
+    setShowConfirmModal(true); // 확인 모달 표시
+    setOpenDropdownId(null); //드롭다운 닫기
+    console.log('삭제 확인 모달 열림:', menu);
   };
-  //  삭제 확인 시 실제 삭제 실행
+
+  // 삭제 확인 시 실제 삭제 실행
   const handleConfirmDelete = async () => {
     if (!menuToDelete) return;
-    
+
     try {
-      console.log('메뉴 삭제 시작:', menuToDelete);
-      
-      const result = await deleteMenu(menuToDelete.id);
-      
-      if (result.success) {
-        console.log(' 메뉴 삭제 완료');
-        // 성공 메시지는 Provider에서 처리되므로 별도 알림 불필요
-      } else {
-        alert('메뉴 삭제에 실패했습니다: ' + result.error);
-      }
-    } catch (error) {
-      console.error('메뉴 삭제 오류:', error);
-      alert('메뉴 삭제 중 오류가 발생했습니다: ' + error.message);
-    } finally {
-      //  모달 닫기
+      console.log('메뉴 삭제 시작:', menuToDelete.menuId);
+
+      await deleteMenu(menuToDelete.menuId);
+
+      console.log('메뉴 삭제 성공');
+
+      // 모달 닫기
       setShowConfirmModal(false);
       setMenuToDelete(null);
+
+      if (onMenuChange) {
+        onMenuChange();
+      }
+      // 메뉴 목록 새로고침
+      await refreshMenus();
+    } catch (error) {
+      console.error('메뉴 삭제 실패:', error);
+      alert('메뉴 삭제에 실패했습니다.');
+    }
+  };
+
+  // 메뉴 등록/수정 성공 시에도 호출
+  const handleMenuSuccess = async () => {
+    await refreshMenus();
+
+    // 카테고리 새로고침
+    if (onMenuChange) {
+      onMenuChange();
     }
   };
 
@@ -143,6 +220,9 @@ const MenuManagement = ({ title = "메뉴 관리" }) => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  if (loading) return <Container></Container>;
+  if (error) return <Container>에러 발생: {error.message}</Container>;
+
   return (
     <Container onClick={handleOutsideClick}>
       <Header>
@@ -155,49 +235,51 @@ const MenuManagement = ({ title = "메뉴 관리" }) => {
           <EmptyState>등록된 메뉴가 없습니다.</EmptyState>
         ) : (
           menus.map((menu) => {
-            const detail = getMenuDetailById(menu.menuId);
-            const category = detail ? getCategoryById(detail.categoryId) : null;
-            
-            //  SOLD_OUT 상태 확인
-            const isSoldOut = detail?.status === 'SOLD_OUT';
-            
+            const detail = menuDetails[menu.menuId];
+            const isSoldOut = detail?.menuStatus === 'SOLD_OUT';
+
             return (
               <MenuCard key={menu.menuId} $isSoldOut={isSoldOut}>
-                {/*  일시품절 오버레이 */}
+                {/* 일시품절 오버레이 */}
                 {isSoldOut && <OutOfStockOverlay />}
-                
+
                 <MenuContent>
                   {/* 카테고리 */}
-                  <CategoryTag>
-                    {category ? category.name : '알 수 없는 카테고리'}
-                  </CategoryTag>
+                  <CategoryTag>{detail?.category?.categoryName}</CategoryTag>
 
                   {/* 메뉴 이미지 */}
-                  <MenuImage 
-                    src={menu.image}
-                    alt={menu.name}
-                    onError={(e) => {
-                      e.target.src = "src/assets/mandoo.svg";
-                    }}
-                  />
+                  {menu.imageUrl ? (
+                    <MenuImage
+                      src={menu.imageUrl}
+                      alt={menu.name}
+                      onError={(e) => {
+                        e.target.style.display = 'none';
+                      }}
+                    />
+                  ) : (
+                    //이미지 없을 때
+                    <NoMenuImage>
+                      <NoImageIcon />
+                    </NoMenuImage>
+                  )}
 
                   {/* 메뉴 상세 정보 */}
                   <MenuInfo>
                     <MenuName>{menu.name}</MenuName>
-                    <MenuDescription>{detail?.description || menu.menuInfo}</MenuDescription>
+                    <MenuDescription>{menu.menuInfo}</MenuDescription>
                   </MenuInfo>
 
                   {/* 가격 */}
                   <MenuPrice>{menu.price.toLocaleString()}원</MenuPrice>
                 </MenuContent>
 
-                {/*  편집 버튼 */}
-                <EditButton 
-                  ref={(el) => editButtonRefs.current[menu.menuId] = el}
+                {/* 편집 버튼 */}
+                <EditButton
+                  ref={(el) => (editButtonRefs.current[menu.menuId] = el)}
                   onClick={(e) => handleDropdownToggle(menu.menuId, e)}
                   $isActive={openDropdownId === menu.menuId}
                 >
-                  <EditIcon />
+                  <MenuEditIcon />
                 </EditButton>
               </MenuCard>
             );
@@ -206,54 +288,59 @@ const MenuManagement = ({ title = "메뉴 관리" }) => {
       </MenuList>
 
       {/*  Portal을 사용한 드롭다운 메뉴 */}
-      {openDropdownId && createPortal(
-        <DropdownMenuPortal
-          style={{
-            position: 'absolute',
-            top: dropdownPosition.top,
-            left: dropdownPosition.left,
-            zIndex: 99999
-          }}
-          onClick={(e) => e.stopPropagation()}
-        >
-          {/*  메뉴 편집 (항상 표시) */}
-          <DropdownItem onClick={() => handleEditMenu(openDropdownId)}>
-            메뉴 편집
-          </DropdownItem>
-          
-          {/*  일시품절 설정/해제 (상태에 따라 텍스트 변경) */}
-          <DropdownItem onClick={() => handleToggleOutOfStock(openDropdownId)}>
-            {(() => {
-              const detail = getMenuDetailById(openDropdownId);
-              const isSoldOut = detail?.status === 'SOLD_OUT';
-              return isSoldOut ? '일시품절 해제' : '일시품절 설정';
-            })()}
-          </DropdownItem>
-          
-          {/*  메뉴 삭제 (항상 표시) */}
-          <DropdownItem 
-            onClick={() => handleDeleteMenuClick(openDropdownId)}
-            $isDanger={true}
+      {openDropdownId &&
+        createPortal(
+          <DropdownMenuPortal
+            style={{
+              position: 'absolute',
+              top: dropdownPosition.top,
+              left: dropdownPosition.left,
+              zIndex: 99999,
+            }}
+            onClick={(e) => e.stopPropagation()}
           >
-            메뉴 삭제
-          </DropdownItem>
-        </DropdownMenuPortal>,
-        document.body
-      )}
+            {/*  메뉴 편집 */}
+            <DropdownItem onClick={() => handleEditMenu(openDropdownId)}>
+              메뉴 편집
+            </DropdownItem>
+
+            {/*  일시품절 설정/해제 (상태에 따라 텍스트 변경) */}
+            <DropdownItem
+              onClick={() => handleToggleOutOfStock(openDropdownId)}
+            >
+              {menuDetails[openDropdownId]?.menuStatus === 'SOLD_OUT'
+                ? '일시품절 해제'
+                : '일시품절 설정'}
+            </DropdownItem>
+
+            {/*  메뉴 삭제 (항상 표시) */}
+            <DropdownItem
+              onClick={() => handleDeleteMenuClick(openDropdownId)}
+              $isDanger={true}
+            >
+              메뉴 삭제
+            </DropdownItem>
+          </DropdownMenuPortal>,
+          document.body
+        )}
 
       {/*  메뉴 등록 모달 */}
       {showAddModal && (
-        <MenuModal onClose={() => setShowAddModal(false)} />
+        <MenuModal
+          onClose={() => setShowAddModal(false)}
+          onSuccess={handleMenuSuccess}
+        />
       )}
 
       {/*  메뉴 편집 모달 */}
       {showEditModal && editingMenuId && (
-        <MenuModal 
+        <MenuModal
           onClose={() => {
             setShowEditModal(false);
             setEditingMenuId(null);
           }}
           editingMenuId={editingMenuId}
+          onSuccess={handleMenuSuccess}
         />
       )}
       {/*  삭제 확인 모달 */}
@@ -261,7 +348,11 @@ const MenuManagement = ({ title = "메뉴 관리" }) => {
         isOpen={showConfirmModal}
         onClose={handleCancelDelete}
         onConfirm={handleConfirmDelete}
-        message={menuToDelete ? `'${menuToDelete.name}' 메뉴를\n정말로 삭제하시겠습니까?` : ''}
+        message={
+          menuToDelete
+            ? `'${menuToDelete.name}' 메뉴를\n정말로 삭제하시겠습니까?`
+            : ''
+        }
       />
     </Container>
   );
@@ -285,19 +376,19 @@ const Header = styled.div`
 `;
 
 const SectionTitle = styled.h3`
-  ${display_large}
+  ${bold24}
   color: var(--black);
 `;
 
 const AddButton = styled.button`
-  ${body_medium}
-  padding: 0.75rem 1.5rem;
+  ${reg18}
+  padding: 0.5rem 1.5rem;
   background: var(--primary);
   color: var(--white);
   border: none;
-  border-radius: 0.5rem;
+  border-radius: 0.625rem;
   cursor: pointer;
-  
+
   &:hover {
     background: var(--secondary);
   }
@@ -311,7 +402,7 @@ const MenuList = styled.div`
 `;
 
 const EmptyState = styled.div`
-  ${body_large}
+  ${bold24}
   color: var(--gray500);
   text-align: center;
   padding: 3rem;
@@ -328,12 +419,14 @@ const MenuCard = styled.div`
   border: 1px solid var(--third);
   border-radius: 0.625rem;
   background: var(--white);
-  
+
   &:hover {
     border-color: var(--primary);
   }
-  
-  ${props => props.$isSoldOut && `
+
+  ${(props) =>
+    props.$isSoldOut &&
+    `
     opacity: 0.7;
   `}
 `;
@@ -350,7 +443,7 @@ const OutOfStockOverlay = styled.div`
 `;
 
 const CategoryTag = styled.div`
-  ${title_semi}
+  ${bold18}
   color: var(--black);
   text-align: center;
   padding: 0.5rem 1rem;
@@ -382,6 +475,22 @@ const MenuImage = styled.img`
   flex-shrink: 0;
 `;
 
+const NoMenuImage = styled.div`
+  height: 100%;
+  aspect-ratio: 1;
+  justify-content: center;
+  display: flex;
+  align-items: center;
+  max-width: 60px;
+  max-height: 60px;
+  min-width: 60px;
+  min-height: 60px;
+  object-fit: cover;
+  border-radius: 0.5rem;
+  background: var(--gray100);
+  flex-shrink: 0;
+`;
+
 const MenuInfo = styled.div`
   flex: 1;
   display: flex;
@@ -391,13 +500,13 @@ const MenuInfo = styled.div`
 `;
 
 const MenuName = styled.h4`
-  ${title_semi}
+  ${reg18}
   color: var(--black);
   margin: 0;
 `;
 
 const MenuDescription = styled.p`
-  ${body_medium}
+  ${reg14}
   color: var(--gray600);
   margin: 0;
   line-height: 1.4;
@@ -408,7 +517,7 @@ const MenuDescription = styled.p`
 `;
 
 const MenuPrice = styled.div`
-  ${title_semi}
+  ${bold18}
   color: var(--black);
   flex-shrink: 0;
   margin-right: 1rem;
@@ -424,13 +533,15 @@ const EditButton = styled.button`
   flex-shrink: 0;
   position: relative;
   z-index: 2;
-  
+
   &:hover {
     background: var(--gray100);
     color: var(--gray700);
   }
-  
-  ${props => props.$isActive && `
+
+  ${(props) =>
+    props.$isActive &&
+    `
     background: var(--gray100);
     color: var(--gray700);
   `}
@@ -443,9 +554,9 @@ const DropdownMenuPortal = styled.div`
   border-radius: 0.5rem;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
   overflow: hidden;
-  
+
   animation: dropdownFadeIn 0.15s ease-out;
-  
+
   @keyframes dropdownFadeIn {
     from {
       opacity: 0;
@@ -459,27 +570,21 @@ const DropdownMenuPortal = styled.div`
 `;
 
 const DropdownItem = styled.button`
-  ${body_medium}
+  ${body_large}
   width: 100%;
   padding: 0.75rem 1rem;
   background: none;
   border: none;
   text-align: left;
   cursor: pointer;
-  color: ${props => props.$isDanger ? 'var(--red)' : 'var(--black)'};
-  
+  color: ${(props) => (props.$isDanger ? 'var(--red)' : 'var(--black)')};
+
   &:hover {
-    background: ${props => props.$isDanger ? 'var(--red)05' : 'var(--gray100)'};
+    background: ${(props) =>
+      props.$isDanger ? 'var(--red)05' : 'var(--gray100)'};
   }
-  
+
   &:not(:last-child) {
     border-bottom: 1px solid var(--gray200);
   }
 `;
-
-// 편집 아이콘
-const EditIcon = () => (
-  <svg width="12" height="24" viewBox="0 0 12 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M8 12C8 12.55 7.80833 13.025 7.425 13.425C7.04167 13.8083 6.56667 14 6 14C5.45 14 4.975 13.8083 4.575 13.425C4.19167 13.025 4 12.55 4 12C4 11.4333 4.19167 10.9583 4.575 10.575C4.975 10.1917 5.45 10 6 10C6.56667 10 7.04167 10.1917 7.425 10.575C7.80833 10.9583 8 11.4333 8 12ZM8 5C8 5.55 7.80833 6.025 7.425 6.425C7.04167 6.80833 6.56667 7 6 7C5.45 7 4.975 6.80833 4.575 6.425C4.19167 6.025 4 5.55 4 5C4 4.43333 4.19167 3.95833 4.575 3.575C4.975 3.19167 5.45 3 6 3C6.56667 3 7.04167 3.19167 7.425 3.575C7.80833 3.95833 8 4.43333 8 5ZM8 19C8 19.55 7.80833 20.025 7.425 20.425C7.04167 20.8083 6.56667 21 6 21C5.45 21 4.975 20.8083 4.575 20.425C4.19167 20.025 4 19.55 4 19C4 18.4333 4.19167 17.9583 4.575 17.575C4.975 17.1917 5.45 17 6 17C6.56667 17 7.04167 17.1917 7.425 17.575C7.80833 17.9583 8 18.4333 8 19Z" fill="currentColor"/>
-  </svg>
-);

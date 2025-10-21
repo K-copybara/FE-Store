@@ -1,6 +1,7 @@
 @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard-dynamic-subset.min.css');
 
-* { /*모든 요소에 적용*/
+* {
+  /*모든 요소에 적용*/
   margin: 0; /*기본 여백 없애기*/
   padding: 0; /*기본 여백 없애기*/
   box-sizing: border-box; /*요소 width, height에 padding, border을 포함*/
@@ -18,13 +19,13 @@ body {
   justify-content: flex-start; /*자식들 가로 방향 시작 부분부터 정렬*/
   align-items: stretch; /*자식 요소 들의 높이를 부모 컨테이너 높이에 맞게 늘임*/
 }
-#root { /*전체 너비*/
+#root {
+  /*전체 너비*/
   width: 100%;
   height: 100vh;
   /* max-width 제거 - PC는 전체 화면 사용 */
   flex: 1;
   background-color: var(--background);
-  padding: 1.25rem 1.5rem;
 }
 
 button {
@@ -66,14 +67,14 @@ textarea {
   --third: #d0d9ff;
   --yellow: #fcc900;
   --red: #ff4d4d;
-  --background: #F4F5F7;
+  --background: #f4f5f7;
   --white: #ffffff;
   --gray100: #fafafc;
   --gray300: #d9d9d9;
   --gray500: #999999;
   --gray700: #717171;
   --black: #222222;
-  
+
   /* PC용 추가 변수 */
   /* --container-padding: 2rem;
   --max-content-width: 1200px; */

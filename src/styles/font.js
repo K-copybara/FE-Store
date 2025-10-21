@@ -6,28 +6,62 @@ const loginTitle = css`
   line-height: 132%; /* 168.96px */
 `;
 
-const display_xl = css`
-  font-size: 2.25rem;
+const bold56 = css`
+  font-size: 3.5rem;
+  
   font-weight: 700;
   line-height: 132%;
 `;
 
-const display_large = css`
+//display_xl
+const bold36 = css`
+  font-size: 2.25rem;
+  
+  font-weight: 700;
+  line-height: 132%; /* 2.97rem */
+`;
+
+const reg36 = css`
+  font-size: 2.25rem;
+  
+  font-weight: 400;
+  line-height: 132%; /* 2.97rem */
+`;
+
+//display_large
+const bold24 = css`
   font-size: 1.5rem;
+  
   font-weight: 700;
-  line-height: 140%;
+  line-height: 132%; /* 1.98rem */
+`;
+const reg24 = css`
+  font-size: 1.5rem;
+  
+  font-weight: 400;
+  line-height: 132%; /* 1.98rem */
 `;
 
-const display_medium = css`
-  font-size: 1.25rem;
+//title_semi
+const bold18 = css`
+  font-size: 1.125rem;
+  
   font-weight: 700;
-  line-height: normal;
+  line-height: 132%; /* 1.485rem */
 `;
 
-const display_small = css`
+const reg18 = css`
+  font-size: 1.125rem;
+  
+  font-weight: 400;
+  line-height: 168%; /* 1.485rem */
+`;
+
+const reg14 = css`
   font-size: 0.875rem;
-  font-weight: 700;
-  line-height: normal;
+  
+  font-weight: 400;
+  line-height: 168%; /* 1.47rem */
 `;
 
 const body_large = css`
@@ -36,81 +70,39 @@ const body_large = css`
   line-height: 140%;
 `;
 
-const body_medium = css`
-  font-size: 0.875rem;
-  font-weight: 400;
-  line-height: 150%;
-`;
-
 const body_small = css`
   font-size: 0.75rem;
   font-weight: 400;
   line-height: 150%;
 `;
 
-const title_large = css`
-  font-size: 1.25rem;
-  font-weight: 600;
-  line-height: 140%;
-`;
 
-const title_semi = css`
-  font-size: 1.125rem;
-  font-weight: 600;
-  line-height: normal;
-`;
 
 const title_medium = css`
   font-size: 1rem;
   font-weight: 600;
   line-height: normal;
 `;
-
 const title_small = css`
   font-size: 0.75rem;
   font-weight: 400;
   line-height: normal;
 `;
 
-const title_extrasmall = css`
-  font-size: 0.625rem;
-  font-weight: 400;
-  line-height: normal;
-`;
-
-const caption_large = css`
-  font-size: 0.75rem;
-  font-weight: 600;
-  line-height: normal;
-`;
-
-const caption_medium = css`
-  font-size: 0.625rem;
-  font-weight: 600;
-  line-height: normal;
-`;
-
-const caption_small = css`
-  font-size: 0.5625rem;
-  font-weight: 400;
-  line-height: normal;
-`;
 
 export {
-  display_xl,
+  bold56,
+  bold36,
+  reg36,  
+  bold24,
+  reg24,
+  bold18,
+  reg18,
+  reg14,
+
   loginTitle,
-  display_large,
-  display_medium,
-  display_small,
-  title_large,
-  title_medium,
-  title_semi,
   title_small,
-  title_extrasmall,
+  title_medium,
   body_large,
-  body_medium,
   body_small,
-  caption_large,
-  caption_medium,
-  caption_small,
 };

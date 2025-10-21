@@ -1,14 +1,21 @@
 // components/MenuModal.jsx
 import styled from 'styled-components';
-import { useState, useRef, useEffect } from 'react';
-import { useStores } from '../hooks/useStores';
-import { title_semi, display_large, body_medium, body_small } from '../styles/font';
+import { useState, useRef, useEffect} from 'react';
+import { body_small, bold18, reg24, reg18, reg14 } from '../styles/font';
 
-const MenuModal = ({ onClose, editingMenuId = null }) => { 
-  //  편집 모드 확인
+import ImageIcon from '../assets/icons/MenuModal/image-icon.svg?react';
+import MenuPlusIcon from '../assets/icons/MenuModal/menuplus-icon.svg?react';
+import ImageRemoveIcon from '../assets/icons/MenuModal/imageremove-icon.svg?react';
+import AllergyRemoveIcon from '../assets/icons/MenuModal/allergyremove-icon.svg?react';
+
+import { postMenuInfo, patchMenuInfo, getMenuDetail, getCategories } from '../api/store';
+const MenuModal = ({ onClose, editingMenuId = null, onSuccess }) => { 
+
+  // 편집 모드 확인
   const isEditMode = !!editingMenuId;
+  const [originalImageUrl, setOriginalImageUrl] = useState(null);
 
-  //  통합된 폼 데이터 상태
+  // 통합된 폼 데이터 상태
   const [formData, setFormData] = useState({
     // 1단계 데이터
     categoryId: null,
@@ -29,70 +36,128 @@ const MenuModal = ({ onClose, editingMenuId = null }) => {
   const [uploadedImage, setUploadedImage] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const [categories, setCategories] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // 이미지 삭제 여부 추적 (편집 모드 전용)
+  const [imageRemoved, setImageRemoved] = useState(false);
+
+  
+  const [menuDataLoaded, setMenuDataLoaded] = useState(false);
+
   const fileInputRef = useRef(null);
 
+  // 카테고리 목록 불러오기
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {    
+        const categoryData = await getCategories();
+        console.log('카테고리 조회 성공:', categoryData);
+        
+        setCategories(categoryData);
+      } catch (error) {
+        console.error('카테고리 목록 조회 실패:', error);
+        
+    
+        setCategories([]);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const { 
-    getCategories, 
-    createMenu, 
-    uploadMenuImage, 
-    updateMenu,
-    getMenuById,
-    getCategoryById 
-  } = useStores();
-  const categories = getCategories();
+    fetchCategories();
+  }, []); 
+
+  const getCategoryById = (categoryId) => {
+    return categories.find(cat => cat.categoryId === categoryId);
+  };
 
 
   useEffect(() => {
-    if (isEditMode && editingMenuId) {
-      console.log('편집 모드로 모달 열림. 메뉴 ID:', editingMenuId);
-      
-      const menuData = getMenuById(editingMenuId);
-      console.log('기존 메뉴 데이터:', menuData);
-      
-      if (menuData) {
-        //  기존 데이터로 폼 초기화
-        setFormData({
-          categoryId: menuData.categoryId,
-          name: menuData.name,
-          price: menuData.price.toString(),
-          description: menuData.description || '',
-          image: menuData.image ? 'existing' : null, // 기존 이미지가 있으면 'existing' 플래그
-          spicyLevel: menuData.spicyLevel || 0,
-          allergies: menuData.allergies || [],
-          extraInfo: menuData.extraInfo || ''
-        });
-
-        // 카테고리 UI 상태 초기화
-        const category = getCategoryById(menuData.categoryId);
-        if (category) {
-          setSelectedCategory(category.name);
-        }
-
-        // 기존 이미지 설정
-        if (menuData.image) {
-          setUploadedImage({
-            id: 'existing-' + editingMenuId,
-            url: menuData.image,
-            name: 'existing-image',
-            isExisting: true
-          });
-        }
-
-        console.log('편집 데이터 로드 완료');
-      }
+    // 이미 로드했으면 다시 로드하지 않음
+    if (menuDataLoaded) {
+      console.log('⚠️ 이미 메뉴 데이터 로드됨. 스킵');
+      return;
     }
-  }, [isEditMode, editingMenuId, getMenuById, getCategoryById]);
 
-  //  공통 데이터 업데이트 함수
+      // 카테고리가 로드된 후에만 메뉴 데이터 로드
+      if (isEditMode && editingMenuId && !loading) {
+        const fetchMenuData = async () => {
+          try {
+            setLoading(true);
+            console.log('✏️ 편집 모드로 모달 열림. 메뉴 ID:', editingMenuId);
+            
+            const menuData = await getMenuDetail(editingMenuId);
+            console.log('📋 기존 메뉴 데이터:', menuData);
+            
+            if (menuData) {
+              // 기존 데이터로 폼 초기화
+              setFormData({
+                categoryId: menuData.category?.categoryId,
+                name: menuData.menuName,
+                price: menuData.menuPrice,
+                description: menuData.menuInfo || '',
+                image: null, 
+                spicyLevel: menuData.spicyLevel || 0,
+                allergies: menuData.allergies || [],
+                extraInfo: menuData.extraInfo || ''
+              });
+
+              
+              // 카테고리 UI 상태 초기화
+              const category = getCategoryById(menuData.category?.categoryId);
+              if (category) {
+                setSelectedCategory(category.name);
+                console.log('✅ 카테고리 설정 완료:', category.name);
+              } else {
+                console.warn('⚠️ 해당 카테고리를 찾을 수 없습니다:', menuData.category?.categoryId);
+              }
+
+              setOriginalImageUrl(menuData.menuPicture || null); 
+              console.log('이미지', originalImageUrl);
+              // 기존 이미지 설정
+              if (menuData.menuPicture) {
+                setUploadedImage({
+                  id: 'existing-' + editingMenuId,
+                  url: menuData.menuPicture,
+                  name: 'existing-image',
+                  isExisting: true
+                });
+                setImageRemoved(false);
+
+              } else {
+                setUploadedImage(null);
+                setImageRemoved(false);
+              }
+
+              setMenuDataLoaded(true);
+              console.log('✅ 편집 데이터 로드 완료');
+            }
+          } catch (error) {
+            setError(error);
+            console.error('❌ 메뉴 데이터 조회 실패:', error);
+            alert('메뉴 정보를 불러오는데 실패했습니다.');
+            onClose();
+          } finally {
+            setLoading(false);
+          }
+        };
+
+      fetchMenuData();
+    }
+  }, [isEditMode, editingMenuId, categories.length, menuDataLoaded]);
+
+  // 공통 데이터 업데이트 함수
   const updateFormData = (field, value) => {
+    console.log('폼 데이터 업데이트:', { field, value });
     setFormData(prev => ({
       ...prev,
       [field]: value
     }));
   };
 
-  //  파일 업로드 핸들러
+  // 파일 업로드 핸들러
   const handleFileUpload = (event) => {
     console.log('🖱️ 파일 선택 이벤트 발생');
     const file = event.target.files[0];
@@ -107,69 +172,79 @@ const MenuModal = ({ onClose, editingMenuId = null }) => {
       size: file.size,
       type: file.type
     });
-    
-    if (file.type.startsWith('image/')) {
-      console.log('이미지 파일 확인됨');
+      console.log('✅ 이미지 파일 확인됨');
       
       const reader = new FileReader();
       reader.onload = (e) => {
-        const imageData = {
+        setUploadedImage({
           id: Date.now() + Math.random(),
           file,
           url: e.target.result,
-          name: file.name
-        };
+          name: file.name,
+          isExisting: false
+        });
+        updateFormData('image', file);  // ⬅️ 새 파일만 저장
+        setImageRemoved(false);   
         
-        setUploadedImage(imageData);
-        updateFormData('image', file);
-        console.log('🔄 상태 업데이트 완료');
-      };
-      
+      };   
       reader.readAsDataURL(file);
-    } else {
-      alert('이미지 파일을 선택해주세요.');
-    }
-    
-    event.target.value = '';
+      event.target.value = '';
   };
 
   const handleAddImageClick = () => {
+    console.log('🖼️ 이미지 추가 버튼 클릭');
     fileInputRef.current?.click();
   };
 
+  // 미리보기 이미지 제거
+  // 삭제
   const handleRemoveImage = () => {
+    // 편집 모드: 삭제 = removeImage=true, UI는 빈 상태
+    if (isEditMode) {
+      setUploadedImage(null);        // ⬅️ 업로드 아이콘 보이도록
+      updateFormData('image', null); // ⬅️ 새 파일 없음
+      setImageRemoved(true);         // ⬅️ 삭제 의사 표시
+      return;
+    }
+    // 등록 모드
     setUploadedImage(null);
     updateFormData('image', null);
+    setImageRemoved(false);
   };
 
   const handleCategorySelect = (category) => {
+    console.log('🏷️ 카테고리 선택:', category);
     setSelectedCategory(category.name);
     updateFormData('categoryId', category.categoryId);
     setShowDropdown(false);
   };
 
   const [allergyInput, setAllergyInput] = useState('');
+  
   const handleAddAllergy = () => {
+    console.log('🚨 알레르기 정보 추가:', allergyInput);
     if (allergyInput.trim() && !formData.allergies.includes(allergyInput.trim())) {
-        const newAllergies = [...formData.allergies, allergyInput.trim()];
-        updateFormData('allergies', newAllergies);
-        setAllergyInput('');
+      const newAllergies = [...formData.allergies, allergyInput.trim()];
+      updateFormData('allergies', newAllergies);
+      setAllergyInput('');
     }
   };
   
-  //  알레르기 삭제 함수
+  // 알레르기 삭제 함수
   const handleRemoveAllergy = (allergyToRemove) => {
+    console.log('❌ 알레르기 정보 삭제:', allergyToRemove);
     const newAllergies = formData.allergies.filter(allergy => allergy !== allergyToRemove);
     updateFormData('allergies', newAllergies);
   };
   
   const toggleDropdown = () => {
+    console.log('📋 드롭다운 토글');
     setShowDropdown(!showDropdown);
   };
 
-  //가격 입력 핸들러
+  // 가격 입력 핸들러
   const handlePriceChange = (e) => {
-    // 입력값에서 숫자만 추출
+    console.log('💰 가격 입력:', e.target.value);
     const value = e.target.value.replace(/[^\d]/g, '');
     updateFormData('price', value);
   };
@@ -179,8 +254,10 @@ const MenuModal = ({ onClose, editingMenuId = null }) => {
     return parseInt(price).toLocaleString();
   };
   
-  //  1단계 → 2단계 이동 (편집 모드에서는 이미지 검사 수정)
+  // 1단계 → 2단계 이동
   const handleStep1Next = () => {
+    console.log('➡️ 1단계에서 2단계로 이동');
+    
     // 1단계 유효성 검사
     if (!formData.name.trim()) {
       alert('메뉴 이름을 입력해주세요.');
@@ -195,132 +272,78 @@ const MenuModal = ({ onClose, editingMenuId = null }) => {
       return;
     }
     
-    if (!formData.image) {
+    // 이미지 필수 검사 (등록 모드일 때만)
+    if (!isEditMode && !formData.image) {
       alert('이미지를 등록해주세요.');
       return;
     }
     
-    console.log('1단계 완료:', {
+    console.log('✅ 1단계 완료:', {
       isEditMode,
       categoryId: formData.categoryId,
       name: formData.name,
       price: formData.price,
       description: formData.description,
-      hasImage: !!formData.image || !!uploadedImage
+      hasImage: !!formData.image,
+      hasUploadedImage: !!uploadedImage,
+      imageRemoved
     });
     
     setCurrentStep(2);
   };
 
-  //  최종 제출 (등록/편집 모드 구분)
-  const handleFinalSubmit = async () => {
-    // 2단계 유효성 검사
-    if (!formData.extraInfo.trim()) {
-      alert('추가 정보를 입력해주세요.');
-      return;
-    }
+const handleFinalSubmit = async () => {
+  if (!formData.extraInfo.trim()) {
+    alert('추가 정보를 입력해주세요.');
+    return;
+  }
+  setIsSubmitting(true);
 
-    setIsSubmitting(true);
+  try {
+    const menuData = {
+      categoryId: formData.categoryId,
+      name: formData.name,
+      price: parseInt(formData.price),
+      description: formData.description,
+      spicyLevel: formData.spicyLevel,
+      allergies: formData.allergies,
+      extraInfo: formData.extraInfo
+    };
 
-    try {
-      console.log('=== 최종 제출 시작 ===');
-      console.log('편집 모드:', isEditMode);
-
-      if (isEditMode) {
-        //  편집 모드 - 메뉴 수정
-        console.log('📤 메뉴 수정 API 호출');
-        
-        const updateData = {
-          categoryId: formData.categoryId,
-          name: formData.name,
-          price: parseInt(formData.price),
-          description: formData.description,
-          spicyLevel: formData.spicyLevel,
-          allergies: formData.allergies,
-          extraInfo: formData.extraInfo
-        };
-
-        console.log('수정할 데이터:', updateData);
-
-        const result = await updateMenu(editingMenuId, updateData);
-
-        if (!result.success) {
-          throw new Error(result.error || '메뉴 수정에 실패했습니다.');
-        }
-
-        console.log(' 메뉴 정보 수정 완료');
-
-        //  새 이미지가 있으면 별도 업로드
-        if (formData.image && formData.image !== 'existing') {
-          console.log('📤 새 이미지 업로드');
-          
-          const imageResult = await uploadMenuImage(editingMenuId, formData.image);
-          
-          if (!imageResult.success) {
-            console.warn('⚠️ 이미지 업로드 실패:', imageResult.error);
-            alert('메뉴는 수정되었지만 이미지 업로드에 실패했습니다.');
-          } else {
-            console.log(' 이미지 업로드 완료');
-          }
-        }
-
-        console.log('🎉 메뉴 수정 프로세스 완료!');
-        alert('메뉴가 성공적으로 수정되었습니다!');
-        onClose();
-
+    if (isEditMode) {
+      // 🔎 규칙에 맞춰 removeImage 결정
+      if (!formData.image) {
+        if (imageRemoved) {
+          menuData.removeImage = true; // ⬅️ 이미지 삭제
+        } // else: 유지(필드 넣지 않음)
       } else {
-        //  등록 모드 (기존 로직)
-        console.log('📤 메뉴 등록 API 호출');
-        
-        const menuData = {
-          categoryId: formData.categoryId,
-          name: formData.name,
-          price: parseInt(formData.price),
-          description: formData.description,
-          spicyLevel: formData.spicyLevel,
-          allergies: formData.allergies,
-          extraInfo: formData.extraInfo
-        };
-
-        const menuResult = await createMenu(menuData);
-
-        if (!menuResult.success) {
-          throw new Error(menuResult.error || '메뉴 등록에 실패했습니다.');
-        }
-
-        console.log(' 메뉴 정보 등록 완료:', menuResult.data.menuId);
-
-        //  이미지가 있으면 별도로 업로드
-        if (formData.image) {
-          console.log('📤 이미지 업로드');
-          
-          const imageResult = await uploadMenuImage(
-            menuResult.data.menuId, 
-            formData.image
-          );
-
-          if (!imageResult.success) {
-            console.warn('⚠️ 이미지 업로드 실패:', imageResult.error);
-            alert('메뉴는 등록되었지만 이미지 업로드에 실패했습니다.');
-          } else {
-            console.log(' 이미지 업로드 완료');
-          }
-        }
-
-        console.log('🎉 메뉴 등록 프로세스 완료!');
-        alert('메뉴가 성공적으로 등록되었습니다!');
-        onClose();
+        // 새 파일 업로드하는 경우: removeImage = false (넣지 않아도 백엔드에서 false로 해석)
       }
-      
-    } catch (error) {
-      console.error('❌ 메뉴 처리 실패:', error);
-      alert(`메뉴 ${isEditMode ? '수정' : '등록'}에 실패했습니다: ` + error.message);
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
 
-  //  1단계 렌더링 (타이틀 편집/등록 구분)
+      await patchMenuInfo(editingMenuId, menuData, formData.image || null);
+      if (onSuccess) await onSuccess();
+      alert('메뉴가 성공적으로 수정되었습니다!');
+      onClose();
+    } else {
+      // 등록 모드: 이미지 파일 필수(기존 로직 유지)
+      await postMenuInfo(menuData, formData.image);
+      if (onSuccess) await onSuccess();
+      alert('메뉴가 성공적으로 등록되었습니다!');
+      onClose();
+    }
+  } catch (error) {
+    setError(error);
+    console.error('❌ 메뉴 처리 실패:', error);
+    alert('메뉴 처리에 실패했습니다.');
+  } finally {
+    setIsSubmitting(false);
+  }
+};
+
+  if (loading) return <FormContainer></FormContainer>;
+  if (error) return <FormContainer>에러 발생: {error.message}</FormContainer>;
+
+  // 1단계 렌더링 (타이틀 편집/등록 구분)
   const renderStep1 = () => (
     <>
       <ModalHeader>
@@ -396,7 +419,7 @@ const MenuModal = ({ onClose, editingMenuId = null }) => {
             <Label>사진 업로드</Label>
             {!uploadedImage && (
               <AddImageButton onClick={handleAddImageClick}>
-                <PlusIcon />
+                <MenuPlusIcon />
               </AddImageButton>
             )}
           </ImageSectionHeader>
@@ -408,18 +431,20 @@ const MenuModal = ({ onClose, editingMenuId = null }) => {
             onChange={handleFileUpload}
           />
 
-          {uploadedImage ? (
-            <ImagePreview>
-              <PreviewImage src={uploadedImage.url} alt={uploadedImage.name} />
-              <RemoveImageButton onClick={handleRemoveImage}>
-                <RemoveIcon />
-              </RemoveImageButton>
-            </ImagePreview>
-          ) : (
-            <ImageUploadArea onClick={handleAddImageClick}>
-                <ImageIcon />
-            </ImageUploadArea>
-          )}
+      {uploadedImage ? (
+        <ImagePreview>
+        <PreviewImage src={uploadedImage.url} alt={uploadedImage.name} />
+        {!uploadedImage.isDefault && (
+          <RemoveImageButton onClick={handleRemoveImage}>
+          <ImageRemoveIcon />
+          </RemoveImageButton>
+        )}
+        </ImagePreview>
+      ) : (
+        <ImageUploadArea onClick={handleAddImageClick}>
+          <ImageIcon />
+        </ImageUploadArea>
+      )}
         </RightSection>
       </FormContainer>
 
@@ -429,7 +454,7 @@ const MenuModal = ({ onClose, editingMenuId = null }) => {
     </>
   );
 
-  //  2단계 렌더링 (타이틀 편집/등록 구분)
+  // 2단계 렌더링 (타이틀 편집/등록 구분)
   const renderStep2 = () => (
     <>
       <ModalHeader>
@@ -455,7 +480,7 @@ const MenuModal = ({ onClose, editingMenuId = null }) => {
             </SpicyLevelContainer>
           </FormGroup>
 
-          {/*  알레르기 정보 (입력창으로 변경) */}
+          {/* 알레르기 정보 */}
           <FormGroup>
           <AllergySection>
             <ModalHeader>
@@ -463,7 +488,7 @@ const MenuModal = ({ onClose, editingMenuId = null }) => {
               <SubLabel2>음식의 재료 중 알레르기 유발할 수 있는 재료명이 있나요?</SubLabel2>
             </ModalHeader>
             
-            {/*  태그 영역 (고정된 공간 확보) */}
+            {/* 태그 영역 */}
             <AllergyTagArea>
               {formData.allergies.length > 0 && (
                 <AllergyTagContainer>
@@ -471,7 +496,7 @@ const MenuModal = ({ onClose, editingMenuId = null }) => {
                     <AllergyTag key={index}>
                       {allergy}
                       <RemoveAllergyButton onClick={() => handleRemoveAllergy(allergy)}>
-                        <RemoveAllergyIcon />
+                        <AllergyRemoveIcon />
                       </RemoveAllergyButton>
                     </AllergyTag>
                   ))}
@@ -479,7 +504,7 @@ const MenuModal = ({ onClose, editingMenuId = null }) => {
               )}
             </AllergyTagArea>
             
-            {/*  알레르기 입력창 (항상 하단에 고정) */}
+            {/* 알레르기 입력창 */}
             <AllergyInputContainer>
               <AllergyInput
                 value={allergyInput}
@@ -490,14 +515,14 @@ const MenuModal = ({ onClose, editingMenuId = null }) => {
                 onClick={handleAddAllergy}
                 disabled={!allergyInput.trim()}
               >
-                <PlusIcon />
+                <MenuPlusIcon />
               </AddAllergyButton>
             </AllergyInputContainer>
           </AllergySection>
           </FormGroup>
         </LeftSection>
 
-        {/*  추가 정보 */}
+        {/* 추가 정보 */}
         <RightSection>
           <FormGroup>
             <Label>추가 정보</Label>
@@ -522,7 +547,7 @@ const MenuModal = ({ onClose, editingMenuId = null }) => {
     </>
   );
 
-  //  단계별 컨텐츠 렌더링
+  // 단계별 컨텐츠 렌더링
   const renderStepContent = () => {
     switch(currentStep) {
       case 1:
@@ -537,7 +562,7 @@ const MenuModal = ({ onClose, editingMenuId = null }) => {
   return (
     <ModalOverlay onClick={onClose}>
       <ModalContent onClick={(e) => e.stopPropagation()}>
-        {/*  단계별 컨텐츠 렌더링 */}
+        {/* 단계별 컨텐츠 렌더링 */}
         {renderStepContent()}
       </ModalContent>
     </ModalOverlay>
@@ -546,7 +571,7 @@ const MenuModal = ({ onClose, editingMenuId = null }) => {
 
 export default MenuModal;
 
-//  기존 스타일 컴포넌트들 (그대로 유지)
+
 const StepIndicator = styled.div`
   display: flex;
   align-items: center;
@@ -581,7 +606,7 @@ const Step = styled.div`
 `;
 
 const BackButton = styled.button`
-  ${body_medium}
+  ${bold18}
   padding: 0.75rem 2rem;
   background: var(--gray200);
   color: var(--black);
@@ -596,7 +621,7 @@ const BackButton = styled.button`
 `;
 
 const SubmitButton = styled.button`
-  ${body_medium}
+  ${bold18}
   padding: 0.75rem 2rem;
   background: var(--primary);
   color: var(--white);
@@ -627,7 +652,7 @@ const CategoryDropdown = styled.div`
 `;
 
 const CategoryInput = styled.input`
-  ${title_semi}
+  ${reg18}
   width: 100%;
   padding: 0.5rem 0.625rem;
   border: 1px solid var(--secondary);
@@ -687,7 +712,7 @@ const DropdownMenu = styled.div`
 `;
 
 const DropdownItem = styled.div`
-  ${title_semi}
+  ${reg18}
   padding: 0.75rem 1rem;
   cursor: pointer;
   transition: background-color 0.2s ease;
@@ -735,7 +760,7 @@ const ModalHeader = styled.div`
 `;
 
 const ModalTitle = styled.h2`
-  ${display_large}
+  ${bold18}
   color: var(--black);
 `;
 
@@ -766,13 +791,13 @@ const FormGroup = styled.div`
 `;
 
 const Label = styled.label`
-  ${display_large}
+  ${reg24}
   color: var(--black);
   font-weight: 400;
 `;
 
 const TextInput = styled.input`
-  ${title_semi}
+  ${reg18}
   padding: 0.5rem 0.625rem;
   border: 1px solid var(--secondary);
   border-radius: 0.625rem;
@@ -792,7 +817,7 @@ const PriceContainer = styled.div`
 `;
 
 const PriceInput = styled.input`
-  ${title_semi}
+  ${reg18}
   flex: 1;
   padding: 0.5rem 0.625rem;
   background: var(--gray100);
@@ -804,7 +829,7 @@ const PriceInput = styled.input`
 `;
 
 const PriceUnit = styled.span`
-  ${title_semi}
+  ${reg18}
   padding: 0.5rem 0.625rem;
   background: var(--gray100);
   border-left: 1px solid var(--gray300);
@@ -826,7 +851,7 @@ const ModalActions = styled.div`
 `;
 
 const NextButton = styled.button`
-  ${body_medium}
+  ${bold18}
   padding: 0.75rem 2rem;
   background: var(--primary);
   color: var(--white);
@@ -915,12 +940,12 @@ const ImageUploadArea = styled.div`
 `;
 
 const SubLabel = styled.p`
-  ${body_medium}
+  ${reg14}
   color: var(--primary);
 `;
 
 const SubLabel2 = styled.p`
-  ${body_medium}
+  ${reg14}
   color: var(--gray500);
 `;
 
@@ -969,7 +994,7 @@ const AllergyTagContainer = styled.div`
 `;
 
 const AllergyTag = styled.div`
-  ${title_semi}
+  ${reg18}
   display: flex;
   align-items: center;
   padding: 0.5rem 0.75rem;
@@ -1020,7 +1045,7 @@ const AllergyTagArea = styled.div`
 `;
 
 const AllergyInput = styled.input`
-  ${title_semi}
+  ${reg18}
   flex: 1;
   padding: 0.75rem;
   border: 1.5px solid var(--secondary);
@@ -1063,27 +1088,3 @@ const AddAllergyButton = styled.button`
   }
 `;
 
-//  아이콘 컴포넌트들 (기존과 동일)
-const ImageIcon = () => (
-  <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M11.6667 35C10.4444 35 9.31945 34.7083 8.29167 34.125C7.29167 33.5139 6.48611 32.7083 5.875 31.7083C5.29167 30.6806 5 29.5556 5 28.3333V11.6667C5 10.4444 5.29167 9.31944 5.875 8.29166C6.48611 7.26389 7.29167 6.45833 8.29167 5.875C9.31945 5.29166 10.4444 5 11.6667 5H28.3333C29.5556 5 30.6806 5.29166 31.7083 5.875C32.7361 6.45833 33.5417 7.26389 34.125 8.29166C34.7083 9.31944 35 10.4444 35 11.6667V28.3333C35 29.5556 34.7083 30.6806 34.125 31.7083C33.5417 32.7083 32.7361 33.5139 31.7083 34.125C30.6806 34.7083 29.5556 35 28.3333 35H11.6667ZM28.3333 31.6667C29.3889 31.6667 30.2083 31.375 30.7917 30.7917C31.375 30.1806 31.6667 29.3611 31.6667 28.3333V11.6667C31.6667 10.6111 31.375 9.79167 30.7917 9.20833C30.2083 8.625 29.3889 8.33333 28.3333 8.33333H11.6667C10.6389 8.33333 9.81945 8.625 9.20833 9.20833C8.625 9.79167 8.33333 10.6111 8.33333 11.6667V28.3333C8.33333 29.3611 8.625 30.1806 9.20833 30.7917C9.81945 31.375 10.6389 31.6667 11.6667 31.6667H28.3333ZM17.875 27.8333C17.5139 28.1944 17.1111 28.375 16.6667 28.375C16.2222 28.375 15.8194 28.1944 15.4583 27.8333L11.6667 24.0417L7.83333 27.8333C7.5 28.1667 7.11111 28.3333 6.66667 28.3333C6.19444 28.3333 5.79167 28.1806 5.45833 27.875C5.15278 27.5417 5 27.1389 5 26.6667C5 26.2222 5.16667 25.8333 5.5 25.5L10.4583 20.5C10.8194 20.1389 11.2222 19.9583 11.6667 19.9583C12.1111 19.9583 12.5139 20.1389 12.875 20.5L16.6667 24.2917L23.7917 17.1667C24.1528 16.8056 24.5556 16.625 25 16.625C25.4444 16.625 25.8472 16.8056 26.2083 17.1667L34.5 25.5C34.8333 25.8333 35 26.2222 35 26.6667C35 27.1389 34.8333 27.5417 34.5 27.875C34.1944 28.1806 33.8056 28.3333 33.3333 28.3333C32.8889 28.3333 32.5 28.1667 32.1667 27.8333L25 20.7083L17.875 27.8333ZM14.2083 17.5C13.2639 17.5 12.4583 17.1806 11.7917 16.5417C11.1528 15.875 10.8333 15.0694 10.8333 14.125C10.8333 13.2083 11.1528 12.4306 11.7917 11.7917C12.4583 11.1528 13.2639 10.8333 14.2083 10.8333C15.1528 10.8333 15.9306 11.1528 16.5417 11.7917C17.1806 12.4028 17.5 13.1806 17.5 14.125C17.5 15.0694 17.1806 15.875 16.5417 16.5417C15.9028 17.1806 15.125 17.5 14.2083 17.5Z" fill="#8298FF"/>
-  </svg>
-);
-
-const PlusIcon = () => (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M4 13C3.58333 13 3.29167 12.8333 3.125 12.5C2.975 12.1667 2.975 11.8333 3.125 11.5C3.29167 11.1667 3.58333 11 4 11H20C20.4167 11 20.7 11.1667 20.85 11.5C21.0167 11.8333 21.0167 12.1667 20.85 12.5C20.7 12.8333 20.4167 13 20 13H4ZM11 4C11 3.58333 11.1667 3.3 11.5 3.15C11.8333 2.98333 12.1667 2.98333 12.5 3.15C12.8333 3.3 13 3.58333 13 4V20C13 20.4167 12.8333 20.7083 12.5 20.875C12.1667 21.025 11.8333 21.025 11.5 20.875C11.1667 20.7083 11 20.4167 11 20V4Z" fill="currentColor"/>
-    </svg>
-);
-
-const RemoveIcon = () => (
-  <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
-    <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-  </svg>
-);
-
-const RemoveAllergyIcon = () => (
-    <svg width="13" height="14" viewBox="0 0 13 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M3.0875 11.1708C2.93403 11.3243 2.7625 11.3694 2.57292 11.3062C2.38333 11.2431 2.25243 11.1212 2.18021 10.9406C2.11701 10.751 2.16667 10.575 2.32917 10.4125L9.9125 2.82917C10.066 2.67569 10.2375 2.63056 10.4271 2.69375C10.6167 2.75694 10.7431 2.88333 10.8063 3.07292C10.8785 3.25347 10.8333 3.425 10.6708 3.5875L3.0875 11.1708ZM2.32917 3.5875C2.16667 3.425 2.11701 3.25347 2.18021 3.07292C2.2434 2.88333 2.36979 2.75694 2.55938 2.69375C2.75799 2.63056 2.93403 2.67569 3.0875 2.82917L10.6708 10.4125C10.8243 10.566 10.8694 10.7375 10.8063 10.9271C10.7431 11.1167 10.6167 11.2476 10.4271 11.3198C10.2465 11.383 10.075 11.3333 9.9125 11.1708L2.32917 3.5875Z" fill="#8298FF"/>
-    </svg>
-);

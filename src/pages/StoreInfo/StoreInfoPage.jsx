@@ -1,39 +1,50 @@
 import styled from 'styled-components';
+import { useState } from 'react';
 import Sidebar from '../../components/Sidebar';
 import EditSection from '../../components/EditSection';
 import EditCategory from '../../components/EditCategory';
 import MenuManagement from '../../components/MenuManagement';
 
 const StoreInfoPage = () => {
-
+  const [refreshKey, setRefreshKey] = useState(0);
   //어쩌다보니 죄다 컴포넌트로 만들어버린 페이지
+  //새로고침 함수
+  const refreshCategories = () => {
+    console.log('새로고침');
+    setRefreshKey(prev => prev + 1);
+  };
   return (
-    <Layout>
-      <Sidebar />
+    <>
       <StoreContainer>
         <ContentWrapper>
-        <LeftColumn>
-          <EditSection
-            title="가게 공지"
-            type="text"
-            field="notice"
-            placeholder="공지사항을 입력하세요"
-          />
-          {/* 영업시간 편집 */}
-          <EditSection
-            title="영업 시간"
-            type="business-hours"
-            field="businessHours"
-          />
-    </LeftColumn>
-    <Divider />
-    <RightColumn>
-      <EditCategory title="메뉴 카테고리" />
-      <MenuManagement title="메뉴 관리" />
-    </RightColumn>
-    </ContentWrapper>
-  </StoreContainer>
-</Layout>
+          <LeftColumn>
+            <EditSection
+              title="가게 공지"
+              type="text"
+              field="notice"
+              placeholder="공지사항을 입력하세요"
+            />
+            {/* 영업시간 편집 */}
+            <EditSection
+              title="영업 시간"
+              type="business-hours"
+              field="businessHours"
+            />
+          </LeftColumn>
+          <Divider />
+          <RightColumn>
+            <EditCategory 
+              title="메뉴 카테고리" 
+              refreshKey={refreshKey}
+            />
+            <MenuManagement
+              title="메뉴 관리"
+              onMenuChange={refreshCategories}
+            />
+          </RightColumn>
+        </ContentWrapper>
+      </StoreContainer>
+    </>
   );
 };
 
@@ -43,7 +54,7 @@ const Layout = styled.div`
   display: flex;
   flex-direction: row;
   align-items: flex-start;
-  gap: 1.25rem;
+
   width: 100%;
   height: 100%;
   overflow: hidden;
@@ -61,7 +72,7 @@ const StoreContainer = styled.div`
   flex: 1;
   height: 100%;
   overflow-y: auto;
-  box-sizing: border-box; 
+  box-sizing: border-box;
 `;
 
 const ContentWrapper = styled.div`
@@ -83,7 +94,6 @@ const Divider = styled.div`
   min-height: 100%;
   align-self: stretch; /* 부모 높이에 맞춰 늘어남 */
 `;
-
 
 const RightColumn = styled.div`
   display: flex;
