@@ -3,9 +3,7 @@ import { authClient } from './client';
 //월별 일별 매출 조회
 export const getMonthlySales = async (date, storeId) => {
   try {
-    const res = await authClient.get(
-      `/api/merchant/stats/daily?month=${date}&storeId=${storeId}`
-    );
+    const res = await authClient.get(`/api/merchant/stats/daily?month=${date}`);
     return res.data.data;
   } catch (err) {
     throw err;
@@ -16,7 +14,7 @@ export const getMonthlySales = async (date, storeId) => {
 export const getWeekDaySales = async (date, storeId) => {
   try {
     const res = await authClient.get(
-      `/api/merchant/stats/weekday?month=${date}&storeId=${storeId}`
+      `/api/merchant/stats/weekday?month=${date}`
     );
     return res.data.data;
   } catch (err) {
@@ -28,7 +26,7 @@ export const getWeekDaySales = async (date, storeId) => {
 export const getDailyOrderSales = async (date, storeId) => {
   try {
     const res = await authClient.get(
-      `/api/merchant/stats/daily/order?date=${date}&storeId=${storeId}`
+      `/api/merchant/stats/daily/order?date=${date}`
     );
     return res.data.data;
   } catch (err) {
@@ -39,9 +37,7 @@ export const getDailyOrderSales = async (date, storeId) => {
 //일별 시간대별 매출
 export const getHourlySales = async (date, storeId) => {
   try {
-    const res = await authClient.get(
-      `/api/merchant/stats/hourly?date=${date}&storeId=${storeId}`
-    );
+    const res = await authClient.get(`/api/merchant/stats/hourly?date=${date}`);
     return res.data.data;
   } catch (err) {
     throw err;
@@ -52,7 +48,7 @@ export const getHourlySales = async (date, storeId) => {
 export const getMenuSales = async (date, sort, storeId) => {
   try {
     const res = await authClient.get(
-      `/api/merchant/stats/menu?date=${date}&sort=${sort}&storeId=${storeId}`
+      `/api/merchant/stats/menu?date=${date}&sort=${sort}`
     );
     return res.data.data;
   } catch (err) {
