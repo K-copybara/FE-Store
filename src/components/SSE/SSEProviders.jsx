@@ -20,12 +20,8 @@ export const SSEProviders = ({ children }) => {
 
   const SERVER_URL = import.meta.env.VITE_SERVER_URL;
 
-  // 주문 알림
-  useEventSource({
-    label: 'order',
-    url: `${SERVER_URL}/alarm/api/merchant/notify/stream?storeId=${storeId}`,
-    getHeaders,
-    handlers: {
+  const orderHandlers = useMemo(
+    () => ({
       onmessage: (event) => {
         if (event.event === 'order-paid') {
           try {
@@ -42,7 +38,7 @@ export const SSEProviders = ({ children }) => {
               timer: 3000,
             });
             window.dispatchEvent(
-              new CustomEvent('order:paid', { detail: data })
+              new CustomEvent('order:created', { detail: data })
             );
           } catch (e) {
             console.error(e);
@@ -52,15 +48,12 @@ export const SSEProviders = ({ children }) => {
       onunauthorized: () => {
         // TODO: 토큰 리프레시 후 재연결 트리거
       },
-    },
-  });
+    }),
+    [play]
+  );
 
-  // 요청 알림
-  useEventSource({
-    label: 'request',
-    url: `${SERVER_URL}/alarm/api/merchant/notify/request/stream?storeId=${storeId}`,
-    getHeaders,
-    handlers: {
+  const requestHandlers = useMemo(
+    () => ({
       onmessage: (event) => {
         if (event.event === 'request-created-notification') {
           try {
@@ -84,7 +77,24 @@ export const SSEProviders = ({ children }) => {
           }
         }
       },
-    },
+    }),
+    [play]
+  );
+
+  // 주문 알림
+  useEventSource({
+    label: 'order',
+    url: `${SERVER_URL}/alarm/api/merchant/notify/stream?storeId=${storeId}`,
+    getHeaders,
+    handlers: orderHandlers,
+  });
+
+  // 요청 알림
+  useEventSource({
+    label: 'request',
+    url: `${SERVER_URL}/alarm/api/merchant/notify/request/stream?storeId=${storeId}`,
+    getHeaders,
+    handlers: requestHandlers,
   });
 
   return <>{children}</>;

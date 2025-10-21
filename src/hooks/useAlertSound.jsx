@@ -1,38 +1,64 @@
-import { useEffect, useRef, useState } from 'react';
+// useAlertSound.js
+import { useEffect, useRef, useCallback } from 'react';
 import alertSound from '../assets/alert_sound.mp3';
 
 export function useAlertSound() {
   const audioRef = useRef(null);
-  const [enabled, setEnabled] = useState(
-    () => localStorage.getItem('soundEnabled') === 'true'
-  );
+  const unlockedRef = useRef(false);
+  const pendingPlayRef = useRef(false);
 
   useEffect(() => {
-    audioRef.current = new Audio(alertSound);
-    audioRef.current.preload = 'auto';
+    const a = new Audio(alertSound);
+    a.preload = 'auto';
+    a.volume = 0.75;
+    audioRef.current = a;
 
-    if (enabled) return;
     const unlock = async () => {
       try {
-        await audioRef.current.play();
-        audioRef.current.pause();
-        audioRef.current.currentTime = 0;
-        setEnabled(true);
-        localStorage.setItem('soundEnabled', 'true');
-      } catch {}
+        await a.play();
+        a.pause();
+        a.currentTime = 0;
+        unlockedRef.current = true;
+
+        // 언락 전에 알림이 왔으면 바로 재생
+        if (pendingPlayRef.current) {
+          pendingPlayRef.current = false;
+          a.currentTime = 0;
+          a.play();
+        }
+      } catch (e) {
+        console.error(e);
+        // 실패하면 다음 제스처에서 다시 시도됨
+      }
     };
+
+    // 사용자가 아무 곳이나 클릭하면 오디오 언락됨
     window.addEventListener('pointerdown', unlock, { once: true });
-    return () => window.removeEventListener('pointerdown', unlock);
-  }, [enabled]);
 
-  const play = () => {
-    if (!enabled) return;
+    return () => {
+      window.removeEventListener('pointerdown', unlock);
+      a.pause();
+      audioRef.current = null;
+      unlockedRef.current = false;
+      pendingPlayRef.current = false;
+    };
+  }, []);
+
+  const play = useCallback(() => {
+    const a = audioRef.current;
+    if (!a) return;
+
+    if (!unlockedRef.current) {
+      // 아직 언락 안됐으면 대기
+      pendingPlayRef.current = true;
+      return;
+    }
+
     try {
-      const a = new Audio(audioRef.current?.src || alertSound);
-      a.volume = audioRef.current?.volume ?? 0.75;
-      a.play().catch(() => {});
-    } catch {}
-  };
+      a.currentTime = 0;
+      a.play();
+    } catch (e) {}
+  }, []);
 
-  return { enabled, setEnabled, play };
+  return { play };
 }
