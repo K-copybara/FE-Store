@@ -6,7 +6,7 @@ export const client = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
-  withCredentials: true,
+  //withCredentials: true,
 });
 
 export const authClient = axios.create({
@@ -14,7 +14,7 @@ export const authClient = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
-  withCredentials: true,
+  //withCredentials: true,
 });
 
 authClient.interceptors.request.use(
@@ -81,7 +81,7 @@ authClient.interceptors.response.use(
         processQueue(null, newAccessToken);
 
         originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
-        return client(originalRequest);
+        return authClient(originalRequest); //authClient로 바꿨음
       } catch (err) {
         processQueue(err, null);
         localStorage.removeItem('token');
