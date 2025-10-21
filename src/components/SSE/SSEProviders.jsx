@@ -84,7 +84,7 @@ export const SSEProviders = ({ children }) => {
   // 주문 알림
   useEventSource({
     label: 'order',
-    url: `${SERVER_URL}/alarm/api/merchant/notify/stream?storeId=${storeId}`,
+    url: `${SERVER_URL}/api/merchant/notify/stream?storeId=${storeId}`,
     getHeaders,
     handlers: orderHandlers,
   });
@@ -92,7 +92,7 @@ export const SSEProviders = ({ children }) => {
   // 요청 알림
   useEventSource({
     label: 'request',
-    url: `${SERVER_URL}/alarm/api/merchant/notify/request/stream?storeId=${storeId}`,
+    url: `${SERVER_URL}/api/merchant/notify/request/stream?storeId=${storeId}`,
     getHeaders,
     handlers: requestHandlers,
   });
