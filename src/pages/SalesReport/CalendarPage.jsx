@@ -2,7 +2,6 @@ import {React, useState, useEffect} from 'react';
 import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
 import { bold36, reg24 } from '../../styles/font';
-import Sidebar from '../../components/Sidebar';
 import { useUserStore } from '../../store/useUserStore';
 
 import PrevMonthIcon from '../../assets/icons/Calendar/prevmonth-icon.svg?react';
@@ -335,13 +334,11 @@ const CalendarContainer = styled.div`
  padding: 2.9375rem 2.9375rem 4.9375rem 2.9375rem;
  flex-direction: column;
  align-items: flex-start;
- align-self: stretch;
  gap: 0.75rem;
  border-radius: 1.25rem;
  background-color: var(--white);
  flex: 1;
  height: 100%;
- overflow-y: auto;
  box-sizing: border-box;
 `;
 
@@ -386,6 +383,7 @@ const CalendarWrapper = styled.div`
 const CalendarTable = styled.table`
  border-collapse: collapse;
  width: 100%;
+ min-width: 80rem;
  // 이거 추가하면 화면 줄일 때 달력도 줄어듦, 이거 빼면 균일한 간격 안됨.
  table-layout: fixed;
  border-spacing: 0; 
@@ -433,7 +431,7 @@ const DayCell = styled.td`
  border: 1px solid var(--third);
  padding: 0.9375rem 1rem;
  vertical-align: top;
- height: 13vh;
+ height: 100%;
  ${props => props.isCurrentMonth && props.hasData && `
   cursor: pointer;
   &:hover { background: var(--gray100); }
@@ -470,7 +468,7 @@ const WeekTotalCell = styled.td`
  border: 1px solid var(--third);
  padding: 0.9375rem 1rem;
  vertical-align: top;
- height: 13vh;
+ height: var(--calendar-day-cell-height);
 `;
 
 

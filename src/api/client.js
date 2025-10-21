@@ -81,7 +81,7 @@ authClient.interceptors.response.use(
         processQueue(null, newAccessToken);
 
         originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
-        return client(originalRequest);
+        return authClient(originalRequest); //authClient로 바꿨음
       } catch (err) {
         processQueue(err, null);
         localStorage.removeItem('token');

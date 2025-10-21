@@ -1,11 +1,18 @@
 import styled from 'styled-components';
+import { useState } from 'react';
 import Sidebar from '../../components/Sidebar';
 import EditSection from '../../components/EditSection';
 import EditCategory from '../../components/EditCategory';
 import MenuManagement from '../../components/MenuManagement';
 
 const StoreInfoPage = () => {
+  const [refreshKey, setRefreshKey] = useState(0);
   //어쩌다보니 죄다 컴포넌트로 만들어버린 페이지
+  //새로고침 함수
+  const refreshCategories = () => {
+    console.log('새로고침');
+    setRefreshKey(prev => prev + 1);
+  };
   return (
     <>
       <StoreContainer>
@@ -26,8 +33,14 @@ const StoreInfoPage = () => {
           </LeftColumn>
           <Divider />
           <RightColumn>
-            <EditCategory title="메뉴 카테고리" />
-            <MenuManagement title="메뉴 관리" />
+            <EditCategory 
+              title="메뉴 카테고리" 
+              refreshKey={refreshKey}
+            />
+            <MenuManagement
+              title="메뉴 관리"
+              onMenuChange={refreshCategories}
+            />
           </RightColumn>
         </ContentWrapper>
       </StoreContainer>

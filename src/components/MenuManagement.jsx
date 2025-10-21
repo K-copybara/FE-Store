@@ -2,25 +2,15 @@ import styled from 'styled-components';
 import { useState, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import MenuModal from './MenuModal';
-import ConfirmModal from '../components/OrderManagement/ConfirmModal';
-import {
-  body_large,
-  bold24,
-  reg24,
-  bold18,
-  reg18,
-  reg14,
-} from '../styles/font';
+import ConfirmModal from './ConfirmModal';
+import { body_large, bold24, bold18, reg18, reg14 } from '../styles/font';
 
 import MenuEditIcon from '../assets/icons/menuedit-icon.svg?react';
 import NoImageIcon from '../assets/icons/MenuManagement/noimage-icon.svg?react';
 
-import {
-  getMenuInfo,
-  deleteMenu,
-  postSoldout,
-  getMenuDetail,
-} from '../api/store';
+import {getMenuInfo, deleteMenu, patchSoldout, getMenuDetail} from '../api/store';
+
+const MenuManagement = ({ title = "메뉴 관리", onMenuChange }) => {
 
 const MenuManagement = ({ title = '메뉴 관리' }) => {
   const [menus, setMenus] = useState([]);
@@ -49,6 +39,7 @@ const MenuManagement = ({ title = '메뉴 관리' }) => {
         //메뉴 목록 가져오기
         const menuData = await getMenuInfo();
         console.log('메뉴 목록:', menuData);
+        console.log('첫 번째 메뉴 이미지:', menuData[0]?.imageUrl);
         setMenus(menuData);
 
         //각 메뉴의 상세 정보 가져오기
@@ -85,7 +76,9 @@ const MenuManagement = ({ title = '메뉴 관리' }) => {
   //메뉴 데이터 새로고침하기
   const refreshMenus = async () => {
     try {
+      console.log('🔄 [MenuManagement] refreshMenus 시작');
       const menuData = await getMenuInfo();
+      console.log('📋 [MenuManagement] 새로 불러온 메뉴 목록:', menuData);
       setMenus(menuData);
 
       //상세 정보 가져오기
@@ -129,41 +122,34 @@ const MenuManagement = ({ title = '메뉴 관리' }) => {
 
   //메뉴 편집
   const handleEditMenu = (menuId) => {
-    // setEditingMenuId(menuId);
-    // setShowEditModal(true);
-    // setOpenDropdownId(null);
+    setEditingMenuId(menuId);
+    setShowEditModal(true);
+    setOpenDropdownId(null);
     console.log('메뉴 편집 클릭:', menuId);
   };
 
   //일시품절 토글 (SOLD_OUT ↔ ON_SALE)
-  const handleToggleOutOfStock = async (menuId) => {
-    try {
-      const menu = menus.find((m) => m.menuId === menuId);
-      const currentStatus = menu?.status;
+const handleToggleOutOfStock = async (menuId) => {
+  try {
+    const before = menuDetails[menuId]?.menuStatus; // 'ON_SALE' | 'SOLD_OUT'
+    const optimistic = before === 'SOLD_OUT' ? 'ON_SALE' : 'SOLD_OUT';
 
-      console.log('일시품절 시작:', menuId, '현재 상태:', currentStatus);
+    setMenuDetails(prev => ({
+      ...prev,
+      [menuId]: { ...(prev[menuId] || {}), menuStatus: optimistic },
+    }));
 
-      await postSoldout(menuId);
+    await patchSoldout(menuId); // 서버 토글
 
-      console.log('일시품절 성공');
-
-      //상태에 따라 다른 메시지 표시
-      if (currentStatus === 'ON_SALE') {
-        alert(`'${menu.name}' 메뉴가 일시품절로 설정되었습니다.`);
-      } else {
-        alert(`'${menu.name}' 메뉴의 일시품절이 해제되었습니다.`);
-      }
-
-      // 드롭다운 닫기
-      setOpenDropdownId(null);
-
-      // 메뉴 목록 새로고침
-      await refreshMenus();
-    } catch (error) {
-      console.error('일시품절 실패:', error);
-      alert('일시품절 설정 변경에 실패했습니다.');
-    }
-  };
+    // 성공 시 드롭다운 닫고 토스트/알림
+    setOpenDropdownId(null);
+  } catch (e) {
+    // 실패 시 롤백 + 에러 알림
+    console.error('일시품절 설정 실패:', e);
+    await refreshMenus(); // 서버 상태로 복구
+    alert('일시품절 설정 변경에 실패했습니다.');
+  }
+};
 
   //  메뉴 삭제
   const handleDeleteMenuClick = (menuId) => {
@@ -184,17 +170,29 @@ const MenuManagement = ({ title = '메뉴 관리' }) => {
       await deleteMenu(menuToDelete.menuId);
 
       console.log('메뉴 삭제 성공');
-      alert(`'${menuToDelete.name}' 메뉴가 삭제되었습니다.`);
-
+      
       // 모달 닫기
       setShowConfirmModal(false);
       setMenuToDelete(null);
-
+      
+      if (onMenuChange) {
+        onMenuChange();
+      }
       // 메뉴 목록 새로고침
       await refreshMenus();
     } catch (error) {
       console.error('메뉴 삭제 실패:', error);
       alert('메뉴 삭제에 실패했습니다.');
+    }
+  };
+
+  // 메뉴 등록/수정 성공 시에도 호출
+  const handleMenuSuccess = async () => {
+    await refreshMenus();
+    
+    // 카테고리 새로고침
+    if (onMenuChange) {
+      onMenuChange();
     }
   };
 
@@ -218,7 +216,8 @@ const MenuManagement = ({ title = '메뉴 관리' }) => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  if (loading) return <Container>로딩중...</Container>;
+  
+  if (loading) return <Container></Container>;
   if (error) return <Container>에러 발생: {error.message}</Container>;
 
   return (
@@ -228,34 +227,35 @@ const MenuManagement = ({ title = '메뉴 관리' }) => {
         <AddButton onClick={() => setShowAddModal(true)}>등록</AddButton>
       </Header>
 
-      <MenuList>
-        {menus.length === 0 ? (
-          <EmptyState>등록된 메뉴가 없습니다.</EmptyState>
-        ) : (
-          menus.map((menu) => {
-            const detail = menuDetails[menu.menuId];
-            const isSoldOut = detail?.status === 'SOLD_OUT';
+     <MenuList>
+      {menus.length === 0 ? (
+        <EmptyState>등록된 메뉴가 없습니다.</EmptyState>
+      ) : (
+        menus.map((menu) => {
+          const detail = menuDetails[menu.menuId];
+          const isSoldOut = detail?.menuStatus === 'SOLD_OUT';
+          
+          return (
+            <MenuCard key={menu.menuId} $isSoldOut={isSoldOut}>
+              {/* 일시품절 오버레이 */}
+              {isSoldOut && <OutOfStockOverlay />}
+              
+              <MenuContent>
+                {/* 카테고리 */}
+                <CategoryTag>
+                  {detail?.category?.categoryName}
+                </CategoryTag>
 
-            return (
-              <MenuCard key={menu.menuId} $isSoldOut={isSoldOut}>
-                {/* 일시품절 오버레이 */}
-                {isSoldOut && <OutOfStockOverlay />}
-
-                <MenuContent>
-                  {/* 카테고리 */}
-                  <CategoryTag>
-                    {detail?.category?.categoryName || '로딩중...'}
-                  </CategoryTag>
-
-                  {/* 메뉴 이미지 */}
-                  {menu.image ? (
-                    <MenuImage
-                      src={menu.image}
-                      alt={menu.name}
-                      onError={(e) => {
-                        e.target.style.display = 'none';
-                      }}
-                    />
+                {/* 메뉴 이미지 */}
+                {menu.imageUrl ? (
+                  <MenuImage 
+                    src={menu.imageUrl}
+                    alt={menu.name}
+                    onError={(e) => {
+                      e.target.style.display = "none";
+                    }}
+                  />
+                  //이미지 없을 때
                   ) : (
                     //이미지 없을 때
                     <NoMenuImage>
@@ -263,43 +263,57 @@ const MenuManagement = ({ title = '메뉴 관리' }) => {
                     </NoMenuImage>
                   )}
 
-                  {/* 메뉴 상세 정보 */}
-                  <MenuInfo>
-                    <MenuName>{menu.name}</MenuName>
-                    <MenuDescription>
-                      {detail?.description || menu.menuInfo}
-                    </MenuDescription>
-                  </MenuInfo>
+                {/* 메뉴 상세 정보 */}
+                <MenuInfo>
+                  <MenuName>{menu.name}</MenuName>
+                  <MenuDescription>{menu.menuInfo}</MenuDescription>
+                </MenuInfo>
 
-                  {/* 가격 */}
-                  <MenuPrice>{menu.price.toLocaleString()}원</MenuPrice>
-                </MenuContent>
+                {/* 가격 */}
+                <MenuPrice>{menu.price.toLocaleString()}원</MenuPrice>
+              </MenuContent>
 
-                {/* 편집 버튼 */}
-                <EditButton
-                  ref={(el) => (editButtonRefs.current[menu.menuId] = el)}
-                  onClick={(e) => handleDropdownToggle(menu.menuId, e)}
-                  $isActive={openDropdownId === menu.menuId}
-                >
-                  <MenuEditIcon />
-                </EditButton>
-              </MenuCard>
-            );
-          })
-        )}
-      </MenuList>
+              {/* 편집 버튼 */}
+              <EditButton 
+                ref={(el) => editButtonRefs.current[menu.menuId] = el}
+                onClick={(e) => handleDropdownToggle(menu.menuId, e)}
+                $isActive={openDropdownId === menu.menuId}
+              >
+                <MenuEditIcon />
+              </EditButton>
+            </MenuCard>
+          );
+        })
+      )}
+    </MenuList>
 
       {/*  Portal을 사용한 드롭다운 메뉴 */}
-      {openDropdownId &&
-        createPortal(
-          <DropdownMenuPortal
-            style={{
-              position: 'absolute',
-              top: dropdownPosition.top,
-              left: dropdownPosition.left,
-              zIndex: 99999,
-            }}
-            onClick={(e) => e.stopPropagation()}
+      {openDropdownId && createPortal(
+        <DropdownMenuPortal
+          style={{
+            position: 'absolute',
+            top: dropdownPosition.top,
+            left: dropdownPosition.left,
+            zIndex: 99999
+          }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          {/*  메뉴 편집 */}
+          <DropdownItem onClick={() => handleEditMenu(openDropdownId)}>
+            메뉴 편집
+          </DropdownItem>
+          
+          {/*  일시품절 설정/해제 (상태에 따라 텍스트 변경) */}
+          <DropdownItem onClick={() => handleToggleOutOfStock(openDropdownId)}>
+            {menuDetails[openDropdownId]?.menuStatus === 'SOLD_OUT'
+              ? '일시품절 해제' 
+              : '일시품절 설정'}
+          </DropdownItem>
+          
+          {/*  메뉴 삭제 (항상 표시) */}
+          <DropdownItem 
+            onClick={() => handleDeleteMenuClick(openDropdownId)}
+            $isDanger={true}
           >
             {/*  메뉴 편집 */}
             <DropdownItem onClick={() => handleEditMenu(openDropdownId)}>
@@ -328,7 +342,12 @@ const MenuManagement = ({ title = '메뉴 관리' }) => {
         )}
 
       {/*  메뉴 등록 모달 */}
-      {showAddModal && <MenuModal onClose={() => setShowAddModal(false)} />}
+      {showAddModal && (
+        <MenuModal 
+          onClose={() => setShowAddModal(false)} 
+          onSuccess={handleMenuSuccess}
+        />
+      )}
 
       {/*  메뉴 편집 모달 */}
       {showEditModal && editingMenuId && (
@@ -338,6 +357,7 @@ const MenuManagement = ({ title = '메뉴 관리' }) => {
             setEditingMenuId(null);
           }}
           editingMenuId={editingMenuId}
+          onSuccess={handleMenuSuccess}
         />
       )}
       {/*  삭제 확인 모달 */}
@@ -378,12 +398,12 @@ const SectionTitle = styled.h3`
 `;
 
 const AddButton = styled.button`
-  ${reg24}
-  padding: 0.75rem 1.5rem;
+  ${reg18}
+  padding: 0.5rem 1.5rem;
   background: var(--primary);
   color: var(--white);
   border: none;
-  border-radius: 0.5rem;
+  border-radius: 0.625rem;
   cursor: pointer;
 
   &:hover {

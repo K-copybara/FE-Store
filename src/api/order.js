@@ -1,9 +1,10 @@
 import { authClient } from './client';
 
+//주문조회
 export const getOrders = async (storeId, status) => {
   try {
     const res = await authClient.get(
-      `/order/api/merchant/orders?storeId=${storeId}&status=${status}`
+      `api/merchant/orders?storeId=${storeId}&status=${status}`
     );
     return res.data.data;
   } catch (err) {
@@ -11,9 +12,10 @@ export const getOrders = async (storeId, status) => {
   }
 };
 
+//주문완료
 export const postOrderComplete = async (orderId) => {
   try {
-    const res = await authClient.post(`/order/api/merchant/orders/${orderId}`);
+    const res = await authClient.post(`api/merchant/orders/${orderId}`);
     return res.data;
   } catch (err) {
     throw err;
@@ -31,10 +33,11 @@ export const getRequests = async (storeId) => {
   }
 };
 
+//요청 완료
 export const postRequestComplete = async (requestId) => {
   try {
     const res = await authClient.post(
-      `/order/api/merchant/orders/${requestId}/request`
+      `api/merchant/orders/${requestId}/request`
     );
     return res.data;
   } catch (err) {
