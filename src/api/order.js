@@ -3,7 +3,9 @@ import { authClient } from './client';
 //주문조회
 export const getOrders = async (storeId, status) => {
   try {
-    const res = await authClient.get(`/api/merchant/orders?status=${status}`);
+    const res = await authClient.get(
+      `/api/merchant/orders?storeId=${storeId}&status=${status}`
+    );
     return res.data.data;
   } catch (err) {
     throw err;
@@ -22,7 +24,9 @@ export const postOrderComplete = async (orderId) => {
 
 export const getRequests = async (storeId) => {
   try {
-    const res = await authClient.get(`/api/merchant/orders/requests`);
+    const res = await authClient.get(
+      `/api/merchant/orders/requests?storeId=${storeId}`
+    );
     return res.data.data;
   } catch (err) {
     throw err;

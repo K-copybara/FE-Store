@@ -13,7 +13,7 @@ export const postLogin = async (data) => {
 
 export const postSignout = async () => {
   try {
-    const res = await authClient.post(`/api/merchant/auth/withdraw`);
+    const res = await client.post(`/api/merchant/auth/withdraw`);
     console.log(res.data);
     return res.data.data;
   } catch (err) {
