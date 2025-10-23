@@ -73,6 +73,10 @@ const StoreContainer = styled.div`
   height: 100%;
   overflow-y: auto;
   box-sizing: border-box;
+  -webkit-overflow-scrolling: touch;
+    &::-webkit-scrollbar {
+    display: none;
+    }
 `;
 
 const ContentWrapper = styled.div`
@@ -85,18 +89,18 @@ const ContentWrapper = styled.div`
 const LeftColumn = styled.div`
   display: flex;
   flex-direction: column;
-  width: 40%;
+  flex: 0.5;
 `;
 
 const Divider = styled.div`
-  width: 0.04375rem;
   background-color: var(--gray300);
   min-height: 100%;
   align-self: stretch; /* 부모 높이에 맞춰 늘어남 */
+  padding: 0.04375rem;
 `;
 
 const RightColumn = styled.div`
   display: flex;
   flex-direction: column;
-  width: 60%;
+  flex: 1;
 `;
