@@ -24,12 +24,18 @@ const RequestCard = ({ request, onComplete }) => {
   return (
     <>
       <CardWrapper status={request.status}>
-        <CardHeader>
-          <Left>
-            <RequestTime>{formatDateTime(request.requestedAt)}</RequestTime>
+        <HeaderWrapper>
+          <CardHeader>
+            <OrderTime>{`요청번호 (${formatDateTime(request.requestedAt)})`}</OrderTime>
+
+            <OrderTitle>테이블</OrderTitle>
+          </CardHeader>
+
+          <CardInfo>
+            <OrderNumber>{request.requestId}</OrderNumber>
             <TableNumber>{request.tableId}번</TableNumber>
-          </Left>
-        </CardHeader>
+          </CardInfo>
+        </HeaderWrapper>
 
         {request.requestNote && (
           <RequestNote>{request.requestNote}</RequestNote>
@@ -78,25 +84,43 @@ const CardWrapper = styled.div`
   box-shadow: '0 4px 8px 0 rgba(130, 152, 255, 0.20)';
 `;
 
+const HeaderWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+`;
+
 const CardHeader = styled.div`
   display: flex;
-  justify-content: flex-start;
+  justify-content: space-between;
   align-items: center;
   align-self: stretch;
 `;
 
-const Left = styled.div`
+const CardInfo = styled.div`
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
+  justify-content: space-between;
+  align-items: center;
+  align-self: stretch;
 `;
 
-const RequestTime = styled.span`
+const OrderTime = styled.span`
   ${reg14}
   color: var(--black);
 `;
 
 const TableNumber = styled.div`
+  ${bold36}
+  color: var(--black);
+  text-align: center;
+`;
+
+const OrderTitle = styled.span`
+  ${reg14}
+  color: var(--black);
+`;
+
+const OrderNumber = styled.span`
   ${bold36}
   color: var(--black);
 `;
@@ -139,13 +163,12 @@ const CompleteButtonWrapper = styled.div`
   justify-content: center;
   align-items: center;
   align-self: stretch;
-  padding-top: 8px;
 `;
 
 const CompleteButton = styled.button`
   ${bold24}
   display: flex;
-  padding: 0.625rem 1.5rem;
+  padding-top: 0.625rem;
   justify-content: center;
   align-items: center;
 
