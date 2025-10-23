@@ -101,6 +101,10 @@ const OrderContainer = styled.div`
   flex: 1;
   height: 100%;
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+    &::-webkit-scrollbar {
+    display: none;
+    }
   box-sizing: border-box;
 `;
 
@@ -164,4 +168,8 @@ const RequestContainer = styled.div`
   height: 100%;
   box-sizing: border-box;
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+    &::-webkit-scrollbar {
+    display: none;
+    }
 `;
