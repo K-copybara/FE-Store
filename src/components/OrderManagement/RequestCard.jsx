@@ -1,50 +1,46 @@
 // components/RequestCard.jsx
 import React, { useState } from 'react';
 import styled from 'styled-components';
-import {reg14, reg24, bold24, bold36 } from "../styles/font";
+import { reg14, reg24, bold24, bold36 } from '../../styles/font';
 import ConfirmModal from './ConfirmModal';
+import { formatDateTime } from '../../utils/formatTime';
 
 const RequestCard = ({ request, onComplete }) => {
   const [showCompleteModal, setShowCompleteModal] = useState(false);
- 
+
   const handleCompleteClick = () => {
     setShowCompleteModal(true);
   };
 
-  const handleConfirmComplete = () => {
-    setShowCompleteModal(false);
-    
-    setTimeout(() => {
-      onComplete && onComplete();
-    }, 500);
-  };
-
-  const formatTime = (timestamp) => {
-    const date = new Date(timestamp);
-    return `${date.getHours()}:${date.getMinutes().toString().padStart(2, '0')}`;
+  const handleConfirmComplete = async () => {
+    try {
+      onComplete(request.requestId);
+      setShowCompleteModal(false);
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   return (
     <>
-      <CardWrapper 
-        status={request.status}
-      >
-        {/* 상단: 요청 시간과 테이블 번호 */}
-        <CardHeader>
-          <Left>
-            <RequestTime>{formatTime(request.requestedAt)}</RequestTime>
-            <TableNumber>{request.tableId}번</TableNumber>
-          </Left>
-        </CardHeader>
+      <CardWrapper status={request.status}>
+        <HeaderWrapper>
+          <CardHeader>
+            <OrderTime>{`요청번호 (${formatDateTime(request.requestedAt)})`}</OrderTime>
 
-        {/* 요청 내용 */}
+            <OrderTitle>테이블</OrderTitle>
+          </CardHeader>
+
+          <CardInfo>
+            <OrderNumber>{request.requestId}</OrderNumber>
+            <TableNumber>{request.tableId}번</TableNumber>
+          </CardInfo>
+        </HeaderWrapper>
+
         {request.requestNote && (
-          <RequestNote>
-            {request.requestNote}
-          </RequestNote>
+          <RequestNote>{request.requestNote}</RequestNote>
         )}
 
-        {/* 요청 아이템들 */}
         {request.items && request.items.length > 0 && (
           <ItemList>
             {request.items.map((item, index) => (
@@ -55,18 +51,13 @@ const RequestCard = ({ request, onComplete }) => {
             ))}
           </ItemList>
         )}
-
-        {/* 완료 버튼 */}
         {request.status === 'PENDING' && (
           <CompleteButtonWrapper>
-            <CompleteButton onClick={handleCompleteClick}>
-              완료
-            </CompleteButton>
+            <CompleteButton onClick={handleCompleteClick}>완료</CompleteButton>
           </CompleteButtonWrapper>
         )}
       </CardWrapper>
 
-      {/* 완료 확인 모달 */}
       <ConfirmModal
         isOpen={showCompleteModal}
         onClose={() => setShowCompleteModal(false)}
@@ -89,35 +80,47 @@ const CardWrapper = styled.div`
 
   background: var(--white);
   border-radius: 1.25rem;
-  border: 1px solid ${props => {
-    if (props.status === 'PENDING') return 'var(--secondary)';
-    return 'var(--gray300)';
-  }};
-  box-shadow: ${props => {
-    if (props.status === 'PENDING') return '0 4px 8px 0 rgba(25, 14, 170, 0.30)';
-    return '0 2px 8px rgba(0,0,0,0.08)';
-  }};
+  border: 2px solid var(--secondary);
+  box-shadow: '0 4px 8px 0 rgba(130, 152, 255, 0.20)';
+`;
+
+const HeaderWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  width: 100%;
 `;
 
 const CardHeader = styled.div`
   display: flex;
-  justify-content: flex-start;
+  justify-content: space-between;
   align-items: center;
   align-self: stretch;
 `;
 
-const Left = styled.div`
+const CardInfo = styled.div`
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
+  justify-content: space-between;
+  align-items: center;
+  align-self: stretch;
 `;
 
-const RequestTime = styled.span`
+const OrderTime = styled.span`
   ${reg14}
   color: var(--black);
 `;
 
 const TableNumber = styled.div`
+  ${bold36}
+  color: var(--black);
+  text-align: center;
+`;
+
+const OrderTitle = styled.span`
+  ${reg14}
+  color: var(--black);
+`;
+
+const OrderNumber = styled.span`
   ${bold36}
   color: var(--black);
 `;
@@ -160,19 +163,17 @@ const CompleteButtonWrapper = styled.div`
   justify-content: center;
   align-items: center;
   align-self: stretch;
-  padding-top: 8px;
 `;
 
 const CompleteButton = styled.button`
   ${bold24}
   display: flex;
-  padding: 0.625rem 1.5rem;
+  padding-top: 0.625rem;
   justify-content: center;
   align-items: center;
-  
+
   background: none;
   border: none;
   cursor: pointer;
   color: var(--primary);
 `;
-

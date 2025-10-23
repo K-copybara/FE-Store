@@ -4,7 +4,7 @@ import { authClient } from './client';
 export const getOrders = async (storeId, status) => {
   try {
     const res = await authClient.get(
-      `api/merchant/orders?storeId=${storeId}&status=${status}`
+      `/api/merchant/orders?storeId=${storeId}&status=${status}`
     );
     return res.data.data;
   } catch (err) {
@@ -15,17 +15,18 @@ export const getOrders = async (storeId, status) => {
 //주문완료
 export const postOrderComplete = async (orderId) => {
   try {
-    const res = await authClient.post(`api/merchant/orders/${orderId}`);
+    const res = await authClient.post(`/api/merchant/orders/${orderId}`);
     return res.data;
   } catch (err) {
     throw err;
   }
 };
 
-//요청조회
-export const getRequests = async () => {
+export const getRequests = async (storeId) => {
   try {
-    const res = await authClient.get(`api/merchant/orders/requests`);
+    const res = await authClient.get(
+      `/api/merchant/orders/requests?storeId=${storeId}`
+    );
     return res.data.data;
   } catch (err) {
     throw err;
@@ -36,7 +37,7 @@ export const getRequests = async () => {
 export const postRequestComplete = async (requestId) => {
   try {
     const res = await authClient.post(
-      `api/merchant/orders/${requestId}/request`
+      `/api/merchant/orders/${requestId}/request`
     );
     return res.data;
   } catch (err) {
@@ -44,12 +45,16 @@ export const postRequestComplete = async (requestId) => {
   }
 };
 
-export const postOrderCancle = async (paymentKey, data) => {
+export const postOrderCancel = async (orderId) => {
   try {
+    const data = {
+      cancelReason: '취소 사유',
+    };
     const res = await authClient.post(
-      `v1/payments/${paymentKey}/cancel`,
+      `/v1/payments/order/${orderId}/cancel`,
       data
     );
+    console.log(res);
     return res.data;
   } catch (err) {
     throw err;
