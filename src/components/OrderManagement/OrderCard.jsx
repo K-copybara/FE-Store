@@ -90,7 +90,7 @@ const OrderCard = ({ order, onComplete, onCancel }) => {
         isOpen={showCancelModal}
         onClose={() => setShowCancelModal(false)}
         onConfirm={handleConfirmCancel}
-        message="주문을 취소하시겠습니까?\n손님에게 취소 사유를 전달해주세요."
+        message={`주문을 취소하시겠습니까?\n손님에게 취소 사유를 전달해주세요.`}
       />
     </>
   );
@@ -161,7 +161,6 @@ const RequestSection = styled.div`
 
   background: rgba(255, 77, 77, 0.1);
   color: var(--red);
-  text-align: center;
 `;
 
 const MenuItem = styled.div`
