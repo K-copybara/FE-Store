@@ -343,6 +343,25 @@ export default EditSection;
 const Container = styled.div`
   background: var(--white);
   padding: 1.875rem;
+  min-width: 0; //자식 축소 허용
+
+    /* 스크롤바 스타일 */
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+  &::-webkit-scrollbar-track {
+    background: var(--gray100);
+    border-radius: 3px;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: var(--gray300);
+    border-radius: 3px;
+  }
+  &::-webkit-scrollbar-thumb:hover {
+    background: var(--gray300);
+  }
+  overflow-x: auto;
+  
 `;
 
 const Header = styled.div`
@@ -355,6 +374,7 @@ const Header = styled.div`
 const SectionTitle = styled.h3`
   ${bold24}
   color: var(--black);
+  white-space: nowrap;
 `;
 
 const ActionButton = styled.button`
@@ -381,6 +401,7 @@ const EditingArea = styled.div`
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
+
 `;
 
 const TextArea = styled.textarea`
@@ -392,23 +413,24 @@ const TextArea = styled.textarea`
   border-radius: 0.625rem;
   background: var(--gray100);
   cursor: default;
-  white-space: pre-wrap;   /* 줄바꿈 유지 */
-  overflow-y: auto;        /* 내용이 많을 때 스크롤 */
-  box-sizing: border-box;  /* 패딩 포함한 크기 계산 */
+  white-space: pre-wrap; 
+  overflow-y: auto;       
+  box-sizing: border-box;  
   
-  /* 스크롤바 스타일링 */
+    /* 스크롤바 스타일 */
   &::-webkit-scrollbar {
-    width: 8px;
+    width: 6px;
   }
-  
   &::-webkit-scrollbar-track {
     background: var(--gray100);
-    border-radius: 4px;
+    border-radius: 3px;
   }
-  
   &::-webkit-scrollbar-thumb {
     background: var(--gray300);
-    border-radius: 4px;
+    border-radius: 3px;
+  }
+  &::-webkit-scrollbar-thumb:hover {
+    background: var(--gray300);
   }
 `;
 
@@ -416,28 +438,29 @@ const TextDisplay = styled.div`
   ${reg18}
   width: 100%;
   height: 25vh;
-  padding: 1.5rem;     /* TextArea와 동일한 패딩 */
+  padding: 1.5rem;  
   border: 1px solid var(--secondary);
   border-radius: 0.625rem;
   background: var(--white);
   cursor: default;
-  white-space: pre-wrap;   /* 줄바꿈 유지 */
-  overflow-y: auto;        /* 내용이 많을 때 스크롤 */
-  box-sizing: border-box;  /* 패딩 포함한 크기 계산 */
+  white-space: pre-wrap;  
+  overflow-y: auto;        
+  box-sizing: border-box;
   
-  /* 스크롤바 스타일링 */
+    /* 스크롤바 스타일 */
   &::-webkit-scrollbar {
-    width: 8px;
+    width: 6px;
   }
-  
   &::-webkit-scrollbar-track {
     background: var(--gray100);
-    border-radius: 4px;
+    border-radius: 3px;
   }
-  
   &::-webkit-scrollbar-thumb {
     background: var(--gray300);
-    border-radius: 4px;
+    border-radius: 3px;
+  }
+  &::-webkit-scrollbar-thumb:hover {
+    background: var(--gray300);
   }
 `;
 
@@ -446,11 +469,13 @@ const BusinessHoursContainer = styled.div`
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  min-width: 10rem;
+
 `;
 
 const BusinessHourRow = styled.div`
   display: grid;
-  grid-template-columns: 2rem 1fr auto 1fr;
+  grid-template-columns: 1rem minmax(8rem, 1fr) 6rem minmax(8rem, 1fr);
   align-items: center;
   gap: 0.75rem;
 `;
@@ -458,24 +483,26 @@ const BusinessHourRow = styled.div`
 const DayLabel = styled.div`
   ${bold18}
   color: var(--black);
+  flex-shrink: 0;
 `;
 
 const TimeGroup = styled.div`
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  min-width: 0;
 `;
 const TimeInput2 = styled.div`
   ${reg18}
   color: var(--black);
-  width: 100%;
+  min-width: 1rem;
   text-align: center;
 `;
 
 const TimeInput = styled.input`
   ${reg18}
   color: var(--black);
-  width: 100%;
+  min-width: 1rem;
   text-align: center;
 
   border-radius: 0.625rem;
@@ -487,11 +514,14 @@ const TimeInput = styled.input`
 const TimeSeparator = styled.span`
     ${reg18}
   color: var(--black);
+  flex-shrink: 0;
 `;
 
 const BreakLabel = styled.div`
   ${bold18}
   color: var(--black);
   text-align: right;
+  white-space: nowrap;
+  flex-shrink: 0;
 `;
 
