@@ -184,9 +184,12 @@ const DailyStatsPage = () => {
 
           <MenuRating>
             <MenuRatingIcon />
-            {item.reviewCount}</MenuRating>
-          <MenuSales>{item.sales?.toLocaleString()}원 </MenuSales>
-          <MenuCount> / {item.orderCount}건</MenuCount>
+            {item.reviewCount}
+            </MenuRating>
+          <MenuSalesCount>
+            <MenuSales>{item.sales?.toLocaleString()}원 </MenuSales>
+            <MenuCount> / {item.orderCount}건</MenuCount>
+          </MenuSalesCount>
          </MenuListItem>
         ))}
        </MenuList>
@@ -202,7 +205,7 @@ const DailyStatsPage = () => {
          <MenuListItem key={index}>
           <MenuName>{slot.hour}시</MenuName>
           <MenuCount2>{slot.orderCount}건</MenuCount2>
-          <MenuSales>{slot.sales?.toLocaleString()}원</MenuSales>
+          
          </MenuListItem>
         ))}
        </TimeList>
@@ -229,11 +232,13 @@ const Layout = styled.div`
 const Title = styled.h1`  
     ${bold36}
     color: var(--black);
+    white-space: nowrap;
 `;
 
 const TodayDate = styled.div`
     ${bold36}
     color: var(--black);
+    white-space: nowrap;
 `;
 const MainContent = styled.div`
   flex: 1;
@@ -265,18 +270,21 @@ const StatBlock = styled.div`
 const StatLabel = styled.div`
   ${bold24}
   color: var(--gray700);
+  white-space: nowrap;
 `;
 
 const StatValue = styled.div`
   ${bold36}
   color: var(--black);
   text-align: right;
+  white-space: nowrap;
 `;
 
 const SectionTitle = styled.h2`
   ${bold24}
   color: var(--gray700);
   margin-bottom: 1.25rem;
+  white-space: nowrap;
 `;
 
 const MenuSection = styled.div`
@@ -383,14 +391,14 @@ const MenuListItem = styled.div`
 const MenuRank = styled.div`
   ${bold24}
   color: var(--black);
-  min-width: 2rem;
+  // min-width: 1.2rem;
   flex-shrink: 0;
+  white-space: nowrap;
 `;
 
 const MenuName = styled.div`
   ${bold24}
-  min-width: 2.5rem;
-  flex: 1;
+  min-width: 10rem;
   color: var(--black);
   text-align: left;
   overflow: hidden; 
@@ -400,10 +408,11 @@ const MenuName = styled.div`
 const MenuRating = styled.div`
   ${reg24}
   display: flex;
+  flex: 1;
   align-items: center;
   justify-content: center;
   gap: 0.25rem;
-  width: 6rem;
+  min-width: 6rem;
   flex-shrink: 0;  //축소 방지
 `;
 
@@ -413,25 +422,29 @@ const MenuRatingCount = styled.div`
   color: var(--black);
 `;
 
-const MenuSales = styled.div`
+
+const MenuSalesCount = styled.div`
   ${reg24}
-  width: 10rem; 
+  display: flex;
+  flex: 1;
+  flex-direction: row;
+  min-width: 13rem;
   flex-shrink: 0;
-  color: var(--black);
-  text-align: right;
+  justify-content: flex-end;
 `;
 
-const MenuDivider = styled.div`
+const MenuSales = styled.div`
   ${reg24}
-  color: var(--gray500);
+  color: var(--black);
+  text-align: right;
+  white-space: nowrap;
 `;
 
 const MenuCount = styled.div`
   ${reg24}
-  width: 3rem;
-  flex-shrink: 0;  // 추가: 축소 방지
   color: var(--gray500);
   text-align: right;
+  white-space: nowrap;
 `;
 
 const MenuCount2 = styled.div`
