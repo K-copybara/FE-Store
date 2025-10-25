@@ -366,6 +366,23 @@ const Container = styled.div`
   padding: 1.875rem;
   gap: 2rem;
   position: relative;
+  min-width: 0;  // 추가: flex 자식이 축소될 수 있도록
+  overflow-x: auto; 
+    /* 스크롤바 스타일 */
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+  &::-webkit-scrollbar-track {
+    background: var(--gray100);
+    border-radius: 3px;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: var(--gray300);
+    border-radius: 3px;
+  }
+  &::-webkit-scrollbar-thumb:hover {
+    background: var(--gray300);
+  }
 `;
 
 const Header = styled.div`
@@ -399,6 +416,7 @@ const MenuList = styled.div`
   flex-direction: column;
   gap: 1rem;
   position: relative;
+  min-width: 40rem;
 `;
 
 const EmptyState = styled.div`
@@ -412,6 +430,7 @@ const EmptyState = styled.div`
 const MenuCard = styled.div`
   position: relative;
   display: flex;
+  height: 5rem;
   padding: 0.6875rem 1.5rem;
   justify-content: space-between;
   align-items: center;
@@ -419,7 +438,8 @@ const MenuCard = styled.div`
   border: 1px solid var(--third);
   border-radius: 0.625rem;
   background: var(--white);
-
+  min-width: 0;
+  
   &:hover {
     border-color: var(--primary);
   }
@@ -450,7 +470,8 @@ const CategoryTag = styled.div`
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  min-width: 15%;
+  min-width: 10rem;
+  flex-shrink: 0;
 `;
 
 const MenuContent = styled.div`
@@ -460,15 +481,17 @@ const MenuContent = styled.div`
   flex: 1;
   position: relative;
   z-index: 2;
+  min-width: 0;
+  overflow: hidden;
 `;
 
 const MenuImage = styled.img`
   height: 100%;
   aspect-ratio: 1;
-  max-width: 60px;
-  max-height: 60px;
-  min-width: 60px;
-  min-height: 60px;
+  width: 3.75rem;
+  height: 3.75rem;
+  min-width: 3.75rem;
+  min-height: 3.75rem;
   object-fit: cover;
   border-radius: 0.5rem;
   background: var(--gray100);
@@ -497,12 +520,16 @@ const MenuInfo = styled.div`
   flex-direction: column;
   gap: 0.25rem;
   min-width: 0;
+  overflow: hidden;
 `;
 
 const MenuName = styled.h4`
   ${reg18}
   color: var(--black);
   margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 `;
 
 const MenuDescription = styled.p`
@@ -514,6 +541,7 @@ const MenuDescription = styled.p`
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
+  word-break: break-word; //길면 줄바꿈
 `;
 
 const MenuPrice = styled.div`
@@ -521,6 +549,8 @@ const MenuPrice = styled.div`
   color: var(--black);
   flex-shrink: 0;
   margin-right: 1rem;
+  white-space: nowrap;
+  min-width: fit-content;
 `;
 
 const EditButton = styled.button`

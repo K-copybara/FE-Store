@@ -35,6 +35,7 @@ const ActionButton = styled.button`
   ${bold24}
   display: flex;
   padding: 0.625rem;
+  padding-bottom: 0;
   justify-content: center;
   align-items: center;
   gap: 0.625rem;

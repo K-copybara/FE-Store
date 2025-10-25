@@ -190,6 +190,10 @@ const OrderContainer = styled.div`
   flex: 1;
   height: 100%;
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+    &::-webkit-scrollbar {
+    display: none;
+    }
   box-sizing: border-box;
 
   &::-webkit-scrollbar {

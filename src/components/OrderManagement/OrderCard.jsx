@@ -46,16 +46,18 @@ const OrderCard = ({ order, onComplete, onCancel }) => {
     <>
       <CardWrapper status={order.status}>
         {/* 상단: 주문 시간과 주문 번호 */}
-        <CardHeader>
-          <Left>
-            <OrderTime>{formatDateTime(order.orderedAt)}</OrderTime>
-            <TableNumber hasRequest={hasRequest}>{order.tableId}번</TableNumber>
-          </Left>
-          <Right>
-            <OrderTitle>주문번호</OrderTitle>
+        <HeaderWrapper>
+          <CardHeader>
+            <OrderTime>{`주문번호 (${formatDateTime(order.orderedAt)})`}</OrderTime>
+
+            <OrderTitle>테이블</OrderTitle>
+          </CardHeader>
+
+          <CardInfo>
             <OrderNumber>{order.orderId.split('-')[0]}</OrderNumber>
-          </Right>
-        </CardHeader>
+            <TableNumber>{order.tableId}번</TableNumber>
+          </CardInfo>
+        </HeaderWrapper>
 
         {/* 요청사항 (있을 때만 표시) */}
         {hasRequest && <RequestSection>{order.requestNote}</RequestSection>}
@@ -90,7 +92,7 @@ const OrderCard = ({ order, onComplete, onCancel }) => {
         isOpen={showCancelModal}
         onClose={() => setShowCancelModal(false)}
         onConfirm={handleConfirmCancel}
-        message="주문을 취소하시겠습니까?\n손님에게 취소 사유를 전달해주세요."
+        message={`주문을 취소하시겠습니까?\n손님에게 취소 사유를 전달해주세요.`}
       />
     </>
   );
@@ -113,22 +115,26 @@ const CardWrapper = styled.div`
   cursor: ${(props) => (props.status === 'PENDING' ? 'pointer' : 'default')};
 `;
 
+const HeaderWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+`;
+
 const CardHeader = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
   align-self: stretch;
 `;
-const Left = styled.div`
+
+const CardInfo = styled.div`
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
+  justify-content: space-between;
+  align-items: center;
+  align-self: stretch;
 `;
-const Right = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-`;
+
 const OrderTime = styled.span`
   ${reg14}
   color: var(--black);
@@ -138,7 +144,6 @@ const TableNumber = styled.div`
   ${bold36}
   color: var(--black);
   text-align: center;
-  margin-bottom: ${(props) => (props.hasRequest ? '8px' : '12px')};
 `;
 
 const OrderTitle = styled.span`
@@ -161,7 +166,6 @@ const RequestSection = styled.div`
 
   background: rgba(255, 77, 77, 0.1);
   color: var(--red);
-  text-align: center;
 `;
 
 const MenuItem = styled.div`
