@@ -8,6 +8,7 @@ import {
   effectSize,
 } from './calculateData';
 import { recentMonthsYYYYMM } from './formatTime';
+import axios from 'axios';
 
 export async function fetchWeekdayInsights(storeId) {
   const months = recentMonthsYYYYMM(2);
