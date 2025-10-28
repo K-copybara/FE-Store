@@ -95,7 +95,7 @@ export function useEventSource({
           },
           onmessage: (e) => {
             handlersRef.current.onmessage?.(e);
-            log('메시지 수신', e.event);
+            //log('메시지 수신', e.event);
           },
           onerror: (err) => {
             error('연결 오류 발생:', err);
