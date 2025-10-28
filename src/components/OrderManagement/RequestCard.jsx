@@ -37,6 +37,7 @@ const RequestCard = ({ request, onComplete }) => {
           </CardInfo>
         </HeaderWrapper>
 
+        {/* {request.requestNote} */}
         {request.requestNote && (
           <RequestNote>{request.requestNote}</RequestNote>
         )}
@@ -51,11 +52,15 @@ const RequestCard = ({ request, onComplete }) => {
             ))}
           </ItemList>
         )}
-        {request.status === 'PENDING' && (
-          <CompleteButtonWrapper>
-            <CompleteButton onClick={handleCompleteClick}>완료</CompleteButton>
-          </CompleteButtonWrapper>
-        )}
+        <ButtonContainer>
+          {request.status === 'PENDING' && (
+            <CompleteButtonWrapper>
+              <CompleteButton onClick={handleCompleteClick}>
+                완료
+              </CompleteButton>
+            </CompleteButtonWrapper>
+          )}
+        </ButtonContainer>
       </CardWrapper>
 
       <ConfirmModal
@@ -74,14 +79,21 @@ const CardWrapper = styled.div`
   display: flex;
   flex-direction: column;
   padding: 0.9375rem 1.25rem;
-  gap: 1.25rem;
-  align-self: stretch;
+  gap: 1rem;
   align-items: flex-start;
-
+  overflow-y: auto;
+  overflow-x: hidden;
+  height: 100%;
+  flex-shrink: 0;
+  width: 25rem;
   background: var(--white);
   border-radius: 1.25rem;
-  border: 2px solid var(--secondary);
-  box-shadow: '0 4px 8px 0 rgba(130, 152, 255, 0.20)';
+  border: 2px solid var(--yellow);
+  box-shadow: 0 4px 8px 0 rgba(252, 201, 0, 0.2);
+  -webkit-overflow-scrolling: touch;
+  &::-webkit-scrollbar {
+    display: none;
+  }
 `;
 
 const HeaderWrapper = styled.div`
@@ -107,6 +119,7 @@ const CardInfo = styled.div`
 const OrderTime = styled.span`
   ${reg14}
   color: var(--black);
+  white-space: nowrap;
 `;
 
 const TableNumber = styled.div`
@@ -118,6 +131,7 @@ const TableNumber = styled.div`
 const OrderTitle = styled.span`
   ${reg14}
   color: var(--black);
+  white-space: nowrap;
 `;
 
 const OrderNumber = styled.span`
@@ -128,7 +142,14 @@ const OrderNumber = styled.span`
 const RequestNote = styled.div`
   ${reg24}
   color: var(--black);
-  align-self: stretch;
+  /* 긴 텍스트 처리 */
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  word-break: break-word;
+
+  width: 100%;
+
+  white-space: normal; /* 줄바꿈 허용 */
 `;
 
 const ItemList = styled.div`
@@ -176,4 +197,11 @@ const CompleteButton = styled.button`
   border: none;
   cursor: pointer;
   color: var(--primary);
+`;
+
+const ButtonContainer = styled.div`
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  margin-top: auto;
 `;

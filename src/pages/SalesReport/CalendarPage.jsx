@@ -169,9 +169,9 @@ const CalendarPage = () => {
 
   // 날짜 클릭하면 DailyStatsPage로 이동
   const handleDateClick = (day) => {
-  // 매출이 0이거나 현재 달이 아닌 경우 클릭 비활성화
-  if (!day.isCurrentMonth || day.sales === 0) {
-  return;
+    // 매출이 0이거나 현재 달이 아닌 경우 클릭 비활성화
+    if (!day.isCurrentMonth || day.sales === 0) {
+    return;
   }
 
 
@@ -189,10 +189,12 @@ const CalendarPage = () => {
 
   // 주별 총 매출 계산 함수
   const getWeekTotal = (week) => {
-  return week.reduce((total, day) => {
-  return total + (day.isCurrentMonth ? day.sales : 0);
-  }, 0);
+    return week.reduce((total, day) => {
+    return total + (day.isCurrentMonth ? day.sales : 0);
+    }, 0);
   };
+
+  
 
 
 
@@ -257,9 +259,10 @@ const CalendarPage = () => {
     {/* 요일 헤더 */}
     <thead>
     <tr>
-      {['일','월','화','수','목','금','토','합계'].map((day)=>
+      {['일','월','화','수','목','금','토'].map((day)=>(
       <DayHeader key={day}>{day}</DayHeader>
-      )}
+      ))}
+      <DayHeader isTotal>합계</DayHeader>
     </tr>
     </thead>
 
@@ -270,6 +273,7 @@ const CalendarPage = () => {
       {weeks.map((week, weekIndex) => {
       const firstDateOfWeek = week.find(day => day.isCurrentMonth)?.date || week[0].date;
       const weekNumber = getWeekNumberInMonth(firstDateOfWeek);
+      const weekTotal = getWeekTotal(week);
       
       return (
       <DataRow key={weekIndex}>
@@ -288,11 +292,9 @@ const CalendarPage = () => {
         >
         {day.date.getDate()}
         </DateNumber>
-        {day.isCurrentMonth && (
-        <SalesAmount isToday={day.isToday}>
-        {day.sales.toLocaleString()}
-        </SalesAmount>
-        )}
+          <SalesAmount isToday={day.isToday}>
+          {day.isCurrentMonth && day.sales > 0 ? day.sales.toLocaleString() : '\u00A0'}
+          </SalesAmount>
         </DayCellContent>
       </DayCell>
       ))}
@@ -302,7 +304,7 @@ const CalendarPage = () => {
         {weekNumber}주
         </WeekNumber>
         <WeekSalesAmount>
-        {getWeekTotal(week).toLocaleString()}
+          {weekTotal > 0 ? weekTotal.toLocaleString() : '\u00A0'}
         </WeekSalesAmount>
       </WeekTotalContent>
       </WeekTotalCell>
@@ -315,19 +317,26 @@ const CalendarPage = () => {
       <SpacerCell colSpan="8" /> 
     </tr>
     <DataRow> 
-      {['일', '월', '화', '수', '목', '금', '토'].map((dayName) => (
-      <FooterCell key={dayName}>
-      <FooterCellContent>
-      <DayLabel>{dayName}</DayLabel>
-      <TotalAmount>{weeklySalesData[dayName]?.toLocaleString() || 0}</TotalAmount>
-      </FooterCellContent>
-      </FooterCell>
-      ))}
+      {['일', '월', '화', '수', '목', '금', '토'].map((dayName) => {
+        const daySales = weeklySalesData[dayName] || 0;
+        return (
+          <FooterCell key={dayName}>
+            <FooterCellContent>
+              <DayLabel>{dayName}</DayLabel>
+              <TotalAmount>
+                {daySales > 0 ? daySales.toLocaleString() : '\u00A0'}
+              </TotalAmount>
+            </FooterCellContent>
+          </FooterCell>
+        );
+      })}
       <FooterCell>
-      <FooterCellContent>
-      <DayLabel>총</DayLabel>
-      <TotalAmount>{monthTotal.toLocaleString()}</TotalAmount>
-      </FooterCellContent>
+        <FooterCellContent>
+          <DayLabel>총</DayLabel>
+          <TotalAmount>
+            {monthTotal > 0 ? monthTotal.toLocaleString() : '\u00A0'}
+          </TotalAmount>
+        </FooterCellContent>
       </FooterCell>
     </DataRow>
     </tfoot>
@@ -343,7 +352,6 @@ const CalendarPage = () => {
 export default CalendarPage;
 
 
-// 스타일 컴포넌트들
 const Layout = styled.div`
     display: flex;
     flex-direction: row;
@@ -431,6 +439,7 @@ const DayHeader = styled.th`
     padding: 0.5rem;
     background: var(--third);
     border: 1px solid var(--secondary);
+    font-weight: ${props => props.isTotal ? 'bold' : 'normal'};
     text-align: center;
     vertical-align: middle;
     white-space: nowrap;
@@ -439,6 +448,7 @@ const DayHeader = styled.th`
     }
     &:last-child {
         border-top-right-radius: 0.625rem;
+
     }
     overflow: hidden;
 `;
