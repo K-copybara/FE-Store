@@ -64,13 +64,15 @@ const OrderCard = ({ order, onComplete, onCancel }) => {
 
         {/* 메뉴 리스트 */}
 
-        {order.items.map((item, index) => (
-          <MenuItem key={index}>
-            <MenuName>{item.menuName}</MenuName>
-            <MenuQuantity>{item.amount}</MenuQuantity>
-          </MenuItem>
-        ))}
+          {order.items.map((item, index) => (
+            <MenuItem key={index}>
+              <MenuName>{item.menuName}</MenuName>
+              <MenuQuantity>{item.amount}</MenuQuantity>
+            </MenuItem>
+          ))}
 
+
+        <ButtonContainer>
         {/* 하단 버튼 - COMPLETED 상태면 버튼 숨김 */}
         {order.status === 'PENDING' && (
           <CancelCompleteButton
@@ -80,6 +82,7 @@ const OrderCard = ({ order, onComplete, onCancel }) => {
             onRightClick={handleCompleteClick}
           />
         )}
+        </ButtonContainer>
       </CardWrapper>
 
       <ConfirmModal
@@ -105,14 +108,24 @@ const CardWrapper = styled.div`
   flex-direction: column;
   padding: 0.9375rem 1.25rem;
   gap: 1.25rem;
-  align-self: stretch;
-  align-items: center;
-
+  //상단 헤더 고정, 메뉴만 스크롤 align-self: stretch;
+  align-items: flex-start;
+  overflow-y: auto;
+  overflow-x: hidden;
+  height: 100%;
+  flex-shrink: 0;
+ 
+  width: 20rem;
   background: var(--white);
   border-radius: 1.25rem;
   border: 2px solid var(--secondary);
   box-shadow: 0 4px 8px 0 rgba(130, 152, 255, 0.2);
   cursor: ${(props) => (props.status === 'PENDING' ? 'pointer' : 'default')};
+
+  -webkit-overflow-scrolling: touch;
+  &::-webkit-scrollbar {
+  display: none;
+  }
 `;
 
 const HeaderWrapper = styled.div`
@@ -121,11 +134,22 @@ const HeaderWrapper = styled.div`
   width: 100%;
 `;
 
+//상단 헤더 고정, 메뉴만 스크롤
+const MenuScrollContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  width: 100%;
+  gap: 1.25rem;
+  overflow-y: auto;
+`;
 const CardHeader = styled.div`
   display: flex;
   justify-content: space-between;
+  flex-direction: row;
   align-items: center;
   align-self: stretch;
+  gap: 1rem;
 `;
 
 const CardInfo = styled.div`
@@ -138,6 +162,7 @@ const CardInfo = styled.div`
 const OrderTime = styled.span`
   ${reg14}
   color: var(--black);
+  white-space: nowrap;
 `;
 
 const TableNumber = styled.div`
@@ -149,6 +174,7 @@ const TableNumber = styled.div`
 const OrderTitle = styled.span`
   ${reg14}
   color: var(--black);
+  white-space: nowrap;
 `;
 
 const OrderNumber = styled.span`
@@ -185,4 +211,11 @@ const MenuQuantity = styled.span`
   ${bold24}
   text-align: right;
   font-weight: 700;
+`;
+
+const ButtonContainer = styled.div`
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  margin-top: auto;
 `;
