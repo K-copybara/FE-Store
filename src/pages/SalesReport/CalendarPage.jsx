@@ -194,6 +194,8 @@ const CalendarPage = () => {
     }, 0);
   };
 
+  
+
 
 
   const getWeekNumberInMonth = (date) => {
@@ -271,6 +273,7 @@ const CalendarPage = () => {
       {weeks.map((week, weekIndex) => {
       const firstDateOfWeek = week.find(day => day.isCurrentMonth)?.date || week[0].date;
       const weekNumber = getWeekNumberInMonth(firstDateOfWeek);
+      const weekTotal = getWeekTotal(week);
       
       return (
       <DataRow key={weekIndex}>
@@ -301,7 +304,7 @@ const CalendarPage = () => {
         {weekNumber}주
         </WeekNumber>
         <WeekSalesAmount>
-        {getWeekTotal > 0 ? getWeekTotal(week).toLocaleString() : '\u00A0'}
+          {weekTotal > 0 ? weekTotal.toLocaleString() : '\u00A0'}
         </WeekSalesAmount>
       </WeekTotalContent>
       </WeekTotalCell>
@@ -314,16 +317,19 @@ const CalendarPage = () => {
       <SpacerCell colSpan="8" /> 
     </tr>
     <DataRow> 
-      {['일', '월', '화', '수', '목', '금', '토'].map((dayName) => (
-      <FooterCell key={dayName}>
-        <FooterCellContent>
-          <DayLabel>{dayName}</DayLabel>
-          <TotalAmount>
-            {weeklySalesData[dayName] > 0 ? weeklySalesData[dayName]?.toLocaleString() : '\u00A0'}
-          </TotalAmount>
-        </FooterCellContent>
-      </FooterCell>
-      ))}
+      {['일', '월', '화', '수', '목', '금', '토'].map((dayName) => {
+        const daySales = weeklySalesData[dayName] || 0;
+        return (
+          <FooterCell key={dayName}>
+            <FooterCellContent>
+              <DayLabel>{dayName}</DayLabel>
+              <TotalAmount>
+                {daySales > 0 ? daySales.toLocaleString() : '\u00A0'}
+              </TotalAmount>
+            </FooterCellContent>
+          </FooterCell>
+        );
+      })}
       <FooterCell>
         <FooterCellContent>
           <DayLabel>총</DayLabel>
