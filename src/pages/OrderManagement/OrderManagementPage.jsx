@@ -91,7 +91,8 @@ const OrderManagementPage = () => {
   }, [requests, activeReq]);
 
   return (
-    <>
+
+    <Container>
       <OrderContainer>
         <OrderStatus>
           <OrderTitle>주문</OrderTitle>
@@ -118,6 +119,7 @@ const OrderManagementPage = () => {
             </TabButton>
           </TabContainer>
         </OrderStatus>
+        <CardContainer>
         {orders.length === 0 ? (
           <EmptyMessage>
             {activeTab === 'PENDING'
@@ -127,17 +129,20 @@ const OrderManagementPage = () => {
                 : '취소된 주문이 없습니다.'}
           </EmptyMessage>
         ) : (
+          
           orders.map((order) => (
-            <OrderCard
-              key={order.orderId}
-              order={order}
-              onComplete={completeOrder}
-              onCancel={cancelOrder}
-            />
+              <OrderCard
+                key={order.orderId}
+                order={order}
+                onComplete={completeOrder}
+                onCancel={cancelOrder}
+              />
           ))
         )}
+        </CardContainer>
       </OrderContainer>
-      <OrderContainer>
+
+      <RequestContainer>
         <OrderStatus>
           <OrderTitle>요청</OrderTitle>
           <TabContainer>
@@ -156,6 +161,7 @@ const OrderManagementPage = () => {
             </TabButton>
           </TabContainer>
         </OrderStatus>
+        <CardContainer>
         {filteredRequests.length === 0 ? (
           <EmptyMessage>
             {activeReq === 'PENDING'
@@ -171,42 +177,65 @@ const OrderManagementPage = () => {
             />
           ))
         )}
-      </OrderContainer>
-    </>
+        </CardContainer>
+      </RequestContainer>
+    </Container>
   );
 };
 
 export default OrderManagementPage;
 
+const Container = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  overflow: hidden;
+  height: 100%;
+  width: 100%;
+`;
 const OrderContainer = styled.div`
+  display: flex;
+  padding: 1.25rem 1.5625rem;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  
+  overflow: hidden;
+  border-radius: 1.25rem;
+  background-color: var(--white);
+  flex: 1;
+  min-height: 0;
+  height: 100%;
+
+  box-sizing: border-box;
+
+
+`;
+
+const RequestContainer = styled.div`
   display: flex;
   padding: 1.25rem 1.5625rem;
   flex-direction: column;
   align-items: center;
   gap: 1.25rem;
 
+  min-height: 0;
+  overflow: hidden;
   border-radius: 1.25rem;
   background-color: var(--white);
-  flex: 1;
+  flex: 0.6;
   height: 100%;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-    &::-webkit-scrollbar {
-    display: none;
-    }
-  box-sizing: border-box;
 
-  &::-webkit-scrollbar {
-    display: none;
-  }
+  box-sizing: border-box;
 `;
 
 const OrderStatus = styled.div`
   display: flex;
-  justify-content: space-between;
   align-items: center;
   align-self: stretch;
-  margin-bottom: 1.25rem;
+  gap: 1.5rem;
+  flex-direction: row;
+  flex-shrink: 0;
 `;
 
 const OrderTitle = styled.div`
@@ -234,10 +263,27 @@ const TabButton = styled.button`
   }
 `;
 
+const CardContainer = styled.div`
+  display: flex;
+  flex-direction: row;  
+  gap: 1.25rem;
+  flex: 1;
+  min-height: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  align-items: flex-start;
+  width: 100%;
+  -webkit-overflow-scrolling: touch;
+  &::-webkit-scrollbar {
+  display: none;
+  }
+`;
+
 const TabDivider = styled.span`
   ${bold24}
   color: var(--gray300);
 `;
+
 
 const EmptyMessage = styled.div`
   ${reg24}

@@ -131,6 +131,7 @@ const StoreName = styled.div`
   align-items: center;
   gap: 0.625rem;
   align-self: stretch;
+  text-align: center;
 
   border-radius: 1.25rem;
   background: var(--gray100);
@@ -156,7 +157,7 @@ const MenuItem = styled.li`
 
 const StyledNavLink = styled(NavLink)`
   ${bold24}
-  display: flex; /* 링크가 li 영역 전체를 차지하도록 */
+  display: flex;
   border-radius: 0.5rem;
   text-decoration: none;
   gap: 0.75rem;
