@@ -59,3 +59,15 @@ export const getMenuSales = async (date, sort, storeId) => {
     throw err;
   }
 };
+
+//2주치 요청사항
+export const getRequestNotes = async (storeId) => {
+  try {
+    const res = await authClient.get(
+      `/api/merchant/stats/order-requests?storeId=${storeId}`
+    );
+    return res.data.data;
+  } catch (err) {
+    throw err;
+  }
+};

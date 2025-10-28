@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
-import { bold36, bold24, reg24 } from '../styles/font';
+import { bold36, bold24, reg18 } from '../styles/font';
 import { NavLink, useNavigate } from 'react-router-dom';
 
 import OrderIcon from '../assets/icons/Sidebar/order-icon.svg?react';
@@ -11,6 +11,7 @@ import CalendarIcon from '../assets/icons/Sidebar/calendar-icon.svg?react';
 import DailyStatsIcon from '../assets/icons/Sidebar/dailystats-icon.svg?react';
 import { postLogout } from '../api/auth';
 import { getStoreInfo } from '../api/store';
+import CarouselBanner from './Carousel';
 
 const Sidebar = () => {
   const [showSalesDropdown, setShowSalesDropdown] = useState(false);
@@ -98,6 +99,7 @@ const Sidebar = () => {
         </MenuItem>
       </MenuList>
       <LogoutContainer>
+        <CarouselBanner />
         <BottomLine />
         <LogoutButton onClick={handleLogout}>로그아웃</LogoutButton>
       </LogoutContainer>
@@ -135,26 +137,23 @@ const StoreName = styled.div`
   background: var(--gray100);
 `;
 
-
 const MenuList = styled.ul`
   list-style: none;
   width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 1rem; 
+  gap: 1rem;
 `;
 
 const Line = styled.div`
   border-bottom: 0.5px solid var(--gray300);
   width: 100%;
 `;
-
 const MenuItem = styled.li`
   align-items: flex-start;
   align-self: stretch;
   padding: 0.62rem;
 `;
-
 
 const StyledNavLink = styled(NavLink)`
   ${bold24}
@@ -165,12 +164,10 @@ const StyledNavLink = styled(NavLink)`
 
   color: var(--gray700);
 
-  
   &:hover {
     color: var(--black);
   }
 
-  /* 현재 활성화된 페이지일 때의 스타일 */
   &.active {
     color: var(--primary);
   }
@@ -238,9 +235,9 @@ const BottomLine = styled.div`
 const LogoutButton = styled.div`
   width: 100%;
   display: flex;
-  padding: 0.8rem 1.25rem;
+  padding: 0.8rem 1rem;
   padding-bottom: 0;
-  ${reg24}
+  ${reg18}
   color: var(--gray500);
 
   cursor: pointer;

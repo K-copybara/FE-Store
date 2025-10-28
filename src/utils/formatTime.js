@@ -21,3 +21,17 @@ export const formatDateTime = (isoString) => {
   if (!isoString) return '';
   return dayjs.utc(isoString).tz('Asia/Seoul').format('YYYY-MM-DD HH:mm:ss');
 };
+
+export const getTodayDate = () => {
+  return dayjs().format('YYYY-MM-DD');
+};
+
+export const getLastWeekDate = () => {
+  return dayjs().subtract(7, 'day').format('YYYY-MM-DD');
+};
+
+export const recentMonthsYYYYMM = (n) => {
+  return Array.from({ length: n }, (_, i) =>
+    dayjs().subtract(i, 'month').format('YYYY-MM')
+  ).reverse(); // 오래된→최신
+};
