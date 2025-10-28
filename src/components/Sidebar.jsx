@@ -129,42 +129,43 @@ const StoreName = styled.div`
   align-items: center;
   gap: 0.625rem;
   align-self: stretch;
+  text-align: center;
 
   border-radius: 1.25rem;
   background: var(--gray100);
 `;
 
-// 메뉴 전체를 감싸는 ul 태그
+
 const MenuList = styled.ul`
-  list-style: none; /* li의 기본 점 모양 제거 */
+  list-style: none;
   width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 1rem; /* 각 메뉴 아이템 사이의 간격 */
+  gap: 1rem; 
 `;
 
 const Line = styled.div`
   border-bottom: 0.5px solid var(--gray300);
   width: 100%;
 `;
-// 각 메뉴 아이템을 위한 li 태그 (보통 스타일은 링크에 직접 줍니다)
+
 const MenuItem = styled.li`
   align-items: flex-start;
   align-self: stretch;
   padding: 0.62rem;
 `;
 
-// 클릭 가능한 링크 (NavLink)
+
 const StyledNavLink = styled(NavLink)`
   ${bold24}
-  display: flex; /* 링크가 li 영역 전체를 차지하도록 */
+  display: flex;
   border-radius: 0.5rem;
   text-decoration: none;
   gap: 0.75rem;
 
   color: var(--gray700);
 
-  /* 마우스를 올렸을 때 스타일 */
+  
   &:hover {
     color: var(--black);
   }
