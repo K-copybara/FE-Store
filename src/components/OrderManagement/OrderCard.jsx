@@ -63,25 +63,24 @@ const OrderCard = ({ order, onComplete, onCancel }) => {
         {hasRequest && <RequestSection>{order.requestNote}</RequestSection>}
 
         {/* 메뉴 리스트 */}
-
+        <MenuScrollContainer>
           {order.items.map((item, index) => (
             <MenuItem key={index}>
               <MenuName>{item.menuName}</MenuName>
               <MenuQuantity>{item.amount}</MenuQuantity>
             </MenuItem>
           ))}
-
-
+        </MenuScrollContainer>
         <ButtonContainer>
-        {/* 하단 버튼 - COMPLETED 상태면 버튼 숨김 */}
-        {order.status === 'PENDING' && (
-          <CancelCompleteButton
-            leftButton={{ text: '취소', type: 'cancel' }}
-            rightButton={{ text: '완료', type: 'accept' }}
-            onLeftClick={handleCancelClick}
-            onRightClick={handleCompleteClick}
-          />
-        )}
+          {/* 하단 버튼 - COMPLETED 상태면 버튼 숨김 */}
+          {order.status === 'PENDING' && (
+            <CancelCompleteButton
+              leftButton={{ text: '취소', type: 'cancel' }}
+              rightButton={{ text: '완료', type: 'accept' }}
+              onLeftClick={handleCancelClick}
+              onRightClick={handleCompleteClick}
+            />
+          )}
         </ButtonContainer>
       </CardWrapper>
 
@@ -106,32 +105,28 @@ export default OrderCard;
 const CardWrapper = styled.div`
   display: flex;
   flex-direction: column;
-  padding: 0.9375rem 1.25rem;
-  gap: 1.25rem;
+  padding: 0.9375rem 0;
   //상단 헤더 고정, 메뉴만 스크롤 align-self: stretch;
   align-items: flex-start;
   overflow-y: auto;
   overflow-x: hidden;
   height: 100%;
   flex-shrink: 0;
- 
+
   width: 20rem;
   background: var(--white);
   border-radius: 1.25rem;
   border: 2px solid var(--secondary);
   box-shadow: 0 4px 8px 0 rgba(130, 152, 255, 0.2);
   cursor: ${(props) => (props.status === 'PENDING' ? 'pointer' : 'default')};
-
-  -webkit-overflow-scrolling: touch;
-  &::-webkit-scrollbar {
-  display: none;
-  }
 `;
 
 const HeaderWrapper = styled.div`
   display: flex;
   flex-direction: column;
   width: 100%;
+  margin-bottom: 1.25rem;
+  padding: 0 1.25rem;
 `;
 
 //상단 헤더 고정, 메뉴만 스크롤
@@ -142,6 +137,17 @@ const MenuScrollContainer = styled.div`
   width: 100%;
   gap: 1.25rem;
   overflow-y: auto;
+  padding: 0 1.25rem;
+
+  &::-webkit-scrollbar {
+    width: 4px;
+    border-radius: 6px;
+    background: var(--gray300);
+  }
+  &::-webkit-scrollbar-thumb {
+    background: var(--secondary);
+    border-radius: 6px;
+  }
 `;
 const CardHeader = styled.div`
   display: flex;

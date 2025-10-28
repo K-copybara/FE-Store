@@ -53,11 +53,13 @@ const RequestCard = ({ request, onComplete }) => {
           </ItemList>
         )}
         <ButtonContainer>
-        {request.status === 'PENDING' && (
-          <CompleteButtonWrapper>
-            <CompleteButton onClick={handleCompleteClick}>완료</CompleteButton>
-          </CompleteButtonWrapper>
-        )}
+          {request.status === 'PENDING' && (
+            <CompleteButtonWrapper>
+              <CompleteButton onClick={handleCompleteClick}>
+                완료
+              </CompleteButton>
+            </CompleteButtonWrapper>
+          )}
         </ButtonContainer>
       </CardWrapper>
 
@@ -83,11 +85,11 @@ const CardWrapper = styled.div`
   overflow-x: hidden;
   height: 100%;
   flex-shrink: 0;
-  width: 30rem;
+  width: 25rem;
   background: var(--white);
   border-radius: 1.25rem;
   border: 2px solid var(--yellow);
-  box-shadow: 0 4px 8px 0 rgba(252, 201, 0, 0.20);
+  box-shadow: 0 4px 8px 0 rgba(252, 201, 0, 0.2);
   -webkit-overflow-scrolling: touch;
   &::-webkit-scrollbar {
     display: none;
@@ -146,9 +148,8 @@ const RequestNote = styled.div`
   word-break: break-word;
 
   width: 100%;
-  
-  white-space: normal;  /* 줄바꿈 허용 */
-  
+
+  white-space: normal; /* 줄바꿈 허용 */
 `;
 
 const ItemList = styled.div`
