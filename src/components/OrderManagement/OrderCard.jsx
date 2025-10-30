@@ -192,7 +192,8 @@ const RequestSection = styled.div`
   ${reg24}
   display: flex;
   align-items: center;
-  padding: 1.25rem;
+  padding: 1rem;
+  margin: 0 1.25rem 1rem;
   border-radius: 0.625rem;
   align-self: stretch;
 

@@ -10,16 +10,16 @@ dayjs.extend(timezone);
 dayjs.locale('ko');
 
 export const formatDate = (dateString) => {
-  return dayjs.utc(dateString).tz('Asia/Seoul').format('YYYY년 M월 D일');
+  return dayjs(dateString).format('YYYY년 M월 D일');
 };
 
 export const extractTime = (datetime) => {
-  return dayjs.utc(datetime).tz('Asia/Seoul').format('HH:mm');
+  return dayjs(datetime).format('HH:mm');
 };
 
 export const formatDateTime = (isoString) => {
   if (!isoString) return '';
-  return dayjs.utc(isoString).tz('Asia/Seoul').format('YYYY-MM-DD HH:mm:ss');
+  return dayjs(isoString).format('YYYY-MM-DD HH:mm:ss');
 };
 
 export const getTodayDate = () => {
