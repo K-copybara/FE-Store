@@ -114,7 +114,6 @@ const SidebarWrapper = styled.aside`
   padding: 1.25rem;
   flex-direction: column;
   align-items: flex-start;
-  gap: 3.75rem;
 
   width: 20%;
   min-width: 20rem;
@@ -143,6 +142,7 @@ const MenuList = styled.ul`
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  margin-top: 2rem;
 `;
 
 const Line = styled.div`
