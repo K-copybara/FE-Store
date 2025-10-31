@@ -57,7 +57,14 @@ const DailyStatsPage = () => {
  const selectedSortLabel = SORT_OPTIONS.find(
   (option) => option.value === sortType
  )?.label;
- const sortedMenuData = rankSalesData;
+  const sortedMenuData = [...rankSalesData].sort((a, b) => {
+    if (sortType === 'sales') {
+      return b.sales - a.sales;
+    } else if (sortType === 'review') {
+      return b.reviewCount - a.reviewCount;
+    }
+    return 0;
+  });
 
 
  useEffect(() => {
@@ -108,6 +115,22 @@ const DailyStatsPage = () => {
  }, [selectedDate, sortType, storeId]); //날짜, 정렬 변경될 때마다 실행
 
 
+//이건 정렬 변경할 때 전체 새로고침 안되게 할라고 만든거
+// useEffect(() => {
+//   const fetchMenuData = async () => {
+//     if (!storeId) return;
+
+//     try {
+//       const menuData = await getMenuSales(selectedDate, sortType, storeId);
+//       console.log('메뉴별 매출 데이터 (정렬 변경):', menuData);
+//       setRankSalesData(menuData);
+//     } catch (error) {
+//       console.error('메뉴 데이터 조회 실패:', error);
+//     }
+//   };
+
+//   fetchMenuData();
+// }, [sortType]);
 
 
  if (loading) return <MenuSection>로딩중...</MenuSection>;
@@ -203,9 +226,11 @@ const DailyStatsPage = () => {
        <TimeList>
         {timeSalesData.map((slot, index) => (
          <MenuListItem key={index}>
-          <MenuName>{slot.hour}시</MenuName>
+          <MenuName2>{slot.hour}시</MenuName2>
           <MenuCount2>{slot.orderCount}건</MenuCount2>
-          
+          <MenuSales>
+            {slot.sales?.toLocaleString() || 0}원
+          </MenuSales>
          </MenuListItem>
         ))}
        </TimeList>
@@ -382,7 +407,7 @@ const MenuListItem = styled.div`
   padding: 0.75rem;
   border-bottom: 1px solid var(--gray300);
   transition: background-color 0.2s;
-
+  justify-content: space-between;
   &:last-child {
     border-bottom: none;
   }
@@ -403,6 +428,15 @@ const MenuName = styled.div`
   text-align: left;
   overflow: hidden; 
   white-space: nowrap;  //한 줄 유지
+`;
+
+const MenuName2 = styled.div`
+  ${reg24}
+  min-width: 4rem;
+  color: var(--black);
+  text-align: left;
+  overflow: hidden; 
+  white-space: nowrap;
 `;
 
 const MenuRating = styled.div`
@@ -435,6 +469,7 @@ const MenuSalesCount = styled.div`
 
 const MenuSales = styled.div`
   ${reg24}
+  min-width: 7rem;
   color: var(--black);
   text-align: right;
   white-space: nowrap;
