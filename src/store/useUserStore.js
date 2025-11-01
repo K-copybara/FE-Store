@@ -15,7 +15,7 @@ export const useUserStore = create((set) => ({
       }
       
       const decoded = jwtDecode(token.accessToken);
-      console.log('디코딩된 토큰:', decoded);
+      //console.log('디코딩된 토큰:', decoded);
       
       set({ storeId: decoded.storeId });
     } catch (error) {

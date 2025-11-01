@@ -17,7 +17,7 @@ const LoginPage = () => {
 
   const Login = async () => {
     const { email, password } = login;
-    console.log(email, password);
+    //console.log(email, password);
     if (email?.trim() && password?.trim()) {
       try {
         const res = await postLogin(login);

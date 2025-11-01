@@ -26,7 +26,7 @@ export const SSEProviders = ({ children }) => {
         if (event.event === 'order-paid') {
           try {
             const data = JSON.parse(event.data);
-            console.log('order-paid:', data);
+            //console.log('order-paid:', data);
             play();
             Swal.fire({
               icon: 'info',
@@ -58,7 +58,7 @@ export const SSEProviders = ({ children }) => {
         if (event.event === 'request-created-notification') {
           try {
             const data = JSON.parse(event.data);
-            console.log('request-created:', data);
+            //console.log('request-created:', data);
             play();
             Swal.fire({
               icon: 'info',

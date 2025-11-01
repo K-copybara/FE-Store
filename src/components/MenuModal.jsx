@@ -13,7 +13,6 @@ const MenuModal = ({ onClose, editingMenuId = null, onSuccess }) => {
 
   // 편집 모드 확인
   const isEditMode = !!editingMenuId;
-  const [originalImageUrl, setOriginalImageUrl] = useState(null);
 
   // 통합된 폼 데이터 상태
   const [formData, setFormData] = useState({
@@ -53,7 +52,7 @@ const MenuModal = ({ onClose, editingMenuId = null, onSuccess }) => {
     const fetchCategories = async () => {
       try {    
         const categoryData = await getCategories();
-        console.log('카테고리 조회 성공:', categoryData);
+        //console.log('카테고리 조회 성공:', categoryData);
         
         setCategories(categoryData);
       } catch (error) {
@@ -76,20 +75,20 @@ const MenuModal = ({ onClose, editingMenuId = null, onSuccess }) => {
 
   useEffect(() => {
     // 이미 로드했으면 다시 로드하지 않음
-    if (menuDataLoaded) {
-      console.log('⚠️ 이미 메뉴 데이터 로드됨. 스킵');
-      return;
-    }
+    // if (menuDataLoaded) {
+    //   //console.log('⚠️ 이미 메뉴 데이터 로드됨. 스킵');
+    //   return;
+    // }
 
       // 카테고리가 로드된 후에만 메뉴 데이터 로드
       if (isEditMode && editingMenuId && !loading) {
         const fetchMenuData = async () => {
           try {
             setLoading(true);
-            console.log('✏️ 편집 모드로 모달 열림. 메뉴 ID:', editingMenuId);
+            //console.log('✏️ 편집 모드로 모달 열림. 메뉴 ID:', editingMenuId);
             
             const menuData = await getMenuDetail(editingMenuId);
-            console.log('📋 기존 메뉴 데이터:', menuData);
+            //console.log('📋 기존 메뉴 데이터:', menuData);
             
             if (menuData) {
               // 기존 데이터로 폼 초기화
@@ -109,13 +108,12 @@ const MenuModal = ({ onClose, editingMenuId = null, onSuccess }) => {
               const category = getCategoryById(menuData.category?.categoryId);
               if (category) {
                 setSelectedCategory(category.name);
-                console.log('✅ 카테고리 설정 완료:', category.name);
+                //console.log('✅ 카테고리 설정 완료:', category.name);
               } else {
                 console.warn('⚠️ 해당 카테고리를 찾을 수 없습니다:', menuData.category?.categoryId);
               }
 
-              setOriginalImageUrl(menuData.menuPicture || null); 
-              console.log('이미지', originalImageUrl);
+              //console.log('이미지', originalImageUrl);
               // 기존 이미지 설정
               if (menuData.menuPicture) {
                 setUploadedImage({
@@ -132,7 +130,7 @@ const MenuModal = ({ onClose, editingMenuId = null, onSuccess }) => {
               }
 
               setMenuDataLoaded(true);
-              console.log('✅ 편집 데이터 로드 완료');
+              //console.log('✅ 편집 데이터 로드 완료');
             }
           } catch (error) {
             setError(error);
@@ -150,7 +148,7 @@ const MenuModal = ({ onClose, editingMenuId = null, onSuccess }) => {
 
   // 공통 데이터 업데이트 함수
   const updateFormData = (field, value) => {
-    console.log('폼 데이터 업데이트:', { field, value });
+    //console.log('폼 데이터 업데이트:', { field, value });
     setFormData(prev => ({
       ...prev,
       [field]: value
@@ -159,20 +157,20 @@ const MenuModal = ({ onClose, editingMenuId = null, onSuccess }) => {
 
   // 파일 업로드 핸들러
   const handleFileUpload = (event) => {
-    console.log('🖱️ 파일 선택 이벤트 발생');
+    //console.log('🖱️ 파일 선택 이벤트 발생');
     const file = event.target.files[0];
     
     if (!file) {
-      console.log('❌ 파일이 선택되지 않음');
+      //console.log('❌ 파일이 선택되지 않음');
       return;
     }
     
-    console.log('📄 선택된 파일 정보:', {
-      name: file.name,
-      size: file.size,
-      type: file.type
-    });
-      console.log('✅ 이미지 파일 확인됨');
+    //console.log('📄 선택된 파일 정보:', {
+    //   name: file.name,
+    //   size: file.size,
+    //   type: file.type
+    // });
+      //console.log('✅ 이미지 파일 확인됨');
       
       const reader = new FileReader();
       reader.onload = (e) => {
@@ -192,7 +190,7 @@ const MenuModal = ({ onClose, editingMenuId = null, onSuccess }) => {
   };
 
   const handleAddImageClick = () => {
-    console.log('🖼️ 이미지 추가 버튼 클릭');
+    //console.log('🖼️ 이미지 추가 버튼 클릭');
     fileInputRef.current?.click();
   };
 
@@ -213,7 +211,7 @@ const MenuModal = ({ onClose, editingMenuId = null, onSuccess }) => {
   };
 
   const handleCategorySelect = (category) => {
-    console.log('🏷️ 카테고리 선택:', category);
+    //console.log('🏷️ 카테고리 선택:', category);
     setSelectedCategory(category.name);
     updateFormData('categoryId', category.categoryId);
     setShowDropdown(false);
@@ -222,7 +220,7 @@ const MenuModal = ({ onClose, editingMenuId = null, onSuccess }) => {
   const [allergyInput, setAllergyInput] = useState('');
   
   const handleAddAllergy = () => {
-    console.log('🚨 알레르기 정보 추가:', allergyInput);
+    //console.log('🚨 알레르기 정보 추가:', allergyInput);
     if (allergyInput.trim() && !formData.allergies.includes(allergyInput.trim())) {
       const newAllergies = [...formData.allergies, allergyInput.trim()];
       updateFormData('allergies', newAllergies);
@@ -232,19 +230,19 @@ const MenuModal = ({ onClose, editingMenuId = null, onSuccess }) => {
   
   // 알레르기 삭제 함수
   const handleRemoveAllergy = (allergyToRemove) => {
-    console.log('❌ 알레르기 정보 삭제:', allergyToRemove);
+    //console.log('❌ 알레르기 정보 삭제:', allergyToRemove);
     const newAllergies = formData.allergies.filter(allergy => allergy !== allergyToRemove);
     updateFormData('allergies', newAllergies);
   };
   
   const toggleDropdown = () => {
-    console.log('📋 드롭다운 토글');
+    //console.log('📋 드롭다운 토글');
     setShowDropdown(!showDropdown);
   };
 
   // 가격 입력 핸들러
   const handlePriceChange = (e) => {
-    console.log('💰 가격 입력:', e.target.value);
+    //console.log('💰 가격 입력:', e.target.value);
     const value = e.target.value.replace(/[^\d]/g, '');
     updateFormData('price', value);
   };
@@ -256,7 +254,7 @@ const MenuModal = ({ onClose, editingMenuId = null, onSuccess }) => {
   
   // 1단계 → 2단계 이동
   const handleStep1Next = () => {
-    console.log('➡️ 1단계에서 2단계로 이동');
+    //console.log('➡️ 1단계에서 2단계로 이동');
     
     // 1단계 유효성 검사
     if (!formData.name.trim()) {
@@ -278,16 +276,16 @@ const MenuModal = ({ onClose, editingMenuId = null, onSuccess }) => {
       return;
     }
     
-    console.log('✅ 1단계 완료:', {
-      isEditMode,
-      categoryId: formData.categoryId,
-      name: formData.name,
-      price: formData.price,
-      description: formData.description,
-      hasImage: !!formData.image,
-      hasUploadedImage: !!uploadedImage,
-      imageRemoved
-    });
+    // console.log('✅ 1단계 완료:', {
+    //   isEditMode,
+    //   categoryId: formData.categoryId,
+    //   name: formData.name,
+    //   price: formData.price,
+    //   description: formData.description,
+    //   hasImage: !!formData.image,
+    //   hasUploadedImage: !!uploadedImage,
+    //   imageRemoved
+    // });
     
     setCurrentStep(2);
   };
