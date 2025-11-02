@@ -36,7 +36,7 @@ const CalendarPage = () => {
       setError(null);
       try {
         const monthString = getMonthString(selectedMonth);
-        console.log('데이터 조회 시작:', monthString, 'storeId:', storeId);
+        //console.log('데이터 조회 시작:', monthString, 'storeId:', storeId);
         
         // 두 API를 동시에 호출
         const [dailyData, weeklyData] = await Promise.all([
@@ -44,8 +44,8 @@ const CalendarPage = () => {
           getWeekDaySales(monthString, storeId)
         ]);
         
-        console.log('일별 매출 데이터:', dailyData);
-        console.log('요일별 매출 데이터:', weeklyData);
+        //console.log('일별 매출 데이터:', dailyData);
+        //console.log('요일별 매출 데이터:', weeklyData);
         
         setDailySalesData(dailyData);
         setWeeklySalesArray(weeklyData);

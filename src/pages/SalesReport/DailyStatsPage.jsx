@@ -79,9 +79,9 @@ const DailyStatsPage = () => {
      getHourlySales(selectedDate, storeId),
      getMenuSales(selectedDate, sortType, storeId)
     ]);
-    console.log('일별 매출 데이터:', dailyData);
-    console.log('시간대별 매출 데이터:', hourlyData);
-    console.log('메뉴별 매출 데이터:', menuData);
+    //console.log('일별 매출 데이터:', dailyData);
+    //console.log('시간대별 매출 데이터:', hourlyData);
+    //console.log('메뉴별 매출 데이터:', menuData);
 
 
     setTodaySalesData([{

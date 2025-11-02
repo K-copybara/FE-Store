@@ -42,8 +42,8 @@ const MenuManagement = ({ title = '메뉴 관리', onMenuChange }) => {
       try {
         //메뉴 목록 가져오기
         const menuData = await getMenuInfo();
-        console.log('메뉴 목록:', menuData);
-        console.log('첫 번째 메뉴 이미지:', menuData[0]?.imageUrl);
+        //console.log('메뉴 목록:', menuData);
+        //console.log('첫 번째 메뉴 이미지:', menuData[0]?.imageUrl);
         setMenus(menuData);
 
         //각 메뉴의 상세 정보 가져오기
@@ -64,7 +64,7 @@ const MenuManagement = ({ title = '메뉴 관리', onMenuChange }) => {
           detailsMap[menuId] = detail;
         });
 
-        console.log('메뉴 상세 정보:', detailsMap);
+        //console.log('메뉴 상세 정보:', detailsMap);
         setMenuDetails(detailsMap);
       } catch (error) {
         setError(error);
@@ -80,9 +80,9 @@ const MenuManagement = ({ title = '메뉴 관리', onMenuChange }) => {
   //메뉴 데이터 새로고침하기
   const refreshMenus = async () => {
     try {
-      console.log('🔄 [MenuManagement] refreshMenus 시작');
+      //console.log('🔄 [MenuManagement] refreshMenus 시작');
       const menuData = await getMenuInfo();
-      console.log('📋 [MenuManagement] 새로 불러온 메뉴 목록:', menuData);
+      //console.log('📋 [MenuManagement] 새로 불러온 메뉴 목록:', menuData);
       setMenus(menuData);
 
       //상세 정보 가져오기
@@ -129,7 +129,7 @@ const MenuManagement = ({ title = '메뉴 관리', onMenuChange }) => {
     setEditingMenuId(menuId);
     setShowEditModal(true);
     setOpenDropdownId(null);
-    console.log('메뉴 편집 클릭:', menuId);
+    //console.log('메뉴 편집 클릭:', menuId);
   };
 
   //일시품절 토글 (SOLD_OUT ↔ ON_SALE)
@@ -161,7 +161,7 @@ const MenuManagement = ({ title = '메뉴 관리', onMenuChange }) => {
     setMenuToDelete(menu); //삭제할 메뉴 정보 저장
     setShowConfirmModal(true); // 확인 모달 표시
     setOpenDropdownId(null); //드롭다운 닫기
-    console.log('삭제 확인 모달 열림:', menu);
+    //console.log('삭제 확인 모달 열림:', menu);
   };
 
   // 삭제 확인 시 실제 삭제 실행
@@ -169,11 +169,11 @@ const MenuManagement = ({ title = '메뉴 관리', onMenuChange }) => {
     if (!menuToDelete) return;
 
     try {
-      console.log('메뉴 삭제 시작:', menuToDelete.menuId);
+      //console.log('메뉴 삭제 시작:', menuToDelete.menuId);
 
       await deleteMenu(menuToDelete.menuId);
 
-      console.log('메뉴 삭제 성공');
+      //console.log('메뉴 삭제 성공');
 
       // 모달 닫기
       setShowConfirmModal(false);

@@ -136,9 +136,9 @@ export default function CarouselBanner() {
   const createFirstText = async () => {
     try {
       const today = getTodayDate(); // "YYYY-MM-DD"
-      console.log(today);
+      //console.log(today);
       const lastweek = getLastWeekDate(); // "YYYY-MM-DD"
-      console.log(lastweek);
+      //console.log(lastweek);
       const nowHours = await getHourlySales(today, storeId);
       const prevHours = await getHourlySales(lastweek, storeId);
 
