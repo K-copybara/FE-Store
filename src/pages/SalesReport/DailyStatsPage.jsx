@@ -1,62 +1,59 @@
 import styled from 'styled-components';
 import { useState, useRef, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import { body_large, bold36, bold24, bold18, reg24} from '../../styles/font';
+import { body_large, bold36, bold24, bold18, reg24 } from '../../styles/font';
 import { useUserStore } from '../../store/useUserStore';
-
 
 import MenuRatingIcon from '../../assets/icons/DailyStats/menurating-icon.svg?react';
 import SortIcon from '../../assets/icons/DailyStats/sortarrow-icon.svg?react';
 
-
-import { getDailyOrderSales, getHourlySales, getMenuSales } from '../../api/stats';
-
-
+import {
+  getDailyOrderSales,
+  getHourlySales,
+  getMenuSales,
+} from '../../api/stats';
 
 const DailyStatsPage = () => {
+  const storeId = useUserStore((state) => state.storeId);
+  const location = useLocation();
 
+  // 오늘 날짜 구하기. 매출조회/일별매출통계 바로 클릭 시 실행
+  const getTodayString = () => {
+    const today = new Date();
+    const formatter = new Intl.DateTimeFormat('ko-KR', {
+      timeZone: 'Asia/Seoul',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+    });
 
- const storeId = useUserStore((state) => state.storeId);
- const location = useLocation();
+    const parts = formatter.formatToParts(today);
+    const year = parts.find((part) => part.type === 'year').value;
+    const month = parts.find((part) => part.type === 'month').value;
+    const day = parts.find((part) => part.type === 'day').value;
 
+    return `${year}-${month}-${day}`;
+  };
+  const selectedDate = location.state?.date || getTodayString(); //달력에서 받아온 날짜 || 오늘 날짜
 
- // 오늘 날짜 구하기. 매출조회/일별매출통계 바로 클릭 시 실행
- const getTodayString = () => {
-  const today = new Date();
-  const formatter = new Intl.DateTimeFormat('ko-KR', {
-   timeZone: 'Asia/Seoul',
-   year: 'numeric',
-   month: '2-digit',
-   day: '2-digit'
-  });
-
-
-  const parts = formatter.formatToParts(today);
-  const year = parts.find(part => part.type === 'year').value;
-  const month = parts.find(part => part.type === 'month').value;
-  const day = parts.find(part => part.type === 'day').value;
-  
-  return `${year}-${month}-${day}`;
- };
- const selectedDate = location.state?.date || getTodayString(); //달력에서 받아온 날짜 || 오늘 날짜
- 
- const [todaySalesData, setTodaySalesData] = useState([ //해당 날짜 매출, 주문건수
-  { date: selectedDate, sales: 0, orders: 0 }
- ]);
- const [timeSalesData, setTimeSalesData] = useState([]); //시간별 매출 조회
- const [rankSalesData, setRankSalesData] = useState([]); //메뉴별 매출순, 리뷰순 조회
- const [loading, setLoading] = useState(false);
- const [error, setError] = useState(null);
+  const [todaySalesData, setTodaySalesData] = useState([
+    //해당 날짜 매출, 주문건수
+    { date: selectedDate, sales: 0, orders: 0 },
+  ]);
+  const [timeSalesData, setTimeSalesData] = useState([]); //시간별 매출 조회
+  const [rankSalesData, setRankSalesData] = useState([]); //메뉴별 매출순, 리뷰순 조회
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
   const [sortType, setSortType] = useState('sales');
- const [dropdownOpen, setDropdownOpen] = useState(false);
- const dropdownRef = useRef();
- const SORT_OPTIONS = [
-  { value: 'sales', label: '매출순' },
-  { value: 'review', label: '리뷰순' },
- ];
- const selectedSortLabel = SORT_OPTIONS.find(
-  (option) => option.value === sortType
- )?.label;
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const dropdownRef = useRef();
+  const SORT_OPTIONS = [
+    { value: 'sales', label: '매출순' },
+    { value: 'review', label: '리뷰순' },
+  ];
+  const selectedSortLabel = SORT_OPTIONS.find(
+    (option) => option.value === sortType
+  )?.label;
   const sortedMenuData = [...rankSalesData].sort((a, b) => {
     if (sortType === 'sales') {
       return b.sales - a.sales;
@@ -66,184 +63,168 @@ const DailyStatsPage = () => {
     return 0;
   });
 
+  useEffect(() => {
+    const fetchDailyStats = async () => {
+      setLoading(true);
+      setError(null);
 
- useEffect(() => {
-  const fetchDailyStats = async () => {
-   setLoading(true);
-   setError(null);
+      if (!storeId) {
+        setError(new Error('storeId가 없습니다.'));
+        setLoading(false);
+        return;
+      }
 
+      try {
+        const [dailyData, hourlyData, menuData] = await Promise.all([
+          getDailyOrderSales(selectedDate, storeId),
+          getHourlySales(selectedDate, storeId),
+          getMenuSales(selectedDate, sortType, storeId),
+        ]);
+        console.log('일별 매출 데이터:', dailyData);
+        console.log('시간대별 매출 데이터:', hourlyData);
+        console.log('메뉴별 매출 데이터:', menuData);
 
-   if (!storeId) {
-    setError(new Error('storeId가 없습니다.'));
-    setLoading(false);
-    return;
-   }
+        setTodaySalesData([
+          {
+            date: selectedDate,
+            sales: dailyData.sales || 0,
+            orders: dailyData.orders || 0,
+          },
+        ]);
 
+        setTimeSalesData(hourlyData);
+        setRankSalesData(menuData);
+      } catch (error) {
+        setError(error);
+        console.error('일별 매출 조회 실패:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-   try{
-    const [dailyData, hourlyData, menuData] = await Promise.all([
-     getDailyOrderSales(selectedDate, storeId),
-     getHourlySales(selectedDate, storeId),
-     getMenuSales(selectedDate, sortType, storeId)
-    ]);
-    console.log('일별 매출 데이터:', dailyData);
-    console.log('시간대별 매출 데이터:', hourlyData);
-    console.log('메뉴별 매출 데이터:', menuData);
+    fetchDailyStats();
+  }, [selectedDate, sortType, storeId]); //날짜, 정렬 변경될 때마다 실행
 
+  //이건 정렬 변경할 때 전체 새로고침 안되게 할라고 만든거
+  // useEffect(() => {
+  //   const fetchMenuData = async () => {
+  //     if (!storeId) return;
 
-    setTodaySalesData([{
-     date: selectedDate,
-     sales: dailyData.sales || 0,
-     orders: dailyData.orders || 0
-    }])
+  //     try {
+  //       const menuData = await getMenuSales(selectedDate, sortType, storeId);
+  //       console.log('메뉴별 매출 데이터 (정렬 변경):', menuData);
+  //       setRankSalesData(menuData);
+  //     } catch (error) {
+  //       console.error('메뉴 데이터 조회 실패:', error);
+  //     }
+  //   };
 
+  //   fetchMenuData();
+  // }, [sortType]);
 
-    setTimeSalesData(hourlyData);
-    setRankSalesData(menuData);
+  if (loading) return <MenuSection>로딩중...</MenuSection>;
+  if (error) return <MainContent>에러 발생: {error.message}</MainContent>;
 
+  return (
+    <>
+      <MainContent>
+        <Header>
+          <Title>일별 매출 통계</Title>
+          <TodayDate>{todaySalesData[0]?.date}</TodayDate>
+        </Header>
 
-   } catch (error) {
-    setError(error);
-    console.error('일별 매출 조회 실패:', error);
-   } finally {
-    setLoading(false);
-   }
-  };
+        <ContentRow>
+          <LeftColumn>
+            <StatsRow>
+              <StatBlock>
+                <StatLabel>총 매출</StatLabel>
+                <StatValue>
+                  {todaySalesData[0]?.sales?.toLocaleString() || 0} 원
+                </StatValue>
+              </StatBlock>
+              <StatBlock>
+                <StatLabel>주문 건수</StatLabel>
+                <StatValue>{todaySalesData[0]?.orders || 0} 건</StatValue>
+              </StatBlock>
+            </StatsRow>
 
+            <MenuSection>
+              <MenuHeader>
+                <SectionTitle>메뉴별 통계</SectionTitle>
+                <SortSelect ref={dropdownRef}>
+                  <SortButton
+                    onClick={() => setDropdownOpen((v) => !v)}
+                    aria-haspopup="listbox"
+                    aria-expanded={dropdownOpen}
+                  >
+                    <SortText>{selectedSortLabel}</SortText>
+                    <Sort $open={dropdownOpen}>
+                      <SortIcon />
+                    </Sort>
+                  </SortButton>
+                  {dropdownOpen && (
+                    <SortDropdown role="listbox">
+                      {SORT_OPTIONS.map((option) => (
+                        <SortDropdownItem
+                          key={option.value}
+                          $selected={option.value === sortType}
+                          role="option"
+                          aria-selected={option.value === sortType}
+                          onClick={() => {
+                            setSortType(option.value);
+                            setDropdownOpen(false);
+                          }}
+                        >
+                          {option.label}
+                        </SortDropdownItem>
+                      ))}
+                    </SortDropdown>
+                  )}
+                </SortSelect>
+              </MenuHeader>
 
-  fetchDailyStats();
- }, [selectedDate, sortType, storeId]); //날짜, 정렬 변경될 때마다 실행
+              <MenuList>
+                {sortedMenuData
+                  .filter((item) => item.sales > 0)
+                  .map((item, idx) => (
+                    <MenuListItem key={item.menuId}>
+                      <MenuRank>{idx + 1}.</MenuRank>
+                      <MenuName>{item.name}</MenuName>
 
+                      <MenuRating>
+                        <MenuRatingIcon />
+                        {item.reviewCount}
+                      </MenuRating>
+                      <MenuSalesCount>
+                        <MenuSales>{item.sales?.toLocaleString()}원 </MenuSales>
+                        <MenuCount> / {item.orderCount}건</MenuCount>
+                      </MenuSalesCount>
+                    </MenuListItem>
+                  ))}
+              </MenuList>
+            </MenuSection>
+          </LeftColumn>
 
-//이건 정렬 변경할 때 전체 새로고침 안되게 할라고 만든거
-// useEffect(() => {
-//   const fetchMenuData = async () => {
-//     if (!storeId) return;
-
-//     try {
-//       const menuData = await getMenuSales(selectedDate, sortType, storeId);
-//       console.log('메뉴별 매출 데이터 (정렬 변경):', menuData);
-//       setRankSalesData(menuData);
-//     } catch (error) {
-//       console.error('메뉴 데이터 조회 실패:', error);
-//     }
-//   };
-
-//   fetchMenuData();
-// }, [sortType]);
-
-
- if (loading) return <MenuSection>로딩중...</MenuSection>;
- if (error) return <MainContent>에러 발생: {error.message}</MainContent>;
-
-
- return (
-  <>
-   <MainContent>
-    <Header>
-     <Title>일별 매출 통계</Title>
-     <TodayDate>{todaySalesData[0]?.date}</TodayDate>
-    </Header>
-
-
-    <ContentRow>
-     <LeftColumn>
-      <StatsRow>
-       <StatBlock>
-        <StatLabel>총 매출</StatLabel>
-        <StatValue>
-         {todaySalesData[0]?.sales?.toLocaleString() || 0} 원
-        </StatValue>
-       </StatBlock>
-       <StatBlock>
-        <StatLabel>주문 건수</StatLabel>
-        <StatValue>{todaySalesData[0]?.orders || 0} 건</StatValue>
-       </StatBlock>
-      </StatsRow>
-
-
-      <MenuSection>
-       <MenuHeader>
-        <SectionTitle>메뉴별 통계</SectionTitle>
-        <SortSelect ref={dropdownRef}>
-         <SortButton
-          onClick={() => setDropdownOpen((v) => !v)}
-          aria-haspopup="listbox"
-          aria-expanded={dropdownOpen}
-         >
-          <SortText>{selectedSortLabel}</SortText>
-          <Sort $open={dropdownOpen}>
-           <SortIcon />
-          </Sort>
-         </SortButton>
-         {dropdownOpen && (
-          <SortDropdown role="listbox">
-           {SORT_OPTIONS.map((option) => (
-            <SortDropdownItem
-             key={option.value}
-             $selected={option.value === sortType}
-             role="option"
-             aria-selected={option.value === sortType}
-             onClick={() => {
-              setSortType(option.value);
-              setDropdownOpen(false);
-             }}
-            >
-             {option.label}
-            </SortDropdownItem>
-           ))}
-          </SortDropdown>
-         )}
-        </SortSelect>
-       </MenuHeader>
-
-
-       <MenuList>
-        {sortedMenuData.map((item, idx) => (
-         <MenuListItem key={item.menuId}>
-          <MenuRank>{idx + 1}.</MenuRank>
-          <MenuName>{item.name}</MenuName>
-
-
-          <MenuRating>
-            <MenuRatingIcon />
-            {item.reviewCount}
-            </MenuRating>
-          <MenuSalesCount>
-            <MenuSales>{item.sales?.toLocaleString()}원 </MenuSales>
-            <MenuCount> / {item.orderCount}건</MenuCount>
-          </MenuSalesCount>
-         </MenuListItem>
-        ))}
-       </MenuList>
-      </MenuSection>
-     </LeftColumn>
-
-
-     <RightColumn>
-      <TimeSection>
-       <SectionTitle>시간대별 매출 현황</SectionTitle>
-       <TimeList>
-        {timeSalesData.map((slot, index) => (
-         <MenuListItem key={index}>
-          <MenuName2>{slot.hour}시</MenuName2>
-          <MenuCount2>{slot.orderCount}건</MenuCount2>
-          <MenuSales>
-            {slot.sales?.toLocaleString() || 0}원
-          </MenuSales>
-         </MenuListItem>
-        ))}
-       </TimeList>
-      </TimeSection>
-     </RightColumn>
-    </ContentRow>
-   </MainContent>
-  </>
- );
+          <RightColumn>
+            <TimeSection>
+              <SectionTitle>시간대별 매출 현황</SectionTitle>
+              <TimeList>
+                {timeSalesData.map((slot, index) => (
+                  <MenuListItem key={index}>
+                    <MenuName2>{slot.hour}시</MenuName2>
+                    <MenuCount2>{slot.orderCount}건</MenuCount2>
+                    <MenuSales>{slot.sales?.toLocaleString() || 0}원</MenuSales>
+                  </MenuListItem>
+                ))}
+              </TimeList>
+            </TimeSection>
+          </RightColumn>
+        </ContentRow>
+      </MainContent>
+    </>
+  );
 };
 export default DailyStatsPage;
-
-
 
 const Layout = styled.div`
   display: flex;
@@ -254,16 +235,16 @@ const Layout = styled.div`
   overflow: hidden;
 `;
 
-const Title = styled.h1`  
-    ${bold36}
-    color: var(--black);
-    white-space: nowrap;
+const Title = styled.h1`
+  ${bold36}
+  color: var(--black);
+  white-space: nowrap;
 `;
 
 const TodayDate = styled.div`
-    ${bold36}
-    color: var(--black);
-    white-space: nowrap;
+  ${bold36}
+  color: var(--black);
+  white-space: nowrap;
 `;
 const MainContent = styled.div`
   flex: 1;
@@ -426,16 +407,16 @@ const MenuName = styled.div`
   min-width: 10rem;
   color: var(--black);
   text-align: left;
-  overflow: hidden; 
-  white-space: nowrap;  //한 줄 유지
+  overflow: hidden;
+  white-space: nowrap; //한 줄 유지
 `;
 
 const MenuName2 = styled.div`
-  ${reg24}
+  ${bold24}
   min-width: 4rem;
   color: var(--black);
   text-align: left;
-  overflow: hidden; 
+  overflow: hidden;
   white-space: nowrap;
 `;
 
@@ -447,7 +428,7 @@ const MenuRating = styled.div`
   justify-content: center;
   gap: 0.25rem;
   min-width: 6rem;
-  flex-shrink: 0;  //축소 방지
+  flex-shrink: 0; //축소 방지
 `;
 
 const MenuRatingCount = styled.div`
@@ -455,7 +436,6 @@ const MenuRatingCount = styled.div`
   width: 3rem;
   color: var(--black);
 `;
-
 
 const MenuSalesCount = styled.div`
   ${reg24}
@@ -514,10 +494,10 @@ const StatsRow = styled.div`
 
 const RightColumn = styled.div`
   flex: 1;
-  min-height: 0; 
-  display: flex; 
-  flex-direction: column; 
-  overflow: hidden; 
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 `;
 
 const TimeSection = styled.div`
@@ -528,7 +508,7 @@ const TimeSection = styled.div`
   display: flex;
   flex-direction: column;
   flex: 1; /* RightColumn 공간 차지 */
-  overflow: hidden; 
+  overflow: hidden;
 `;
 
 const TimeList = styled.div`
