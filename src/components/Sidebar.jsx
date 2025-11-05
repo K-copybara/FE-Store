@@ -29,7 +29,7 @@ const Sidebar = () => {
       setLoading(true);
       try {
         const data = await getStoreInfo();
-        console.log('가게 정보 조회 성공:', data);
+        //console.log('가게 정보 조회 성공:', data);
         setStoreData(data);
       } catch (error) {
         setError(error);

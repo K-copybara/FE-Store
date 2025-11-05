@@ -41,7 +41,7 @@ const EditSection = ({
       setLoading(true);
       try {
         const data = await getStoreInfo();
-        console.log('가게 정보 조회 성공:', data);
+        //console.log('가게 정보 조회 성공:', data);
         setStoreData(data);
       } catch (error) {
         setError(error);
@@ -99,11 +99,11 @@ const EditSection = ({
         businessHours: apiFormat
       };
       
-      console.log('영업시간 업데이트 요청:', requestData);
+      //console.log('영업시간 업데이트 요청:', requestData);
       
      
-      const response = await patchStoreHours(requestData);
-      console.log('영업시간 업데이트 성공:', response);
+      await patchStoreHours(requestData);
+      //console.log('영업시간 업데이트 성공:', response);
       
       return { success: true };
     } catch (error) {
@@ -120,10 +120,10 @@ const EditSection = ({
         notice: newNotice 
       };
       
-      console.log('공지사항 업데이트 요청:', requestData);
+      //console.log('공지사항 업데이트 요청:', requestData);
       
-      const response = await patchStoreNotice(requestData);
-      console.log('공지사항 업데이트 성공:', response);
+      await patchStoreNotice(requestData);
+      //console.log('공지사항 업데이트 성공:', response);
       
       return { success: true };
     } catch (error) {

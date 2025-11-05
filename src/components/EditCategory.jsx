@@ -12,7 +12,7 @@ import CancelIcon from '../assets/icons/EditCategory/cancel-icon.svg?react';
 import { getCategories, postCategory, deleteCategory, patchCategoryOrder } from '../api/store';
 
 const EditCategory = ({ title = "메뉴 카테고리", refreshKey = 0 }) => {
-console.log('📁 [EditCategory] 렌더링, refreshKey:', refreshKey);
+//console.log('📁 [EditCategory] 렌더링, refreshKey:', refreshKey);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -28,7 +28,7 @@ console.log('📁 [EditCategory] 렌더링, refreshKey:', refreshKey);
     setLoading(true);
     try {
       const data = await getCategories();
-      console.log('카테고리 조회 성공:', data);
+      //console.log('카테고리 조회 성공:', data);
       setCategories(data);
     } catch (error) {
       setError(error);
@@ -87,7 +87,7 @@ console.log('📁 [EditCategory] 렌더링, refreshKey:', refreshKey);
     setIsAddingNew(false);
     setNewCategoryName('');
     
-    console.log('임시 카테고리 추가:', newCategory);
+    ////console.log('임시 카테고리 추가:', newCategory);
   };
 
   // 새 카테고리 추가 취소  X
@@ -215,11 +215,11 @@ console.log('📁 [EditCategory] 렌더링, refreshKey:', refreshKey);
     if (!confirmDelete) return;
 
     try {
-      console.log('카테고리 삭제 요청:', categoryId);
+      //console.log('카테고리 삭제 요청:', categoryId);
       
       await deleteCategory(categoryId);
       
-      console.log('카테고리 삭제 성공');
+      //console.log('카테고리 삭제 성공');
       
       // localCategories에서 제거
       setLocalCategories(prev => prev.filter(cat => cat.categoryId !== categoryId));
@@ -247,8 +247,8 @@ console.log('📁 [EditCategory] 렌더링, refreshKey:', refreshKey);
       cat.categoryId !== currentOrder[index]?.categoryId
     );
     
-    console.log('새 카테고리:', newCategories.length);
-    console.log('순서 변경:', orderChanged);
+    //console.log('새 카테고리:', newCategories.length);
+    //console.log('순서 변경:', orderChanged);
     
     // 변경사항이 없으면 그냥 닫기
     if (newCategories.length === 0 && !orderChanged) {
@@ -261,7 +261,7 @@ console.log('📁 [EditCategory] 렌더링, refreshKey:', refreshKey);
       if (newCategories.length > 0) {
         const createdCategories = [];
         for (const newCat of newCategories) {
-          console.log('카테고리 생성 요청:', { name: newCat.name });
+          //console.log('카테고리 생성 요청:', { name: newCat.name });
           const result = await postCategory({ name: newCat.name });
           createdCategories.push({
             tempId: newCat.categoryId,
@@ -296,9 +296,9 @@ console.log('📁 [EditCategory] 렌더링, refreshKey:', refreshKey);
           order: index
         }));
         
-        console.log('카테고리 순서 변경 요청:', categoryOrders);
+        //console.log('카테고리 순서 변경 요청:', categoryOrders);
         await patchCategoryOrder({ categoryOrders });
-        console.log('카테고리 순서 변경 성공');
+        //console.log('카테고리 순서 변경 성공');
       }
       
       // 전체 카테고리 다시 조회

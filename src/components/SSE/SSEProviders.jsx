@@ -26,7 +26,7 @@ export const SSEProviders = ({ children }) => {
         if (event.event === 'order-paid') {
           try {
             const data = JSON.parse(event.data);
-            console.log('order-paid:', data);
+            //console.log('order-paid:', data);
             play();
             Swal.fire({
               icon: 'info',
@@ -58,7 +58,7 @@ export const SSEProviders = ({ children }) => {
         if (event.event === 'request-created-notification') {
           try {
             const data = JSON.parse(event.data);
-            console.log('request-created:', data);
+            //console.log('request-created:', data);
             play();
             Swal.fire({
               icon: 'info',
@@ -84,7 +84,7 @@ export const SSEProviders = ({ children }) => {
   // 주문 알림
   useEventSource({
     label: 'order',
-    url: `${SERVER_URL}/alarm/api/merchant/notify/stream?storeId=${storeId}`,
+    url: `${SERVER_URL}/api/merchant/notify/stream?storeId=${storeId}`,
     getHeaders,
     handlers: orderHandlers,
   });
@@ -92,7 +92,7 @@ export const SSEProviders = ({ children }) => {
   // 요청 알림
   useEventSource({
     label: 'request',
-    url: `${SERVER_URL}/alarm/api/merchant/notify/request/stream?storeId=${storeId}`,
+    url: `${SERVER_URL}/api/merchant/notify/request/stream?storeId=${storeId}`,
     getHeaders,
     handlers: requestHandlers,
   });

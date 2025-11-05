@@ -102,8 +102,6 @@ export default function CarouselBanner() {
   const executedRef = useRef(false);
   const executedReqRef = useRef(false);
 
-  const OPENAI_KEY = import.meta.env.VITE_OPENAI_API_KEY;
-
   const slides = [
     {
       id: 1,
@@ -138,9 +136,9 @@ export default function CarouselBanner() {
   const createFirstText = async () => {
     try {
       const today = getTodayDate(); // "YYYY-MM-DD"
-      console.log(today);
+      //console.log(today);
       const lastweek = getLastWeekDate(); // "YYYY-MM-DD"
-      console.log(lastweek);
+      //console.log(lastweek);
       const nowHours = await getHourlySales(today, storeId);
       const prevHours = await getHourlySales(lastweek, storeId);
 
@@ -170,7 +168,7 @@ export default function CarouselBanner() {
   }, [storeId]);
 
   useEffect(() => {
-    if (!storeId || !OPENAI_KEY) return;
+    if (!storeId) return;
     if (executedRef.current) return; // 동일 마운트 사이클에서 재실행 방지
     executedRef.current = true;
 
@@ -184,7 +182,7 @@ export default function CarouselBanner() {
     // 캐시에 없으면 호출
     (async () => {
       try {
-        const line = await fetchWeekdayInsights(storeId, OPENAI_KEY); // 한 줄 문구 반환
+        const line = await fetchWeekdayInsights(storeId); // 한 줄 문구 반환
         setSecondText(line);
         saveInsightToCache(storeId, line); // 저장
       } catch (e) {
@@ -192,10 +190,10 @@ export default function CarouselBanner() {
         setSecondText('요일 인사이트를 불러오는 중 오류가 발생했어요.');
       }
     })();
-  }, [storeId, OPENAI_KEY]);
+  }, [storeId]);
 
   useEffect(() => {
-    if (!storeId || !OPENAI_KEY) return;
+    if (!storeId) return;
     if (executedReqRef.current) return;
     executedReqRef.current = true;
 
@@ -211,7 +209,6 @@ export default function CarouselBanner() {
       try {
         const line = await fetchRequestInsightOneLine({
           storeId,
-          apiKey: OPENAI_KEY,
         });
         setThirdText(line);
         saveReqInsight(storeId, line);
@@ -220,7 +217,7 @@ export default function CarouselBanner() {
         setThirdText('요청사항 요약을 불러오는 중 오류가 발생했어요.');
       }
     })();
-  }, [storeId, OPENAI_KEY]);
+  }, [storeId]);
 
   return (
     <CarouselContainer>

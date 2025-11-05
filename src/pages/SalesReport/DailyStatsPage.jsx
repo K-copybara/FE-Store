@@ -14,25 +14,93 @@ import {
 } from '../../api/stats';
 
 const DailyStatsPage = () => {
-  const storeId = useUserStore((state) => state.storeId);
-  const location = useLocation();
 
-  // 오늘 날짜 구하기. 매출조회/일별매출통계 바로 클릭 시 실행
-  const getTodayString = () => {
-    const today = new Date();
-    const formatter = new Intl.DateTimeFormat('ko-KR', {
-      timeZone: 'Asia/Seoul',
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-    });
 
-    const parts = formatter.formatToParts(today);
-    const year = parts.find((part) => part.type === 'year').value;
-    const month = parts.find((part) => part.type === 'month').value;
-    const day = parts.find((part) => part.type === 'day').value;
+ const storeId = useUserStore((state) => state.storeId);
+ const location = useLocation();
 
-    return `${year}-${month}-${day}`;
+
+ // 오늘 날짜 구하기. 매출조회/일별매출통계 바로 클릭 시 실행
+ const getTodayString = () => {
+  const today = new Date();
+  const formatter = new Intl.DateTimeFormat('ko-KR', {
+   timeZone: 'Asia/Seoul',
+   year: 'numeric',
+   month: '2-digit',
+   day: '2-digit'
+  });
+
+
+  const parts = formatter.formatToParts(today);
+  const year = parts.find(part => part.type === 'year').value;
+  const month = parts.find(part => part.type === 'month').value;
+  const day = parts.find(part => part.type === 'day').value;
+  
+  return `${year}-${month}-${day}`;
+ };
+ const selectedDate = location.state?.date || getTodayString(); //달력에서 받아온 날짜 || 오늘 날짜
+ 
+ const [todaySalesData, setTodaySalesData] = useState([ //해당 날짜 매출, 주문건수
+  { date: selectedDate, sales: 0, orders: 0 }
+ ]);
+ const [timeSalesData, setTimeSalesData] = useState([]); //시간별 매출 조회
+ const [rankSalesData, setRankSalesData] = useState([]); //메뉴별 매출순, 리뷰순 조회
+ const [loading, setLoading] = useState(false);
+ const [error, setError] = useState(null);
+  const [sortType, setSortType] = useState('sales');
+ const [dropdownOpen, setDropdownOpen] = useState(false);
+ const dropdownRef = useRef();
+ const SORT_OPTIONS = [
+  { value: 'sales', label: '매출순' },
+  { value: 'review', label: '리뷰순' },
+ ];
+ const selectedSortLabel = SORT_OPTIONS.find(
+  (option) => option.value === sortType
+ )?.label;
+ const sortedMenuData = rankSalesData;
+
+
+ useEffect(() => {
+  const fetchDailyStats = async () => {
+   setLoading(true);
+   setError(null);
+
+
+   if (!storeId) {
+    setError(new Error('storeId가 없습니다.'));
+    setLoading(false);
+    return;
+   }
+
+
+   try{
+    const [dailyData, hourlyData, menuData] = await Promise.all([
+     getDailyOrderSales(selectedDate, storeId),
+     getHourlySales(selectedDate, storeId),
+     getMenuSales(selectedDate, sortType, storeId)
+    ]);
+    //console.log('일별 매출 데이터:', dailyData);
+    //console.log('시간대별 매출 데이터:', hourlyData);
+    //console.log('메뉴별 매출 데이터:', menuData);
+
+
+    setTodaySalesData([{
+     date: selectedDate,
+     sales: dailyData.sales || 0,
+     orders: dailyData.orders || 0
+    }])
+
+
+    setTimeSalesData(hourlyData);
+    setRankSalesData(menuData);
+
+
+   } catch (error) {
+    setError(error);
+    console.error('일별 매출 조회 실패:', error);
+   } finally {
+    setLoading(false);
+   }
   };
   const selectedDate = location.state?.date || getTodayString(); //달력에서 받아온 날짜 || 오늘 날짜
 

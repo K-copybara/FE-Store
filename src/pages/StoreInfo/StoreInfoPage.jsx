@@ -10,7 +10,7 @@ const StoreInfoPage = () => {
   //어쩌다보니 죄다 컴포넌트로 만들어버린 페이지
   //새로고침 함수
   const refreshCategories = () => {
-    console.log('새로고침');
+    //console.log('새로고침');
     setRefreshKey(prev => prev + 1);
   };
   return (
